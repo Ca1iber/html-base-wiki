@@ -269,7 +269,7 @@ def render_table(node, depth=0):
     rowtag = '行' if depth == 0 else '子行'
     out = []
     out.append(f'{ind}{tag} {cap}' if cap else f'{ind}{tag}')
-    header = [norm(text_with_tables(c, depth)) for c in rows[0] if c.tag == 'th']
+    header = [norm(text_with_tables(c, depth + 1)) for c in rows[0] if c.tag == 'th']
     if header:
         out.append(f'{ind}列: ' + ' | '.join(header))
         body_rows = rows[1:]
@@ -279,7 +279,7 @@ def render_table(node, depth=0):
     for i, cells in enumerate(body_rows, 1):
         out.append(f'{ind}{rowtag} {i}:')
         for c in cells:
-            t = text_with_tables(c, depth)
+            t = text_with_tables(c, depth + 1)
             marks = []
             rs = c.get('rowspan')
             cs = c.get('colspan')
@@ -306,7 +306,15 @@ def text_with_tables(node, depth=0):
             elif c.tag in ('script', 'style'):
                 continue
             elif c.tag == 'table':
-                parts.append('\n' + render_table(c, depth + 1) + '\n')
+                parts.append('\n' + render_table(c, depth) + '\n')
+            elif c.tag in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
+                parts.append('\n' + '#' * int(c.tag[1]) + ' ' + norm(text_of(c)) + '\n')
+            elif c.tag == 'pre':
+                parts.append('\n```\n' + text_of(c) + '\n```\n')
+            elif c.tag == 'a':
+                href = (c.get('href') or '').strip()
+                t = norm(text_of(c))
+                parts.append(f'[{t}]({href})' if href else t)
             else:
                 if c.tag in BLOCK_TAGS:
                     parts.append('\n')
@@ -415,7 +423,7 @@ def flatten_events(article):
                 events.append(('b', render_table(c)))
                 continue
             if c.tag == 'pre':
-                events.append(('b', text_of(c)))
+                events.append(('b', '```\n' + text_of(c) + '\n```'))
                 continue
             if c.tag in BLOCK_TAGS:
                 events.append(('t', '\n'))
