@@ -3,7 +3,7 @@ slug,type,layer,stage,rel,status,note
 # rel 指定义该对象的源文档；本臂用 .htm 路径。,,,,,
 level,stage,,,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.01.01_Device_directory_structure.htm,todo,
 pattern,stage,,,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01_Testing_a_basic_digital_device.htm,todo,
-pin,stage,,,02_System_reference/02.06_Command_Reference/02.06.03_Pin_configuration_setup_commands.htm,todo,
+pin,stage,,,02_System_reference/02.06_Command_Reference/02.06.03_Pin_configuration_setup_commands.htm,done,
 project,stage,,,01_Getting_started/01.01_SmarTest_Work_Center/01.01.04_SmarTest_workspaces.htm,todo,
 results,stage,,,02_System_reference/02.06_Command_Reference/02.06.11_Test_Result_Commands.htm,todo,
 run,stage,,,02_System_reference/02.08_Setup_and_Result_Tools/02.08.01.01_Digital_test_setup_flow.htm,todo,

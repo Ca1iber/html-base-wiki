@@ -4,7 +4,9 @@
 
 ## 阶段（9）
 
-（待建）
+- [[pin]] — Pin / Channel 配置（Pin Configuration）
+
+（其余待建）
 
 ## 概念
 
