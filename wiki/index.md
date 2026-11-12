@@ -4,13 +4,15 @@
 
 ## 阶段（9）
 
+- [[project]] — 建工程 / Device / 目录结构（Project）
 - [[pin]] — Pin / Channel 配置（Pin Configuration）
 - [[level]] — Level / 电平配置（Level Setup）
 - [[timing]] — Timing / Wavetable 时序配置（Timing Setup）
 - [[pattern]] — Pattern / Vector 配置（Vector Setup）
+- [[testmethod]] — Test Method / 测试方法与 Test Instance（L2 C++ API）
+- [[testflow]] — Testflow 组装（Testflow Tool）
+- [[run]] — 运行与调试（Run / Debug）
 - [[results]] — Results / 数据与判定（Test Result Commands）
-
-（其余待建）
 
 ## 概念
 
