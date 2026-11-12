@@ -5,6 +5,7 @@
 # 用法  python show.py 02.06.05 01.07.01          # 精确匹配分类号
 #       python show.py --head 02.06.05             # 只打前 800 字符
 #       python show.py --grep 定义                  # 按标题关键词找
+#       python show.py --list 02.06.03.02          # 列出子树下的全部文档（建页覆盖面清单）
 #
 # 与 md 版的 show.py 同名、同参数、同输出格式。
 # 区别只在背后读的是原始 HTML，返回的是抽取后的文本（表格按结构展开）。
@@ -75,6 +76,10 @@ def main():
     if args and args[0] == '--grep':
         grep = args[1]
         args = args[2:]
+    list_prefix = None
+    if args and args[0] == '--list':
+        list_prefix = args[1]
+        args = args[2:]
 
     if not INDEX.exists():
         sys.exit(f'缺少索引：{INDEX}\n先跑 python extract_html.py')
@@ -89,6 +94,20 @@ def main():
             hay = (d.get('title') or '') + ' ' + stem
             if grep.lower() in hay.lower():
                 print(f'{m.group(1) if m else "?":14s} {d["rel"]}')
+        return
+
+    if list_prefix is not None:
+        n = 0
+        for d in rows:
+            stem = stem_of(d['rel'])
+            if not stem.startswith(list_prefix):
+                continue
+            m = RE_STEM.match(stem)
+            if not m:
+                continue
+            n += 1
+            print(f'{m.group(1):20s} {d.get("title") or stem}')
+        print(f'# {n} 条', file=sys.stderr)
         return
 
     want = set(args)

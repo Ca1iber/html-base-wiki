@@ -30,6 +30,7 @@ cd F:/master-dev/html-wiki/extract
 python show.py 02.06.05        # 按分类号打原文（正文 + 真表）
 python show.py --head 02.06.05 # 只打前 800 字符
 python show.py --grep 关键词    # 按标题/文件名找分类号
+python show.py --list 02.06.03.02  # 列出子树下的全部文档（建页覆盖面清单）
 ```
 
 - `docs.jsonl` — 9,393 篇的机械索引（`rel` / `title` / `headings` / `first_para` /
@@ -41,6 +42,9 @@ python show.py --grep 关键词    # 按标题/文件名找分类号
 
 ## 4. 硬规矩（违反即作废）
 
+0. **不许漏。** 源里属于本阶段的东西，页面上至少要有「名字 + 一句话 + 出处」。
+   **「没写」和「源里没有」必须能区分开**——源里有而页面没提，就是漏。
+   stage 页尤其要详细；但详细不等于只写主路径。
 1. **不许凭印象写。** 你写的每一条 L1/L2/L3 条目、每个产物、每条验证方法，
    都必须来自你**真的读过**的文档，并写进 frontmatter 的 `sources:`。
 2. **区分三种东西**，页内措辞必须体现：
@@ -97,7 +101,10 @@ verified: doc-only
   `[[对象页名]]` + 层级（L1/L2/L3/file/gui） + 一句它在本阶段干什么。
   对象页多数**还没建**，这没关系——wikilink 就是待建清单。
 - **L1 / L2 / L3** — 三层的具体条目。
-  - L1 = firmware / setup 命令（如 `DFPN`、`PSFC`）。**给最小可用示例**（从文档里抄，别自己编）。
+  - L1 = 本阶段命令子树下的**全部命令**。先用 `show.py --list <子树前缀>` 列出清单
+    （例：`python show.py --list 02.06.03.02`），**逐条写**：命令名 + 一句作用 + 出处；
+    能给最小可用示例的就附上（从文档里抄，别自己编）。
+    **不许只写主路径上的几个**——深度可以按重要性分配，但每一条都必须出现。
   - L2 = C++ Test Method API（`02.07_Test_Method_Reference` 那一大章）。
   - L3 = 外部控制：SmartShell / Test suite control API / HVM。语料里这块很薄，
     **薄就写「文档未覆盖」，不许拿 L1 的东西冒充 L3。**
