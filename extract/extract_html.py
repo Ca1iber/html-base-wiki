@@ -202,21 +202,43 @@ def in_code(node):
 
 
 def find_article(root):
+    """DITA 页用 <article>；Doxygen 页用 <div class="contents">。"""
+    article = None
     for n in iter_nodes(root):
         if n.tag == 'article':
+            article = n
+            break
+    if article is not None and any(
+            c.tag == 'h1' and c.has_class('topictitle1')
+            for c in iter_nodes(article)):
+        return article
+    for n in iter_nodes(root):
+        if n.tag == 'div' and n.has_class('contents'):
             return n
+    if article is not None:
+        return article
     for n in iter_nodes(root):
         if n.tag == 'main':
+            return n
+    for n in iter_nodes(root):
+        if n.tag == 'body':
             return n
     return root
 
 
-def page_title(article):
+def page_title(root, article):
     for n in iter_nodes(article):
         if n.tag == 'h1' and (n.has_class('topictitle1') or n.get('id') == 'ariaid-title1'):
             return norm(text_of(n))
     for n in iter_nodes(article):
         if n.tag == 'h1':
+            return norm(text_of(n))
+    # Doxygen 页：标题在 div.headertitle 或 <title>
+    for n in iter_nodes(root):
+        if n.tag == 'div' and n.has_class('headertitle'):
+            return norm(text_of(n))
+    for n in iter_nodes(root):
+        if n.tag == 'title':
             return norm(text_of(n))
     return ''
 
@@ -383,20 +405,21 @@ def load_toc():
 
 
 def build_file_map():
-    """所有源文件 → rel。toc 里没有的进 99_。"""
+    """所有源文件 → rel。键是**相对 RAW 的路径**（子目录文件不会撞名）。"""
     by_href = load_toc()
     files = sorted([p for p in RAW.rglob('*')
                     if p.is_file() and p.suffix.lower() in ('.htm', '.html')])
     mapping = {}
     unlisted = []
     for p in files:
-        base = p.name
-        if base in by_href:
-            mapping[base] = by_href[base][0]
+        key = p.relative_to(RAW).as_posix()
+        if p.name in by_href:
+            mapping[key] = by_href[p.name][0]
         else:
             unlisted.append(p)
-    for i, p in enumerate(sorted(unlisted, key=lambda x: x.name), 1):
-        mapping[p.name] = f'99_Unlisted_or_Unreferenced/99.{i:04d}_{slug(p.stem)}{p.suffix}'
+    for i, p in enumerate(sorted(unlisted, key=lambda x: x.relative_to(RAW).as_posix()), 1):
+        key = p.relative_to(RAW).as_posix()
+        mapping[key] = f'99_Unlisted_or_Unreferenced/99.{i:04d}_{slug(p.stem)}{p.suffix}'
     return mapping, by_href
 
 
@@ -445,7 +468,7 @@ def group_of(text):
 def extract_doc(path, rel, by_href, mapping, all_topic_ids):
     root = parse_html(path)
     article = find_article(root)
-    title = page_title(article)
+    title = page_title(root, article)
     headings = []
     for n in iter_nodes(article):
         if n.tag in ('h2', 'h3', 'h4'):
@@ -543,7 +566,9 @@ def extract_doc(path, rel, by_href, mapping, all_topic_ids):
         'in_catalog': not rel.startswith('99_'),
         'frontmatter': {
             'title': title,
-            'source_topic': path.name,
+            # 相对 RAW 的路径：顶层就是 `98550.htm`，
+            # search 子目录里则是 `254242-search/all_0.html`（与 md 版一致）。
+            'source_topic': path.relative_to(RAW).as_posix(),
             'source_html': rel,
         },
         'title': title or None,
@@ -603,20 +628,24 @@ def main(argv):
     mapping, by_href = build_file_map()
     files = sorted([p for p in RAW.rglob('*')
                     if p.is_file() and p.suffix.lower() in ('.htm', '.html')],
-                   key=lambda p: p.name)
+                   key=lambda p: p.relative_to(RAW).as_posix())
     if limit:
         files = files[:limit]
+
+    # 链接解析用 basename → rel（href 里写的是扁平文件名）
+    name2rel = {p.name: mapping[p.relative_to(RAW).as_posix()]
+                for p in files if p.relative_to(RAW).as_posix() in mapping}
 
     docs, edges_all, sections_all, failures = [], [], [], []
     topic_ids = set(mapping)
 
     for i, p in enumerate(files, 1):
-        rel = mapping.get(p.name)
+        rel = mapping.get(p.relative_to(RAW).as_posix())
         if rel is None:
             failures.append({'doc': p.name, 'kind': 'unmapped', 'detail': 'no rel'})
             continue
         try:
-            doc, edges, sections = extract_doc(p, rel, by_href, mapping, topic_ids)
+            doc, edges, sections = extract_doc(p, rel, by_href, name2rel, topic_ids)
         except Exception as e:  # 单篇失败不拖垮全库
             failures.append({'doc': rel, 'kind': 'parse_error', 'detail': repr(e)})
             continue
