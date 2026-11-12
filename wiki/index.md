@@ -5,6 +5,10 @@
 ## 阶段（9）
 
 - [[pin]] — Pin / Channel 配置（Pin Configuration）
+- [[level]] — Level / 电平配置（Level Setup）
+- [[timing]] — Timing / Wavetable 时序配置（Timing Setup）
+- [[pattern]] — Pattern / Vector 配置（Vector Setup）
+- [[results]] — Results / 数据与判定（Test Result Commands）
 
 （其余待建）
 
