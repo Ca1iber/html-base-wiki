@@ -1,0 +1,15 @@
+# 与 md 臂同一套规矩：代码要能回滚，数据要能重算。
+
+# ① 快照目录（若以后生成）。git 本身就是干这个的，同一件事不做两遍。
+/snapshots/
+
+# ② Python 编译缓存：机器生成的，无信息。
+__pycache__/
+*.pyc
+
+# ③ 语料抽取的三个大产出，合计约 20 MB。
+#    `extract_html.py` 跑一遍能逐字节重算，所以不入库。
+#    其余 `extract/` 下的东西（脚本、failures、hubs、以后的 findings）全部入库。
+/extract/docs.jsonl
+/extract/edges.jsonl
+/extract/sections.jsonl
