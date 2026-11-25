@@ -403,20 +403,50 @@ combined with a multiport vector setup.
 
 ## 是什么
 
-（待补）
+**文档事实** equation based timing 允许在 edge position 与 period length 的定义中使用变量，从而在变量值改变时保持 period 与 edge delay 之间的既定关系（例如让 edge 始终落在不同 cycle length 的 tester cycle 中央）。
+
+**文档事实** 一个 equation based timing setup 由三类主要数据集合组成：equation set（含 timing set 与变量定义）、wavetable（定义 waveform），以及 timing specification 内的 specification set（给变量赋值）。
+
+**文档事实** 一个 timing setup file 可以包含多份各类集合。一个 timing specification 定义某次测试使用哪个 equation set、wavetable 与变量值集；一个 setup file 可以含多个 timing specification。
+
+**文档事实** 这些集合用 EQFS 与 EQSP 下载；集合本身不能用固件命令编辑，但可以查询其内容，并可在 runtime 修改定义。
+
+**文档事实** equation set 以大于 0 的编号标识，主要构件依次为：可选的 SPECS base（spec）变量声明（只声明、不赋值）、可选的 EQUATIONS derived 变量定义（表达式可引用常量、base variables 与先前定义的 derived variables）、以及 timing set 中的 period/edge 定义。
+
+**文档事实** wavetable 以名称标识，名称最多 40 个字符；含空格时须用双引号，且不得含分号。
+
+**文档事实** spec set 给 equation set 中声明的 base variables 赋固定值，编号从 1 起，每个 equation set 最多 99 个。spec set 只存在于 specification 内；若两个 specification 指向同一 equation set，其 spec set 编号必须不同。固件命令用 specset ID 引用 timing specification：`(equation_set_nr * 100) + specification_set_nr`。
 
 ## 典型用法
 
-（待补）
+**文档事实** setup file 示例以 `hp93000,timing,0.1` 开头；用 `EQSP TIM,WVT,#...` 下载 wavetable，用 `EQSP TIM,EQN,#...` 下载 equation set，用 `EQSP TIM,SPS,#...` 下载 specification。
+
+**文档事实** 用 `SQPG ... CTIM ...` 可在测试序列中切换 timing set：示例在器件初始化前切到 set 2（`SQPG 4,CTIM,2,,(@)`），在 vector 400 结束时切回 set 1（`SQPG 6,CTIM,1,,(@)`）；binning 测试用 `CTIM,PRM` 切到 primary timing set，配合 `SPRM` 每次 test run 更换 primary set 即可复用 setup。
+
+**文档事实** wavetable 示例覆盖 Pin Scale standard pin（`PINS IN1` 配 `ZERO`/`ONE` 等 waveform 名，Pattern Debug 工具会显示这些名字）与 Smart Scale pin（native 格式用点表示 “no action”）。`WFDS?` 取回定义时，即使 wavetable 用纯 Smart Scale 格式，也以 modified standard format 返回；Q0 的 waveform 3 含 window compare。
+
+**文档事实** 运行时用 spec value set 同时修改 base variables：`SVLR?` 读值、`DSVS` 建立 set、`BSVR` 写 `per1`/`per2`、`BSVE` 应用；`BSVE` 之前值不变。
+
+**文档事实** 多端口示例用 `SPECIFICATION "MultSpec"` 包住多个 `PORT`，每个 port 指定 `EQNSET`/`WAVETBL`/`SYNC`/`var`；`CHECK all` 置于首个 port 块前即对所有 port 生效。示例中公共 period resolution 为 4 ns，port3 的 period 由 10 ns 自动修正为 12 ns。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[timing-specification]]` — spec set 在 timing specification 内定义，base variables 的值也在其中指定；本页两处交叉引用 Defining the timing specification。
+- **文档事实** `[[timing-equation-set]]` — Equation sets 段的详细参考指向 Timing equation set reference；equation set 声明 SPECS/EQUATIONS。
+- **文档事实** `[[wavetable]]` — Wavetables 段说明 wavetable 定义 waveform 与 device cycle；示例引用 Pin Scale standard 与 Smart Scale 的 wavetable 写法。
+- **文档事实** `[[spec-set]]` — Specification sets and timing specifications 段说明 spec set 的编号、每 equation set 99 个上限与 specset ID 计算。
+- **文档事实** `[[eqfs]]`、`[[eqsp]]` — 数据集合用 EQFS/EQSP 下载；setup file 示例用 `EQSP TIM,WVT/EQN/SPS`。
+- **文档事实** `[[svlr]]` — 运行时修改 base variables 的示例使用 `SVLR?`、`DSVS`、`BSVR`、`BSVE`。
+- **文档事实** `[[sprm]]` — `CTIM,PRM` 示例说明可用 SPRM 更换 primary set 以复用 setup。
+- **文档事实** `[[wfds]]` — Wavetable 示例用 `WFDS?` 取回定义。
+- **文档事实** 本页是 `Structure of an equation based timing setup`（02.08.04.34.04.03）的子主题，extract 的 edges 显示该父页以 “Data organization of equation based timing” 引用本页。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 “Introduced before SmarTest 6.3.2”。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.03.01_Data_organization_of_equation_based_timing.htm`，主源，含三类数据集合、equation set/wavetable/spec set 结构与示例、Functional changes。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.04_Example_of_the_equation_based_timing_setup_file.htm`，完整 setup file 示例（`hp93000,timing,0.1`、`EQSP TIM,WVT/EQN/SPS`）。
+- 子主题示例来源：`02.06.06.01.05_Defining_the_timing_specification.htm`、`02.06.06.01.05.02_Changing_the_runtime_values_of_base_variables.htm`、`02.06.06.01.05.03_Multiport_timing_specifications.htm`、`02.06.06.01.03.01_Defining_waveform_shapes_for_Pin_Scale_standard_pins.htm`、`02.06.06.01.03.02_Defining_waveform_shapes_for_Smart_Scale_pins.htm`、`02.06.07.01.08.03.01_Changing_the_timing_set__CTIM.htm`。

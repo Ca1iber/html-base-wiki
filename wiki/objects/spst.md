@@ -194,20 +194,41 @@ only a period 2 limit violation will be recorded.
 
 ## 是什么
 
-（待补）
+**文档事实** `SPST?` 返回当前 status bit 的设置。多数 bit 决定测试执行时对 edge order 与 period 做哪类 violation check：关联 bit 被清除时执行检查，被置位时省略检查；其余 bit 表示 timing 是否被特定固件命令修改过。
+
+**文档事实** 该命令可取得 site-specific 信息，但同一时刻只能有一个 site 处于 focus。对 focus 中的 site，SmarTest 在 Testflow Editor 与 result tools 中显示结果；任何固件查询也只报告当前 focus site 的 setup 与结果。
+
+**文档事实** `spec_type` 取 `LEV`（levels）或 `TIM`（timing）；`equation_set_no` 为 0–256，可用 `ALL`、`PRM`（primary equation set，此时忽略 `specset_no`）；`specset_no` 为 1–99，可用 `ALL`。
+
+**文档事实** equation set 0 用于与非 equation based 测试环境兼容：`spec_type` 为 `LEV` 时 `specset_no` 无意义；为 `TIM` 时 `specset_no` 被解释为 waveform set 编号。
+
+**文档事实** 多端口时用 `SPST? {spec_type}, , {"multi-port_spec"}` 查询，此时 `equation_set_no` 必须留空；也支持 `SPST? {spec_type}, PRM,` 形式。
+
+**文档事实** `status` 是各置位 bit 对应 2 的幂之和；例如 768 = 512 + 256 表示 bit 8 与 bit 9 置位、其余清零。bit 8 表示 timing/level 数据被 ETIM/ETDS/PCLK/CLKR/DRLV/RCLV/TERM/PSLV 修改过（restore 应带回原 SPST 状态），bit 9 对应 SHVL，bit 10 对应 SVLR；bit 12/13 为 absolute/relative range violation，bit 14/15 为 drive/receive 10 period limit violation。
 
 ## 典型用法
 
-（待补）
+**文档事实** `SPST? lev,all,all` 返回 `SPST LEV,1,1,0`。
+
+**文档事实** `SPST? tim,all,all` 返回 `SPST TIM,1,1,0` 与 `SPST TIM,2,22,0`。
+
+**文档事实** `SPST? TIM,,"mu_burst"` 返回 `SPST TIM,,"mu_burst",6`。6 = bit 1 + bit 2，表示 drive 或 receive 的 period 1 limit violation 被忽略，只记录 period 2 limit violation。
+
+**文档事实** Application 段列出四个使用场景：Level setup、Timing setup、Testflow、Spec tool。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[etim]]`、`[[etds]]`、`[[pclk]]`、`[[clkr]]`、`[[drlv]]`、`[[rclv]]`、`[[term]]`、`[[pslv]]` — status bit 8 的说明把这些命令列为会修改 timing/level 数据的命令；执行其中任一命令会自动为受影响的 specset 置该 bit，restore 应恢复原 SPST 状态。
+- **文档事实** `[[svlr]]` — status bit 10 的说明是 “Modified with SVLR”。
+- **文档事实** `SHVL` — status bit 9 的说明是 “Modified with SHVL”；该命令没有独立对象页。
+- **文档事实** `[[spec-set]]` — 参数 `specset_no` 指向 spec set（1–99，ALL），SPST? 查询的就是该 specset 的 status；`spec_type` 区分 LEV 与 TIM。
+- **文档事实** `[[timing-specification]]` — 多端口查询参数是 `multi-port_spec`（specification 名）；本命令按 equation set/spec set 或 multiport specification 两种方式定位查询对象。
+- **推断** Application 段列的 Level setup、Timing setup、Testflow、Spec tool 分别对应 `[[level-setup-tool]]`、`[[timing-setup-tool]]`、`[[testflow-tool]]`、`[[spec-tool]]`；文档没有逐项点名工具页。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 “Introduced before SmarTest 6.3.2”。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.05.02.23_SPST__-__SPecset_STatus.htm`，主源，含 status bit 行为、site focus 说明、语法/参数、Application、三个示例与 Functional changes。

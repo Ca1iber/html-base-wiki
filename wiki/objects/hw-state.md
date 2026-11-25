@@ -1732,20 +1732,48 @@ ON_FIRST_INVOCATION_END();
 
 ## 是什么
 
-（待补）
+**文档事实**：`HW_STATE` 是 MAPI 定义的 C++ 类，头文件为 `/opt/hp93000/soc/prod_com/include/MAPI/HwState.h`；其对象保存硬件设置状态，需先由成员函数从硬件读取，再按 pin 和属性取回。
+
+**文档事实**：构造函数 `HW_STATE()` 创建对象；读出的设置用附属类 `HW_PIN_STATE`（头文件 `HwPinState.h`，无构造函数，不能直接构造，只能经 `HW_STATE::pin()` 获得）的成员函数读取。
+
+**文档事实**：`getStatus(const STRING &pinlist)` 查询 focus site 上指定 pin 的状态，数据存入 `HW_STATE` 对象；每次硬件设置改变后都必须重新调用。它必须用在 `ON_FIRST_INVOCATION` 块之外，或位于 `FOR_EACH_SITE...WITH_QUERY` 块内。pinList 为空或含无效 pin 会报错且不执行查询，无返回值。
+
+**文档事实**：`pin(const STRING &pinName)` 返回指定 pin 的硬件设置，即调用 `getStatus()` 时刻的设置；pinName 为空或不在 getStatus 的 pinList 中会报错且不返回设置。
+
+**文档事实**：`HW_PIN_STATE` 的成员函数返回 DOUBLE 的有：`getCompHoldOff`、`getCompHysteresis`、`getConstCurrTimeToAlarm`、`getConstCurrTimeToDisconnect`、`getComplianceValue`、`getCurrentClampFilter`、`getCurrentClampMax`、`getCurrentClampMin`、`getCurrentClampSink`、`getCurrentClampSource`、`getCurrentForce`、`getCurrentForceMax`、`getCurrentForceMin`、`getCurrentSlew`、`getDCPower`、`getLoadcap`、`getMeasFilter`、`getPulseEnergy`、`getVoltageClampHigh`、`getVoltageClampLow`、`getVoltageClampMax`、`getVoltageClampMin`、`getVoltageDropMaxForce`、`getVoltageDropMaxReturn`、`getVoltageDropWarnForce`、`getVoltageDropWarnReturn`、`getVoltageForce`、`getVoltageForceFilter`、`getVoltageForceMax`、`getVoltageForceMin`、`getVoltageSlew`；返回 INT 的有 `getActiveChannels`、`getStackLevel`；返回 STRING 的有 `getCompSelector`、`getConnectState`、`getLoadStepMode`、`getOpenLoopProtection`、`getPulldownState`、`getReferencePin`、`getVoltageClampState`。设置不适用时通常返回 `NaN` 或字符串 `"na"`。所有上述函数都要求先调用 `getStatus()` 从硬件取数。
+
+**文档事实**：`checkKelvinStatus()`（focus site）和 `checkKelvinStatusParallel()`（所有 active site）发起 sense connection（Kelvin）测试；`checkGangConnection()` / `checkGangConnectionParallel()` 仅支持 DC Scale XPS256 card；`readMaxAbsVdropsParallel()` / `getMaxAbsVdrops()` 读取锁存的最大绝对电压降，也仅支持 XPS256。
+
+**文档事实**：`readMaxAbsVdropsParallel(pinList, reset)` 为所有 active site 读取锁存的最大绝对电压降并存入 test method cache，只要 test method 已加载这些值就有效；`reset` 默认 `true`（读取后清除），`false` 则不清除。它应放在 `ON_FIRST_INVOCATION` 块中调用。`getMaxAbsVdrops(pin, maxAbsForceDrop, maxAbsReturnDrop)` 查询 focus site 上该 pin 的最大绝对 force / return 电压降（单位 V），必须先调用 `readMaxAbsVdropsParallel`，且应放在 `FOR_EACH_SITE...WITH_QUERY` 块或 `ON_FIRST_INVOCATION` 块之外。
 
 ## 典型用法
 
-（待补）
+**文档事实**：Example 1 在 `ON_FIRST_INVOCATION` 块外调用 `hwState.getStatus("PMU_pin_1, DPS_pin_1")`，再用 `hwState.pin("DPS_pin_1").getVoltageForce()` 和 `.getCurrentClampSource()` 读取 forced voltage 与 current clamp source。
+
+**文档事实**：Example 2 在 `ON_FIRST_INVOCATION` 块内用 `FOR_EACH_SITE_BEGIN_WITH_QUERY()` 设置 query focus，再执行同样的 `getStatus` / `pin` 查询，最后 `FOR_EACH_SITE_END()`；文档强调必须用该 API 设置 query focus。
+
+**文档事实**：Kelvin 示例先用 `SPMU_TASK` 断开被测 pin（`relay("NT")`、`execMode(TM::FORCE_OFF)`），调用 `checkKelvinStatusParallel(pinlist, goNogoResult)` 在所有 active site 上并行测试；对失败 site 在 `FOR_EACH_SITE` 块内用 `checkKelvinStatus(pinlist, statusPosArray, statusNegArray)` 串行复测以定位失败 pin / line。并行结果数组：`-1` 表示 site 未激活、`0` 表示失败、`1` 表示通过；串行结果按 pin 对应，`0` 失败、`1` 通过。
+
+**文档事实**：Gang connection 示例用 `checkGangConnectionParallel(pinlist, samples, maxResistance, goNogoResult)` 并行测试，对失败 site 用 `checkGangConnection(pinlist, samples, maxResistance, perPinResult)` 复测。
+
+**文档事实**：连接测试的 `samples` 为可选的平均测量次数，范围 1 到 128，默认 1；XPS256 语法额外提供 `maxResistance`（或分别的 `maxResistancePos` / `maxResistanceNeg`）。Kelvin 阈值范围 0 到 5000 Ω；gang connection 阈值范围 0 到 100 Ω，默认 20 Ω。`checkKelvinStatus*` / `checkGangConnection*` 的 bool 返回值表示从读取数据到数组的转换状态：`true` 无错，`false` 读到无效数据。
 
 ## 和谁有关
 
-（待补）
+**文档事实**：以下关系均由来源文档的正文、示例或回链证据支撑。
+
+- [[hw-pin-state]]：`HW_STATE` 的附属类，`pin()` 返回其引用；其所有成员函数都要求先由 `getStatus()` 从硬件取数（本页正文与子主题明确写出）。
+- [[on-first-invocation-begin]] / [[on-first-invocation-end]]：`getStatus()` 必须在其块外（或 `FOR_EACH_SITE...WITH_QUERY` 内），`readMaxAbsVdropsParallel()` 应放在块内，`getMaxAbsVdrops()` 应放在块外（本页正文明确写出）。
+- [[for-each-site-begin]] / [[for-each-site-end]]：多 site 查询需在 `FOR_EACH_SITE` 块内用 `FOR_EACH_SITE_BEGIN_WITH_QUERY()` 设置 query focus（本页两个示例明确使用）。
+- [[dc-scale-xps256-card]]：`checkGangConnection*`、`readMaxAbsVdropsParallel`、`getMaxAbsVdrops` 及带阈值语法的 Kelvin 测试都标注仅支持该卡（本页正文明确写出）。
+- [[dps128-dps64-cards]]：该页回链到 `checkKelvinStatusParallel()` 和 `HW_STATE.checkKelvinStatus()`，作为 DPS128/DPS64 的 sense connection test 编程入口（回链证据）。
+- `XPS256 programming - Kelvin test / sense connection test`（`02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.12_XPS256_programming_-_Kelvin_test___sense_connection_test.htm`）、`XPS256 programming - Ganging`（`02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.10_XPS256_programming_-_Ganging.htm`）、`XPS256 programming - Voltage drop measurement`（`02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.19_XPS256_programming_-_Voltage_drop_measurement.htm`）：分别说明 Kelvin 测试、Ganging、电压降测量的编程用法，并回链本页对应成员函数（回链证据）。
 
 ## 版本
 
-（待补）
+**文档事实**：`Functional changes` 记录：Introduced in SmarTest 6.5.0；SmarTest 7.4.0 新增 `HW_STATE.checkKelvinStatus()`；SmarTest 7.4.2 新增 `checkKelvinStatusParallel()`；SmarTest 7.10.1 新增 `checkGangConnection()`、`checkGangConnectionParallel()`、`getMaxAbsVdrops()`、`readMaxAbsVdropsParallel()`；SmarTest 7.10.3 为 `checkKelvinStatus()`、`checkKelvinStatusParallel()`、`checkGangConnection()`、`checkGangConnectionParallel()` 增加定义最大电阻的参数语法。
 
 ## 出处
 
-（待补）
+- 主源（「语法 / 参数」的来源）：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.117_HW_STATE.htm` 及其子主题 `02.07.04.01.117.01_HW_PIN_STATE.htm`、`02.07.04.01.117.02_HW_STATE.checkKelvinStatus.htm`、`02.07.04.01.117.03_HW_STATE.checkKelvinStatusParallel.htm`、`02.07.04.01.117.04_HW_STATE.checkGangConnection.htm`、`02.07.04.01.117.05_HW_STATE.checkGangConnectionParallel.htm`。
+- 回链证据：`02_System_reference/02.05_Test_Head_Cards/02.05.05.01.03_DPS128___DPS64_functionality_and_features.htm`、`02.05.05.03.10.12_XPS256_programming_-_Kelvin_test___sense_connection_test.htm`、`02.05.05.03.10.10_XPS256_programming_-_Ganging.htm`、`02.05.05.03.10.19_XPS256_programming_-_Voltage_drop_measurement.htm`、`02_System_reference/02.01_Release_Information/02.01_Release_Information.htm`。

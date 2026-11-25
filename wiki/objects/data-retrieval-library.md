@@ -1270,20 +1270,55 @@ Executed Testmethod ac_tml.AcTest.Shmoo on Site 2: PASSED
 
 ## 是什么
 
-（待补）
+**文档事实** Data Retrieval Library（DRL）是访问 data log stream 的应用编程接口（API）；该 stream 记录当前正在执行的生产测试的全部事件，DRL 同时提供对单条 event record 内部数据的访问。
+
+**文档事实** 编写自己的 data logging 工具时，DRL 可让人用尽 event data logging 的全部能力，因而不必再为 data log 文件写 parser。
+
+**文档事实** DRL 函数负责读取 event records、从中抽取数据并存入合适类型的变量；承载这些数据的数据类型也由 DRL 提供，用于覆盖各 attribute 的不同数据，便于后续直接处理。
+
+**文档事实** 离线分析时，可先把 data log stream 保存为文件，之后以与访问 stream 相同的方式访问该文件；Event Formatter 构建在 DRL 之上。
+
+**文档事实** 头文件为 `/opt/hp93000/soc/com/include/drl.h`；同目录的 `dcl.h`、`dcl_drl.h` 也与 DRL 相关。材料分为「DRL functions」与「DRL data types」两个子主题：前者覆盖 DRLStart/DRLStop/DRLSave/DRLTruncate、事件掩码、事件与属性读取、pin/site 查询；后者覆盖 DRLEventRec、DRLEventMask、DRLAttributeRec 及各 attribute 结构体。
+
+**文档事实** `EDF data organization` 页注明 DRL 只在 Linux 上运行。
+
+**推断** 因此 DRL 是日志流/日志文件与用户自建分析工具之间的 API 层，而不是测试执行本身的一部分。
 
 ## 典型用法
 
-（待补）
+**文档事实** 启动检索：`DRLStart(path, flags, &stream)` 初始化一次 data retrieval；`path` 为 NULL 时附着系统共享内存并读 data log stream，非 NULL 时打开已保存的 data log 文件做离线分析。示例传入 NULL 并用 `DRL_SYNC_COUNTER | DRL_RESET_MASK`，只检查新 event record 并重置 active event mask。
+
+**文档事实** 读事件：`DRLGetNextUnmaskedEvent(&stream, &event)` 读到未掩码事件返回 0；`ERR_NO_EVENT` 表示无可用事件或全部事件被掩码，`ERR_EOF` 表示在 record 读完前遇到流/文件结尾。被掩码的事件会被丢弃，但 `ConfigurationChangedEventType` 的 record 例外。
+
+**文档事实** 设掩码：`DRLEventMask event_mask = {NumberOfEventTypes, 0};` 然后把关心的事件类型（如 TestSuiteStartEventType、TestSuiteEndEventType、BinReachedEventType、AssignmentEventType）置 1，再调 `DRLSetEventMask(&mask, &stream)` 设为 active event mask；`DRLGetEventMask` 返回当前掩码指针，出错为 NULL，且文档不建议直接改该指针指向的掩码。
+
+**文档事实** 读属性：用 `DRLEventGetNoOfAttributes` 取属性数，再 `DRLEventGetAttribute(&event, i, &attribute)` 逐条读取；也可用 `DRLEventGetFirstAttributeByType` / `DRLEventGetNextAttributeByType` 按类型遍历，并依 `attribute.type` 分派到 `attribute.data` 的对应成员。事件类型由 `DRLEventGetType` 取得。
+
+**文档事实** event buffer 只在同 stream 下一次 `DRLGetNextUnmaskedEvent` 调用前有效；要延长保留须调 `DRLKeepEvent`，不再需要时用 `DRLFreeEvent` 释放其分配的内存。示例一次保留 100 条 event record。若事件读完即处理、始终复用同一个 DRLEventRec，则不必调用这两个函数。
+
+**文档事实** 保存/截断：`DRLSave(stream, filename, truncate)` 把流复制到指定文件（同名文件被覆盖）；`truncate` 为真时复制后清空流。`DRLTruncate` 清空指定 stream；若 stream 指向已保存文件，该文件不变。DRLSave 失败返回 ERR_ACCESS 或 ERR_TRUNC。
+
+**文档事实** pin/site 元数据查询：`DRLNumberOfSites`、`DRLNumberOfPins`、`DRLNumberOfPinGroups`，以及 `DRLPinIndexToName/Number/Channel`、`DRLPinGroupIndexToName/IndexToPins/NameToIndex`。
+
+**建议** 先用事件类型掩码缩小读取范围；需要跨阶段保留的记录用 DRLKeepEvent，处理完再 DRLFreeEvent；独立进程须先 DRLStart，report formatter 则由系统自动调用 DRLStart。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Event Data Logging Concepts：定义 DRL 所访问的 data log stream 的 event data logging 概念；其子页 `How event data logging works` 指向 DRL 了解函数与类型。
+- **文档事实** EDF data organization：说明 event record / attribute record 的组成，并指出要访问 data log stream 中的数据可用 DRL，且 DRL 只在 Linux 上运行。
+- **文档事实** Attribute types：DRL 提供持有与处理 attribute 数据的类型；该页逐项列出各 AttrType。
+- **文档事实** Event Formatter：主源称 Event Formatter 构建在 DRL 之上；`How the Event Formatter works` 称它使用 DRL 的同一套函数和数据类型。
+- **文档事实** DRL functions 与 DRL data types：主源的两个子主题，分别列出读取函数与结构体/类型。
+- **文档事实** Example of yield monitor 与 Reducing Cost of Test using SmarTest Execution Profiles：这两页引用 DRL 作为实现 yield monitor / 应用论文的资料（入边）。
+- **文档事实** `drl.h`、`dcl.h`、`dcl_drl.h`：主源给出的 DRL 相关头文件。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.10_Data_Logging/02.10.01.04_Data_Retrieval_Library.htm`，主源，含概览、头文件与 Functional changes，已用 `show.py` 读取。
+- 子主题 `02.10.01.04.01_DRL_functions.htm`、`02.10.01.04.01.09_DRLGetNextUnmaskedEvent.htm`、`02.10.01.04.01.10_DRLKeepEvent.htm`、`02.10.01.04.01.20_DRLSave.htm`、`02.10.01.04.01.21_DRLSetEventMask.htm`、`02.10.01.04.01.22_DRLStart.htm`、`02.10.01.04.01.24_DRLTruncate.htm`、`02.10.01.04.02_DRL_data_types.htm`，用于函数语义与类型清单，已用 `show.py` 读取。
+- `02_System_reference/02.10_Data_Logging/02.10.01.06.01_EDF_data_organization.htm`、`02.10.01.06.05_Attribute_types.htm`、`02.10.02.07_How_the_Event_Formatter_works.htm`、`02.10.01.01_Event_Data_Logging_Concepts.htm`，用于关系与 Linux-only 说明，已用 `show.py` 读取。
+- 入边与引用语境取自 `extract/objpack.py` / `edges.jsonl`。

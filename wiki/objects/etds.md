@@ -307,20 +307,46 @@ mismatch exists between edge delays of the selected timing set and the waveform 
 
 ## 是什么
 
-（待补）
+**文档事实** ETDS（Edge Timing Definition String）命令在已存在的 waveform set/specification 内，为选定的 pin 与 timing set 定义或修改 edge delay。
+
+**文档事实** ETDS? 查询返回当前值，但只返回指定 waveform set/specification 的 wavetable 中用到的 edge，或值不为 0 的 edge。
+
+**文档事实** 该命令配置拥有 setup focus 的 site 的 setup；对处于 focus 的 site，SmarTest 在 Testflow Editor 与 result tool 中显示结果，firmware query 也仅报告当前 focus site 的 setup 与结果。
+
+**文档事实** Mode of operation：edge delay 不必为所有 edge 定义，缺失的 delay 由系统从数据库提供，未设置过的 delay 默认为 0.0 ns；不做自动修正，非法值会被拒绝。与 equation based timing 一起使用时，ETDS 只改运行时值，不改 timing set 中指定的 setup 值。
+
+**文档事实** Postdependencies：命令执行后，primary set 会在下一个 functional test 开始时以新值重新激活。
+
+**文档事实** definition_string 中，drive edge 用 `dn` 表示，receive edge 用 `rn` 表示；Pin Scale 800/3600 板用 `dn`，Pin Scale 9G 板有两类 drive edge（`fn`、`sn`），也可使用 `dn` 写法，但同一字符串中不得混用两种写法。
+
+**文档事实** Fast pin 可在 definition string 开头写 period divider `pdiv:n`；同时给出 `pdiv:n` 和第一个 edge 的 delay 时，ETDS 会计算其后 n-1 个 edge 的 delay（显式指定的除外）；在 `DELTA` 模式下，指定的 delay 被解释为相对默认值的偏移，且允许负偏移。
 
 ## 典型用法
 
-（待补）
+**文档事实** 设置后再读回：`ETDS 1,1,,"d1:0 d2:1 d3:2 d4:3 d5:4 d6:5 d7:6 d8:7",(clk)`，用 `ETDS? 1,1,,(@)` 读回（`@` 表示全部已配置 pin）。文档示例中 io 用 `e1:0 e2:2 e3:6 e4:4` 设置后，查询结果显示为 drive 与 receive 两组展开的 `d1:0 d2:2 d3:6 d4:4 r1:0 r2:2 r3:6 r4:4`。
+
+**文档事实** Fast pin 示例：`ETDS? 401,1,,(CP)` 得到 `pdiv:4 d1:0 d2:5 d3:10 d4:15`；`ETDS 401,1,,"d2:5.5",(CP)` 只覆盖 d2；`ETDS 401,1,DELTA,"d3:-1",(CP)` 把 -1 应用到计算出的默认值（13）而不是当前实际值（14）。
+
+**文档事实** Multi-port 示例：`ETDS? "mu_timing",2,,(In1)` 读回，`ETDS "mu_timing",2,,"d1:0.5",(In1)` 设置；specification 名与 pin 名确定 port，port 与 specification 再确定 equation set。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[etim]]` — ETDS 首段称此命令从 release 2.0 起，对 edge 数超过 6 的 waveform 取代 ETIM；ETIM 页则称从 release 2.1 起，在 14-edge setup 中使用 ETDS 取代 ETIM。两处关于起始 release 与适用条件的说法不一致，此处并列记录，不自行取舍。
+- **文档事实** `[[wfds]]`、`[[bwds]]` — Errors 段把 edge order 错误（例如 window open 必须先于 window close）列为 timing set 的 edge delay 与 waveform definition（WFDS）或 break waveform definition（BWDS）不匹配。
+- **文档事实** `[[tsus]]`、`[[wsus]]` — timing_set 与 waveform_set 的上限分别由 TSUS、WSUS 决定；超出该范围会报错。
+- **文档事实** `[[vtim]]` — VTIM 页用 `ETDS?` 的结果比较不同 pin 在不同 timing set 中的 edge timing，并用 `ETDS` 修改后再验证。
+- **文档事实** `[[spst]]` — SPST 页把 ETIM(ETDS) 与 PCLK、CLKR、DRLV、RCLV、TERM、PSLV 并列为会修改 timing/level 数据并自动置位受影响 specset 的命令。
+- **文档事实** `[[psfc]]` — ETDS 页说明命令配置拥有 setup focus 的 site，并在同一段链到 PSFC（Parallel Setup Focus）。
+- **文档事实** `DFGP`（`02_System_reference/02.06_Command_Reference/02.06.02.02.60_DFGP__DFGP__-__DeFine_GrouP.htm`）— pinlist 可包含由 DFGP（DeFine GrouP）创建的 group，`@` 表示所有已配置 pin。
+- **文档事实** 命令清单（`02_System_reference/02.06_Command_Reference/02.06.02.02_List_of_commands.htm`、`02_System_reference/02.06_Command_Reference/02.06.01.05_Site_dependent_firmware_commands.htm`）— 这些页面列出 ETDS、ETDS?。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 只记载 `Introduced before SmarTest 6.3.2`（哨兵值，表示在文档集覆盖范围开始前就已存在）。
+
+**文档事实** 关于取代 ETIM 的起始 release 另有不同说法（见「和谁有关」），它不属本页 Functional changes 的条目。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.117_ETDS__ETDS__-__Edge_Timing_Definition_String.htm`，主源，含用途、Mode of operation、Postdependencies、参数表、三个 Example、Errors 与 Functional changes。
+- 关系与版本佐证另读 ETIM（`02_System_reference/02.06_Command_Reference/02.06.02.02.118_ETIM__ETIM__-__Edge_TIMing.htm`）、VTIM（`02_System_reference/02.06_Command_Reference/02.06.02.02.329_VTIM__-__Verify_TIMing.htm`）、SPST（`02_System_reference/02.06_Command_Reference/02.06.02.02.229_SPST__-__SPecset_STatus.htm`）、WFDS（`02_System_reference/02.06_Command_Reference/02.06.02.02.335_WFDS__WFDS__-__WaveForm_Definition_String.htm`）、BWDS（`02_System_reference/02.06_Command_Reference/02.06.02.02.14_BWDS__BWDS__-__Break_Waveform_Definition_String.htm`）、TSUS（`02_System_reference/02.06_Command_Reference/02.06.02.02.283_TSUS__TSUS__-__Timing_Sets_USed.htm`）与 WSUS（`02_System_reference/02.06_Command_Reference/02.06.02.02.342_WSUS__WSUS__-__Waveform_Sets_USed.htm`）。

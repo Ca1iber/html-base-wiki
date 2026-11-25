@@ -136,20 +136,43 @@ readable format.
 
 ## 是什么
 
-（待补）
+**文档事实** Project Explorer 视图是 Setup perspective 的一部分，提供 device directory 的层级视图。
+
+**文档事实** 在该视图中可以添加（导入）或移除 workspace 中的 device，并激活当前正在处理的 device。
+
+**文档事实** 文档列出可在视图中完成的操作：导航到 test method project 的元素；在 editor 视图中打开并编辑 class source file；创建新 project 与 class source file；管理已有 project、class source file 和 method（剪切、粘贴、删除、移动、重命名）；编译 source 以构建 test method shared library；导入或移除外部 test method project。
+
+**文档事实** 右键视图中的文件会打开快捷菜单，可执行复制、移动、新建文件和文件比较等操作。
+
+**文档事实** 视图工具栏含三个图标：折叠所有文件树；切换视图选择是否与 active editor 联动（选中时，切换 active editor 会自动把视图选择更新为正在编辑的资源）；提供排序/过滤文件以及创建、选择 working set 的菜单项。
+
+**文档事实** 本页的四个子主题是 Working with Project Explorer view、Working Sets、Device Directories、SmarTest lock mechanism。
 
 ## 典型用法
 
-（待补）
+**文档事实** 导入 device 到 workspace、从 workspace 移除 device、切换 device：分别见 Working with Project Explorer view 下的子主题。
+
+**文档事实** 直接编辑 setup file：见 Editing a Setup File Directly；其做法是在 Project Explorer 视图中打开 device directory。
+
+**文档事实** 创建 working set：见 Creating a Working Set；working set 与排序、过滤入口在工具栏第三个图标的菜单中。
+
+**建议** 希望视图选中项跟随当前编辑的资源时，启用工具栏中「与 active editor 联动」的切换图标。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[setup-perspective]]` — 本页写明 Project Explorer 视图是 Setup perspective 的一部分；Setup perspective 页把它描述为以树形显示 test method project 与 class、便于导航到程序代码、并可在其中新建 project 和 class 的视图。
+- **文档事实** Views（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.08_Views.htm`）— 本页 Related information 列出 Views；Views 页称 view 支持 editor，并把 Project Explorer 作为显示所处理 device 及其 setup data 的视图举例。
+- **文档事实** `[[debug-perspective]]` — Debug perspective 页也列出 Project Explorer，说明它显示当前 workspace 中的 test method project 与 device，并支持新建 project 和 class。
+- **文档事实** C/C++ perspective（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.03_C_C___perspective.htm`）— 该页在同一位置列出 Project Explorer，说明它以树形显示 test method project 与 class。
+- **文档事实** Editor view — 本页写明可在 editor 视图中打开并编辑 class source file，且工具栏可让视图选择跟随 active editor。
+- **文档事实** Device Directories（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02.03_Device_Directories.htm`）— 本页是 device directory 的层级视图，device 的导入、移除与激活都在此进行。
+- **文档事实** Working Sets（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02.02_Working_Sets.htm`）与 SmarTest lock mechanism（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02.04_SmarTest_lock_mechanism.htm`）— 本页的子主题。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 `Introduced before SmarTest 6.3.2`（哨兵值，表示在文档集覆盖范围开始前就已存在）；`SmarTest 6.5.3: The Navigator view is renamed as Project Explorer view`。
 
 ## 出处
 
-（待补）
+- `01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02_Project_Explorer_view.htm`，主源，含视图职责、可执行操作、工具栏、Related information 与 Functional changes。
+- 子主题 `01.01.08.02.01_Working_with_Project_Explorer_view.htm`、`01.01.08.02.02_Working_Sets.htm`、`01.01.08.02.03_Device_Directories.htm`、`01.01.08.02.04_SmarTest_lock_mechanism.htm` 用于典型用法。

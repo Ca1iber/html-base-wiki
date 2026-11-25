@@ -164,20 +164,33 @@ and loads the hardware with the default vector rate and edge placement values. O
 
 ## 是什么
 
-（待补）
+**文档事实** RSET（ReSET）命令把指定类型文件的 power-on 默认值装入硬件。
+
+**文档事实** specifier 可取：DPS（标准 DPS 的默认电源设置）、FCR（默认时钟布线）、LEV（默认电源设置，文档给出 Level 0 V、Current 50 mA、Off state minimum current、Setup time 0 ms 等值；其中 UHC4T 的 clamp mode 为 limit，见 UHCM）、TIM（默认 timing 设置）、VEC（默认 vector 设置，Vector Memory 中无 vector、无 test/label、无 comment、无 sequencer program）、ATR（默认 edge attribute，pin attribute 置 0）、PDL（默认 path delay attribute，cable assembly、fixture、system attribute 均置 0）、CAL（默认 level 与 timing 校准数据）、MTPP（复位 memory test 与 per-pin sequencer subroutine 数据）。
+
+**文档事实** 文档的 Application 一栏写的是 Test Program Explorer。
 
 ## 典型用法
 
-（待补）
+**文档事实** 语法为 `RSET {specifier}`，每次指定一种 specifier。
+
+**文档事实** 最小示例是 `RSET TIM`：文档说明它重置所有 waveform set 与 timing set，并把默认 vector rate 与 edge placement 装入硬件；此后只有 waveform set 1 和 waveform set 1 中的 timing set 1 处于 active。
+
+**建议** 需要把某一类 setup 恢复为 power-on 默认值时选对应 specifier；具体默认值见上方参数表，执行前先确认要覆盖的范围。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `*RST`（`02_System_reference/02.06_Command_Reference/02.06.02.02.345_RST_-__ReSeT.htm`）— 该页写明 *RST 复位 firmware 与全部校准数据，使硬件装入 power-up 默认值，并注明「For default values see the RSET command」。
+- **文档事实** DCCH（`02_System_reference/02.06_Command_Reference/02.06.02.02.40_DCCH_-__DC_Current_measurement_High_precision_pmu.htm`）与 DCVH（`02_System_reference/02.06_Command_Reference/02.06.02.02.52_DCVH_-__DC_Voltage_measurement_High_precision_pmu.htm`）— 两页都把 `RSET DC` 与 DCCH、DCVH、*RST、UDEF 并列为「执行一次复位」的情形。
+- **文档事实** `UHCM`（`02_System_reference/02.06_Command_Reference/02.06.02.02.303_UHCM__UHCM__-__Ultra_High_Current_power_supply_Modes.htm`）— RSET 的 LEV 默认值中 clamp mode 为 limit，文档在此注明见 UHCM。
+- **文档事实** `02_System_reference/02.06_Command_Reference/02.06.02.02_List_of_commands.htm` — 该命令清单列出 RSET。
+- **文档事实** RSET 本页参数表列出的 specifier 中没有 DC，而 DCCH/DCVH 页出现 `RSET DC`；两处记载并列，不自行取舍。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 `Introduced before SmarTest 6.3.2`（哨兵值，表示在文档集覆盖范围开始前就已存在）；`SmarTest 7.0.3: Removed MTST parameter option`。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.210_RSET_-__ReSET.htm`，主源，含命令用途、参数表、Application、Example 与 Functional changes。
+- 关系与版本佐证另读 `02.06.02.02.345_RST_-__ReSeT.htm`、`02.06.02.02.40_DCCH_-__DC_Current_measurement_High_precision_pmu.htm`、`02.06.02.02.52_DCVH_-__DC_Voltage_measurement_High_precision_pmu.htm`、`02.06.02.02.303_UHCM__UHCM__-__Ultra_High_Current_power_supply_Modes.htm`。
