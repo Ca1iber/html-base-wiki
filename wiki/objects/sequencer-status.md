@@ -390,20 +390,70 @@ required as shown in above example 1.
 
 ## 是什么
 
-（待补）
+**文档事实** SEQUENCER_STATUS 是访问「保存数字 sequencer 状态的数据容器」的测试方法 API，通过成员函数操作 sequencer。
+
+**文档事实** 使用限制：必须使用系统预先准备的类对象 `Sequencer`；不能自行创建 SEQUENCER_STATUS 类的对象。该 API 不影响模拟 sequencer。
+
+**文档事实** 该 API 不支持 execution context：只能通过 `run()` 启动全局 sequencer run（执行当前 start label），只能通过 `abort()` 全局中止所有活动 run。
+
+**文档事实** 若已有 sequencer 在运行（例如处于 endless loop），`run()` 不会再启动全局 run；必须先 `abort()` 停掉所有活动 run。
+
+**文档事实** API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/SequencerStat.h`。
+
+**文档事实** 成员函数共七类：`stopCycle`（带 `portName` 与不带 `portName` 两个重载）、`stopVector`、`reset`、`run`、`abort`、`isRunning`、`getSequencerStatus`。
+
+**文档事实** `stopCycle(num[, portName])` 指定随后由 `run()` 启动的全局 run 在第 num 个 tester cycle 之后停止（该 cycle 是最后执行的一个）；若当前 start label 是 multiport burst，还必须给出该 cycle 号所属的 port。它的设置不仅影响 `run()`，也影响 EXECUTE_TEST、START_TEST、FUNCTIONAL_TEST、DIGITAL_CAPTURE_TEST、NB_DIGITAL_CAPTURE_START 这些 API 以及 DC API 的 pre-action。设置一直有效，直到 `reset()` 清除；因此应在 test suite 末尾、或在为另一项测试启动 sequencer 之前 reset。
+
+**文档事实** `stopVector(num)` 指定 sequencer 在第 num 个 vector 之后停止（该 vector 是本次执行最后一个）；注意事项与 `stopCycle` 相同。
+
+**文档事实** `reset()` 清除 `stopCycle`/`stopVector` 的设置；不 reset 的话，后续标准 functional test 会在先前指定的点停止。reset 要等到下一次由上述 test method API 发起的 sequencer run 之前才 flush（download）；要更早生效必须显式调用 FLUSH。`reset()` 不改变当前 sequencer 状态；要停止 sequencer 必须调用 `abort()`。AC test 中必须在测量前清除 sequencer 设置。
+
+**文档事实** `run(status = TM::NORMAL)` 启动全局 sequencer run；sequencer 在 `stopCycle`/`stopVector` 指定的 cycle 或 vector 之后暂停；只有在没有活动 run 时才会启动。
+
+**文档事实** `status` 模式：`TM::NORMAL`（执行 pattern）、`TM::ENDLESS_LOOP`（无限重复完整测试，含 primary activation 与 multiport 同步，只能由 break 动作停止）、`TM::ENDLESS_PATTERN_LOOP`（只重复 pattern 中用户 sequencer 程序，避免测量期间的关键 hold，例如 IDD 工作电流测量）、`TM::STOPONERROR`（执行出错时停止）、`TM::STOPONERROR_LOOP`（在 endless loop 中出错时停止）。multiport 下各 port 频率可不同；此时用 ELPT 模式，当 loop count > 1 时同步可能不再执行。
+
+**文档事实** `abort()` 把所有活动 sequencer run 置为 break 状态，可用于停止以 `TM::ENDLESS_PATTERN_LOOP` 启动的无限循环，且必须在新 run 之前调用。
+
+**文档事实** `isRunning()` 返回数字 sequencer 是否在运行；要判断模拟或数字 sequencer 是否在运行，用 IS_TEST_RUNNING API。
+
+**文档事实** `getSequencerStatus()` 返回当前 sequencer 状态：`OFF`、`RUN`、`HALT` 或 `BRK`。
+
+**文档事实** 限制：DPS128/DPS64 用 `run()` 或固件命令 `SQST RUN` 启动 sequencer 时，不能并行执行动态与静态 DC 动作；与动态 pattern 并行的测量要用 profiling。
 
 ## 典型用法
 
-（待补）
+**文档事实** Example 1：`Sequencer.stopCycle(13).run();` 在第 13 个 cycle（p1=1）后停；改 `stopCycle(14)` 则在第 14 个 cycle（p1=0）后停；`stopVector(9)` 在第 9 个 vector（p1=1）后停，`stopVector(10)` 在第 10 个 vector（p1=0）后停。
+
+**文档事实** Example 2：FLEX DC 测量。先在 `ON_FIRST_INVOCATION_BEGIN()` 内准备 PPMU_SETTING、PPMU_RELAY、PPMU_CLAMP、PPMU_MEASURE 等 task，再 `Sequencer.stopCycle(15).run();` 启动 sequencer 并在 tester cycle 15 暂停，`tasks.execute()` 执行 DC 测量，读回 `ppmu_meas.getValue("pin1")` 后 `Sequencer.reset();`。
+
+**文档事实** Example 3：`Sequencer.run(TM::ENDLESS_PATTERN_LOOP);` → `DPS_VFIM("@").execute();` → `Sequencer.abort();`，在无限 pattern loop 中于随机 device cycle 测 DPS 工作电流，然后中止 sequencer。
+
+**文档事实** Example 4：`Sequencer.reset();` 后执行 `PMU_IFVM("@").preAction("FTST").execute();`，在 DC 测试的 pre-action 前清空 sequencer 设置。文档同时建议用 FLEX DC 代替 PMU_IFVM，并在需要 functional pattern 作 pre-action 时按 Example 2 用 SEQUENCER_STATUS API。
+
+**建议** 把 `stopCycle`/`stopVector` 视为「一次性定长执行」的手段，用完立即 `reset()`；否则该设置会延续到后续 test suite，文档明确要求在使用后 reset。
+
+**建议** 需要在 DC 测量前稳定 pattern 时，优先用 `stopCycle` 定位并暂停 sequencer（Example 2 的模式），不要沿用 PMU_IFVM 的 functional pre-action 老写法——文档本身推荐 FLEX DC。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** SQGB —— 固件侧控制 sequencer 状态的命令；`run()` 的 `EL` 与 `ELPT` 模式语义分别对应 SQGB 的 EL / ELPT 模式，正文两处指向该页。
+- **文档事实** SQST —— `SQST RUN` 也能启动 sequencer，并与 `run()` 共有「DPS128/DPS64 不能并行动态与静态 DC」的限制。
+- **文档事实** Controlling sequencer status（`02.07.03.12`）—— 明写 test method 编程中可用 SEQUENCER_STATUS API 或固件命令 SQGB 显式控制 sequencer 状态；并说明 DC test method library 测量后不清 sequencer、AC library 在测量前用 `Sequencer.reset()` 或 `SQGB ACQF,0` 清除。
+- **文档事实** EXECUTE_TEST、START_TEST、FUNCTIONAL_TEST、DIGITAL_CAPTURE_TEST、NB_DIGITAL_CAPTURE_START —— `stopCycle` 的设置同样作用于这些 API（以及 DC API 的 pre-action）。
+- **文档事实** [[flush]] —— `reset()` 要早于下一次 run 生效，必须显式调用 FLUSH。
+- **文档事实** IS_TEST_RUNNING —— `isRunning()` 只回答数字 sequencer；要覆盖模拟 sequencer 用 IS_TEST_RUNNING。
+- **文档事实** WAIT_TEST_DONE / SMC_WAIT_TEST_DONE —— 可与 SEQUENCER_STATUS 一起使用，此时超时从对应 API 执行结束时开始计。
+- **文档事实** Applying Desired Vector before DC Test（`02.07.03.08.01`）—— 指出也可用 SEQUENCER_STATUS API 施加目标 vector address 或 device cycle 对应的 vector。
+- **文档事实** [[dps128-dps64-cards]] —— 上述动态/静态 DC 限制的硬件来源；文档给出的并行测量替代是 profiling。
+- **文档事实** PMU_IFVM、DPS_VFIM —— 分别出现在 Example 4 与 Example 3；前者文档建议改用 FLEX DC。
+- **文档事实** APIs in alphabetical order（`02.07.04.01`）—— SEQUENCER_STATUS 收录于该 API 索引。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes：Introduced before SmarTest 6.3.2；SmarTest 6.5.2 新增 `run()` 的 `TM::STOPONERROR` 与 `TM::STOPONERROR_LOOP` 选项、新增 `getSequencerStatus()` 成员函数、`stopCycle()` 新增 `portName` 参数；SmarTest 6.5.4 新增 `run()` 的 `TM::ENDLESS_PATTERN_LOOP` 选项。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.204_SEQUENCER_STATUS_-__Sequencer.htm` —— 主源：正文与使用限制、Class definition、Syntax、各成员函数说明、Examples 1–4、Functional changes。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.03.12_Controlling_sequencer_status.htm` —— 读了控制方式、DC/AC test programming 与 Functional changes。
+- 其余跨页条目（SQGB、SQST、WAIT_TEST_DONE 等）取自各页被本接口引用的语境句，未整篇通读。

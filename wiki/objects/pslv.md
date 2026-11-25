@@ -228,20 +228,43 @@ The programmed voltage reaches the overvoltage limit.
 
 ## 是什么
 
-（待补）
+**文档事实**：PSLV（Power Supply LeVel）为先前的 `DFPS` 命令定义过的通道设置 DPS 参数；`PSLV?` 返回已有设置。可设置的量包括输出电压（V）、source/sink 电流限值（A）、断开状态下的输出阻抗模式，以及 settle 时间（ms）。
+
+**文档事实**：`voltage` 与电流限值的可取值取决于 DPS 类型。`source_current` 在 source 与 sink 限值相等时同时定义两者；若使用 `sink_current`，则 `source_current` 只定义 source 限值，`sink_current` 定义 sink 限值。查询只在 sink 限值与 source 限值不对称时输出 `sink_current`。
+
+**文档事实**：非方程化（fixed）setup 用 DPS set 号；方程化 setup（equation based testing）用 `dps_set_id`，其导出式为 `100000*equation_set_no + 1000*specset_no+1`。`ALL` 只作用于全部非方程化的 fixed DPS set，`PSLV? ALL` 也只返回非方程化 DPS set 的信息；`PSLV? ACT` 显示实际启用的 DPS set 的设置。
+
+**文档事实**：`setup_time` 是 DPS 的 settling 时间；所有 DPS 被同步为在同一时间点结束 settling，即系统切换到 connect 状态的那一刻。若两个 DPS 分别设 10 ms 和 4 ms，后者会比前者晚 6 ms 启动。取值 -2147483647…2147483646 ms，默认 0，分辨率为 ms（浮点值四舍五入）。
+
+**文档事实**：`impedance` 决定 disconnect 状态下输出的处置方式：`LOZ` 把输出电压拉到 0 V 并保持电流限；`HIZ` 切到最小可能电流限（DPS-slot 类型的默认值，用于 DC Scale 卡时改用 `HIZ_R`）；`HIZ_R` 通过断开输出继电器实现高阻（比 HIZ 慢）；`LOZ_HIZ` / `LOZ_HIZ_R` 先按 LOZ 降到 0 V（±50 mV 或超时 1 s），再分别切到 HIZ / 断开。
+
+**文档事实**：`PSLV` 的 `setup_time` 与 `PSSR` 的 `rise_...` / `fall_...` 参数互斥，也与 `DPSPINS` 的 `t_ms` 方程参数互斥。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`PSLV 1,5.2,0.5,HIZ,15,(Vee)`——对器件引脚 Vee 使用 DPS set 1，输出电压 5.2 V、限流 0.5 A、断开时 HIZ、setup time 15 ms。
+
+**文档事实**：查询语法为 `PSLV? {dps_No|dps_set_id}, {(pinlist)}`，返回一条与设置命令同参数形式的 `PSLV ...` 行。
+
+**文档事实**：`pinlist` 中的引脚必须先用 `DFPS` 定义；多个引脚用逗号分隔；字符 `@` 表示对所有 DPS 引脚设置。
+
+**建议**：若同一 DPS 还要用 PSSR 配置上升/下降斜率，不要同时设置 PSLV 的 `setup_time`；文档规定二者互斥。
 
 ## 和谁有关
 
-（待补）
+- `DFPS`：**文档事实**——PSLV 的 `pinlist` "must contain the names of pins previously defined by the DFPS command"；PSLV 只改已存在的 DPS 通道，不自己定义引脚。
+- `DSCP`：**文档事实**——`dps_No` 不得超过 DSCP 定义的最大允许 DPS set 数。
+- `PSSR`：**文档事实**——PSLV 与 PSSR 两篇都写明 PSLV 的 `setup_time` 与 PSSR 的 `rise_...`/`fall_...` 互斥；PSLV 的 Related information 也指向 PSSR。
+- `DPSPINS` / `DPSPINS resources`：**文档事实**——`t_ms` 方程参数与 PSLV 的 `setup_time` 互斥；DPSPINS resources 页把 "HIZ in the PSLV command" 作为最小电流（min）的用法。
+- `PSSL`：**文档事实**——PSSL 页说明，当 PSSL 设定的安全限被其他固件命令（例如 PSLV）超过时，固件报错。
+- `PSLR`：**文档事实**——PSLR 页说明其设定的最大输出电压就是之后 PSLV 可编程的最大电压。
+- `PSST`：**文档事实**——PSST 页说明 DPS 的 ON/OFF 状态由 PSLV 指定；断开时输出阻抗取当前 active DPS set 中的 `HIZ_R`、`HIZ` 或 `LOZ`。
+- `SPST?` / `UPTD`：**文档事实**——SPST? 页把 PSLV 列为会修改 level 数据、从而置位受影响 specset 状态位的命令；UPTD 页说明使用 PSLV 会把 DPS 与 LEV 标志清 0，直到重新 setup。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced before SmarTest 6.3.2（早于文档集覆盖起点即已存在，不是 6.3.2 的变更）；SmarTest 6.5.3 解除与 PSSR 命令的依赖（"Excluding dependency with PSSR command"）；SmarTest 7.1.3 新增阻抗模式 `LOZ_HIZ` 与 `LOZ_HIZ_R`；SmarTest 7.2.0 新增 `sink_current` 参数。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.195_PSLV__PSLV__-__Power_Supply_LeVel.htm`——首段、语法/参数、示例、Errors、Related information 与 Functional changes 均取自本篇。

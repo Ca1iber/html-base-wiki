@@ -283,20 +283,45 @@ modified as necessary
 
 ## 是什么
 
-（待补）
+**文档事实**：WFDS（WaveForm Definition String）在一个 waveform set 内定义 logical waveform（fixed timing），用 `definition_string` 按 edge 给出 drive / receive action。它也可在 equation based timing 下修改 logical 或 pure physical waveform 的运行时定义；`WFDS?` 返回 logical 或 pure physical waveform 的已有定义。
+
+**文档事实**：`definition_string` 是 edge action 定义串，只覆盖 drive / bidirectional edge。Pin Scale 系统只有一种 drive edge 类型 `di`（1 ≤ i ≤ 8）；Smart Scale 系统有 `fi` 与 `si` 两类 drive edge（1 ≤ i ≤ 8），两者只允许 action code 0、1、N，同时仍支持旧的 `di` 语法。
+
+**文档事实**：未显式设置的 edge 一律为 N，查询时只打印用到的 edge。数据相关的 drive action 决定使用 driver formatter、tri-state formatter 还是两者：`D1N`/`D2N`/`C1N`/`C2N` 只用 driver，`DN1`/`DN2` 只用 tri-state，`D11`/`C11`/`D22`/`C22` 两者都用；这会影响 `WAVE` 命令的参数赋值。
+
+**文档事实**：若 `wfIndex` 已被占用，WFDS 覆盖旧定义，并使该 logical waveform 之前定义的所有 physical waveform 失效，必须用 `WAVE` 全部重新定义。edge order 限制不满足时命令不被接受；未使用 edge 的位置会被自动校正，已在其他波形中用到的 edge 不会被移动。
+
+**文档事实**：如果 edge delay 为适配所编程的波形而被自动校正，会产生 warning，受影响的 waveform set 下的 timing set 会按需修改。
+
+**文档事实**：`ALLOW_EQ` 形式只改 runtime 设置，不改 wavetable 中的定义；每次运行时改动会影响所有使用该 wavetable 的 specification，因为新波形要为其分别求值并下载，所以改动偏慢，且运行时定义不做一致性检查，由用户自行保证。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`WFDS 1,0,,"e1:F00 e2:D1N e3:F00",(io)`——为 waveform set 1 的 waveform 0 定义 io 的 edge action：e1 驱动 0、e2 驱动 DD1、e3 驱动 0（固定动作均无 tri-state action）。
+
+**文档事实**：同一示例继续用 `WFDS 1,1,,"r4:EE1",(io)` 定义接收侧，用 `WFDS 1,0,,"d1:F00 d2:F10 d3:F10 d4:F00 d5:F10 d6:F00 d7:F10 d8:F00",(clk)` 定义 clk 的 8 个 drive edge。
+
+**文档事实**：查询 `WFDS? 1,ALL,,(@)` 会回读上述三条定义；`wvf_set` 可写 `ALL`（全部 waveform set）或 `PRM`（primary waveform set）。
+
+**文档事实**：`wfIndex` 取 0–255，这里必须用十进制；文档特别说明 wavetable 中同一索引以十六进制编码。
+
+**建议**：覆盖已在使用的 `wfIndex` 前，先确认其 physical waveform 可以重建；WFDS 覆盖会令旧 physical waveform 全部失效，之后必须重发 WAVE。
 
 ## 和谁有关
 
-（待补）
+- `WAVE`：**文档事实**——WFDS 的 Postdependencies 要求定义 logical waveform 后必须用 WAVE 指定其 physical waveform；WFDS 参数说明写 `wfIndex` 也被 WAVE 使用，覆盖定义会使旧 physical waveform 失效。
+- `WFDF`：**文档事实**——WFDF 与 WFDS 都能定义 logical waveform，两篇都说明覆盖已有索引会使旧 physical waveform 失效；WFDS 的 Related information 也指向 WFDF。
+- `ETDS`：**文档事实**——WFDS 的 Related information 指向 ETDS（Edge Timing Definition String）；ETDS 页把边序错误、边延迟不匹配等问题指向 WFDS。
+- `WFUD`：**文档事实**——WFUD 删除由 WFDF/WFDS 定义的 logical waveform 及其关联 physical waveform。
+- `BWDS`：**文档事实**——BWDS 页说明其 definition_string 的语法细节见 WFDS。
+- `EUDS?`：**文档事实**——EUDS? 页说明 edge direction 由 WFDS 或 BWDS 设定。
+- `WAVE` 的 Prerequisites：**文档事实**——WAVE 页要求 physical waveform 所基于的 logical waveform 已由 WFDS 或 WFDF 定义。
+- `Selecting and ordering edges` / `Defining waveforms for Smart Scale pins` / `Specifying the actions`：**文档事实**——WFDS 的参数说明直接引用这三篇，分别对应 edge 顺序限制、Smart Scale 的 `fi`/`si` 语法、数据相关 action 的 formatter 说明。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced before SmarTest 6.3.2（早于文档集覆盖起点即已存在，不是 6.3.2 的变更）；SmarTest 7.0.1 起不支持 C/CE 与 P 卡（"C/CE and P cards are not supported"）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.335_WFDS__WFDS__-__WaveForm_Definition_String.htm`——首段、Mode of operation、Postdependencies、语法/参数、示例、Errors/Warnings、Related information 与 Functional changes 均取自本篇。

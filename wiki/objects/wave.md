@@ -261,20 +261,41 @@ wavetable_name
 
 ## 是什么
 
-（待补）
+**文档事实**：WAVE 在 fixed timing 下定义一个 physical waveform：为某个 logical waveform 的 data parameter 指定具体取值，并给这组取值分配 physical waveform index（`pwfIndex`）。只有 physical waveform 会下载到硬件并由 sequencer 执行，因此每个 logical waveform 至少要发一条 WAVE，即使它不含任何 data parameter。
+
+**文档事实**：logical waveform 中由固定状态给出的 drive / receive action 直接决定物理状态；由 data parameter 给出的部分则在 WAVE 中补齐——驱动侧用 `DD1`/`DD2`，接收侧用 `ED1`/`ED2`。文档的 Mode of operation 给出 data parameter 形式与允许的 fixed action 的对应表；若 logical waveform 不含 data parameter，WAVE 的 `DD1`…`ED2` 必须留空。
+
+**文档事实**：`pwfIndex` 范围为 0–31（Pin Scale Digital 系统为 0–255），该索引存入 vector 区并引用 physical waveform 表。WAVE 也可为 equation based timing 创建 physical waveform 的运行时定义（第二语法形式带 `ALLOW_EQ`，只影响 runtime，不改 wavetable）。
+
+**文档事实**：对同一 logical waveform 的多条 WAVE，同一 Expected Data 参数在不同实例中的 `C`/`D`（selective digital capture）取值必须同质：要么全为 C/D，要么全不为；且用于 selective digital capture 的波形最多只能有一个 compare action。
+
+**推断**：由此 WAVE 与 WFDS/WFDF 构成"logical waveform 定义 / physical waveform 落地"两级分工，WAVE 是让波形真正可被 sequencer 执行的一步；文档"Only physical waveforms are downloaded to the hardware"直接支持这一分工。
 
 ## 典型用法
 
-（待补）
+**文档事实**：文档示例先用 `WFDS 1,2,,"d1:D11 d3:0 d4:C11",(pin1,pin2,pin3,pin4)` 为 waveform set 1 定义 logical waveform 索引 2（使用 DD1、固定 0、DD1 的补码 C11），再用 `WAVE 1,2,F00,,,,4,(pin1,pin2,pin3,pin4)` 与 `WAVE 1,2,F10,,,,5,(pin1,pin2,pin3,pin4)` 定义两个 physical waveform：4 号在 d1/d3 驱动 0、d4 驱动 1；5 号在 d1 驱动 1、d3/d4 驱动 0。
+
+**文档事实**：查询语法为 `WAVE? {wvf_set|"wavetable_name"|specset_id|"multi-port_spec"}, {(pinlist)}`，返回 physical waveform 定义；`wvf_set` 也可写 `ALL`。
+
+**文档事实**：`wvf_set` 的上限由 `WSUS` 决定；`pinlist` 可使用 `DFGP` 定义的组，`@` 表示全部已配置引脚。
+
+**建议**：重定义已存在的 physical waveform 前先用 `WFUD` 删除原 waveform 及其关联 physical waveform；WAVE 的 Errors 段明确把"重定义已有 physical waveform"列为报错条件。
 
 ## 和谁有关
 
-（待补）
+- `WFDS` / `WFDF`：**文档事实**——WAVE 的 Prerequisites 要求待建 physical waveform 的 logical waveform 已由 WFDS 或 WFDF 定义；Errors 段也把"为不存在的 logical waveform 定义 physical waveform"列为报错，并要求先用 WFDS 定义。
+- `WFUD`：**文档事实**——WFUD 页说明它删除由 WFDF/WFDS 定义的 logical waveform 及其由 WAVE 定义的全部 physical waveform；WAVE 的 Errors 段要求重定义前先用 WFUD 删除。
+- `ETIM` / `ERCY?`：**文档事实**——ETIM 页把 WAVE 列在相关命令中；ERCY? 页让读者参考 WAVE 以理解 expected data 参数。
+- `VWFS?` / `VWFG?`：**文档事实**——这两个校验命令把 WFDF、WAVE、BWDF 等命令定义的波形与数据参数纳入一致性/兼容性检查。
+- `VDCP`：**文档事实**——VDCP 页说明其 data parameter 与 WAVE 使用的 data parameter 相同，称为 direction parameter。
+- `WSUS`：**文档事实**——`wvf_set` 的最大值由 WSUS 决定；WAVE 的 Errors 段以 WSUS 允许范围作为越界判据。
+- `WFDS` 的 Postdependencies：**文档事实**——WFDS 页要求定义 logical waveform 后必须用 WAVE 指定其 physical waveform，即使 logical waveform 不含 data parameter。
+- `Edge action` / `Specifying the actions`：**文档事实**——WAVE 的 Related information 指向这两篇，用于 fixed action / edge action 取值的说明。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 仅记录 "Introduced before SmarTest 6.3.2"，即该命令早于文档集覆盖起点即已存在；文档未列出更细的版本变更。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.333_WAVE__WAVE__-__WAVEform.htm`——首段、Prerequisites、Mode of operation、语法/参数、示例、Errors、Related information 与 Functional changes 均取自本篇。

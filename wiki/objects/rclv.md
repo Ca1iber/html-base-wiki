@@ -202,20 +202,50 @@ ignored.
 
 ## 是什么
 
-（待补）
+**文档事实**：RCLV（ReCeive LeVel）为比较器定义 logic 1 与 logic 0 阈值电平（mV），可在同一条命令中设置一个或多个引脚，也可用于 `DFGP` 先前定义的 pin 组；阈值写入指定的 level set，`RCLV?` 返回该 level set 与指定引脚的当前阈值。
+
+**文档事实**：`vth` 是 FAST 比较器的单阈值（代替分别给出的高、低阈值）；`logic_0_level` / `logic_1_level` 分别是比较器区分 logic 0 / logic 1 与中间电平的阈值点。
+
+**文档事实**：普通 level set 编号大于 0；level set 0 是 sequencer state OFF 专用的 level set。`ALL` 设置除 level set 0 外的所有已有 level set，`PRM` 设置 primary level set。若写入的编号超出 `LSUS` 已使用的 level set 范围，会新建一个 level set。
+
+**文档事实**：DUT 板上若使用串联电阻（resistive divider），接收电平会自动调整，以补偿串联电阻上的压降。
+
+**文档事实**：equation based level setup 使用 `level_set_id`，导出式为 `100000*equation_set_no + 1000*specset_no + level_set_no`；此时只修改运行值，不修改 level set 中的值。
+
+**文档事实**：Warnings 段记录：若发生 logic 1 或 logic 0 阈值的自动校正，会产生 warning；若为高分辨率电流比较器定义 `range`，该 `range` 会被忽略。
+
+**文档事实**：`range` 选择接收量程（mV）：高速电压比较器可选 8 V（-8000.0…8000.0）或 -40 V…+80 V（-40000.0…80000.0）；高分辨率电压比较器可选 3 V、10 V、30 V 或 -40 V…+80 V；高分辨率电流比较器固定 200 mA。未指定时，若选择的是电压比较器，则按 `logic_0_level` / `logic_1_level` 选最佳量程。参数说明同时标注 "This parameter is currently not available."，而功能变更记录写明 `range` 是 SmarTest 7.4.0 新增的参数，两处表述不一致。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`RCLV 1,-1300,-750,(Q0)`——把 pin Q0 的 logic 0 比较阈值设为 -1300 mV、logic 1 阈值设为 -750 mV。
+
+**文档事实**：AVI64 示例先执行 `TERM 1,,,,,,HRV,(avi64Pin1)`，再执行 `RCLV 1,-1300,-750,3000,(avi64Pin1)`；文档说明该例把低、高阈值设为 -1300/-750 mV，并把量程设为 3 V range。
+
+**文档事实**：查询语法为 `RCLV? {level_set_no | level_set_id}, {(pinlist)}`，返回一条与设置命令同参数形式的 `RCLV ...` 行。
+
+**文档事实**：`pinlist` 可包含 `DFGP` 定义的 pin 组；`@` 用于设置或读取全部 output pin 的阈值；pinlist 中可包含 O 或 IO 引脚。
+
+**建议**：批量设置前先对目标引脚与 level setup 用 `SPEC?` 查 RCLV 允许的最小 logic 0 / 最大 logic 1 阈值，避免越界报错。
 
 ## 和谁有关
 
-（待补）
+- `DRLV`：**文档事实**——DRLV 是驱动电平的对应命令；入门文档在同一处要求 "Change the drive and receive levels (DRLV and RCLV)"。
+- `DFGP`：**文档事实**——RCLV 首段与 `pinlist` 参数都写明可使用 `DFGP` 定义的 pin 组。
+- `TERM`：**文档事实**——RCLV 的 Example 2 先用 TERM 选择比较器，再设置阈值；SPST? 页也把 TERM 与 RCLV 并列为会修改 level 数据的命令。
+- `RCLS?`：**文档事实**——RCLS? 页要求 `pass_value` 落在通道板比较器阈值范围内，并让读者参考 RCLV。
+- `SPEC?`：**文档事实**——SPEC? 查询指定引脚与 level setup 下 RCLV 可指定的最小 logic 0 与最大 logic 1 阈值。
+- `DSCP`：**文档事实**——level set 数不得超过 DSCP 定义的最大 level set 数；RCLV 的 Errors 段以 DSCP 范围作为越界判据。
+- `LSUS`：**文档事实**——写入编号超出 LSUS 已用范围时新建 level set；查询时编号超出 LSUS 已用范围会报错。
+- `SPST?` / `UPTD`：**文档事实**——SPST? 页把 RCLV 列为会修改 level 数据、从而置位受影响 specset 状态位的命令；UPTD 页在 DPS/LEV 状态同步的说明中把 PSLV、DRLV、RCLV 等命令并列。
+- `Defining a level set for sequencer state OFF`：**文档事实**——`level_set` 参数说明引用该篇，用于 level set 0 的专用性。
+- `Digital Cards`（如 Pin Scale 1600、Pins Scale 5000）：**文档事实**——RCLV 末尾让读者到这些卡页查 level range 等规格。
+- `Set fixed receiver levels` / `Create a fixed level set`：**文档事实**——这两篇 how-to 都以 RCLV 作为设置接收阈值的命令。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced before SmarTest 6.3.2（早于文档集覆盖起点即已存在，不是 6.3.2 的变更）；SmarTest 7.4.0 新增额外参数 `range`。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.204_RCLV__RCLV__-__ReCeive_LeVel.htm`——首段、语法/参数、两个示例、Errors/Warnings、Related information 与 Functional changes 均取自本篇。

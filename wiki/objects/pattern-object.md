@@ -342,20 +342,41 @@ cout << "Low current clamp at vector 32 (expect 0.001): " << current << " A" << 
 
 ## 是什么
 
-（待补）
+**文档事实** PATTERN 类是一个 subsidiary data container，保存单个 subpattern 的元素。
+
+**文档事实** 该类不能直接实例化，只能通过 PATTERN_CONTROLLER 的 `label(...)` 成员函数访问。
+
+**文档事实** 该 API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/Pattern.h`。
+
+**文档事实** 成员函数分为三类：`add(...)` 系列把 PPMU/BADC 任务或 DC waveform 挂到 subpattern；`vecEvents(...)` 返回 DC Scale 通道的向量事件编辑接口；`getClampHighCurrent` / `getClampLowCurrent` / `getForceVoltage` 在 pattern 中按 vector 回查当前生效的 force 或 clamp 值。
+
+**文档事实** `getForceVoltage` 只作用于 setup data，且作用于 vectors 而非 cycles；文档举例为查某个 cycle 的 force voltage，同时提醒该函数按 vectors 而非 cycles 工作（原文如此）。
 
 ## 典型用法
 
-（待补）
+**文档事实** Example 1：用 `PATTERN_CONTROLLER` 的 `label("myRamp")` 取 PATTERN 引用，再调用 `getForceVoltage("Vdd", 100, voltage)` 查 vector 100 处的 force voltage。
+
+**文档事实** Example 2：先构造 `ANALOG_WAVEFORM` 与 `DC_WAVEFORM`，再通过 `PATTERN_CONTROLLER.label("ppmuSubRamp","portPpmu").add(dcWaveform)` 把 DC waveform 挂到指定 label；示例注释说明 `setup()` 仅在首次运行时需要。
+
+**文档事实** Example 3：用 `vecEvents("dps1").clearAll().setup()` 清空事件，插入 `iClamp` 事件与 range restore 事件，再用 `getClampHighCurrent` / `getClampLowCurrent` 从 vector 32 回查 current clamp。
+
+**文档事实** `vecEvents(...)` 返回的接口同一时间只对一个 pinlist 有效，直到 pattern 经 `label()` 改变或下一次调用 `vecEvents()` 为止；每次调用都会使先前取得的 `VEC_EVENTS` 引用失效。
+
+**文档事实** `add(PPMU_TASK)` / `add(BADC_TASK)` / `add(TASK)` 要求任务所定义的 pins 是该 subpattern 所属 port 的 pins 的子集。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[pattern-controller]]` — PATTERN 只能由 PATTERN_CONTROLLER 的 `label(...)` 取得；该页说明 `label` 返回持有指定 label 的 DC 任务的 PATTERN 对象引用。
+- **文档事实** `[[vec-events]]` — `VEC_EVENTS` 不能直接创建，由 PATTERN 实例维护；`vecEvents()` 返回它，且一次只对一个 pinlist 有效。
+- **文档事实** DC_WAVEFORM（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.29_DC_WAVEFORM.htm`）— `add(DC_WAVEFORM)` 把 DC waveform 赋给 pattern；Related information 也列出该页。
+- **文档事实** `PPMU_SETTING` / `PPMU_RELAY` / `PPMU_MEASURE` / `PPMU_CLAMP` — `add(PPMU_TASK)` 接受这些类的对象，并把其测量集在指定 subpattern 内执行。
+- **文档事实** `BADC_SETTING`（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.09_BADC_SETTING.htm`）/ `BADC_MEASURE`（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.08_BADC_MEASURE.htm`）— `add(BADC_TASK)` 接受这些类的对象。
+- **文档事实** 用例页 How to use PPMU as AWG、How to use the BADC as digitizer、二者合用，以及 DC event example，均在正文引用 PATTERN。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced before SmarTest 6.3.2（哨兵值，表示文档集覆盖范围开始前已存在）。SmarTest 6.5.2 新增 `vecEvents()` 与 `getForceVoltage()`；SmarTest 7.2.0 新增用于赋 DC waveform 的 `add()`；SmarTest 7.2.1 新增 `getClampHighCurrent` 与 `getClampLowCurrent`。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.142.01_PATTERN.htm`，主源，含类定义、成员函数、三段 Example、Related information 与 Functional changes。

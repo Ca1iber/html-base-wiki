@@ -474,20 +474,46 @@ above).
 
 ## 是什么
 
-（待补）
+**文档事实**：TERM 设置 output 与 IO pin 的 termination mode（终接模式）。
+
+**文档事实**：它配置处于 setup focus 的 site 的 setup（参见 PSFC）；该命令一次只能聚焦一个 site，SmarTest 在 Testflow Editor 与 result tools 中按焦点 site 显示结果，firmware 查询也只报告当前焦点 site 的 setup 与结果。
+
+**文档事实**：equation based testing 中要以 level set ID 标识 level set，算法为 `100000 * equation_set_no + 1000 * specset_no + level_set_no`。TERM 会置位状态位的 bit 8，表示 equation based 值已被覆盖（见 SPST?）。
+
+**文档事实**：`level_set_no` 可填 `ALL`（对除 level set 0 外的所有现有 level set 设置）或 `PRM`（primary level set）；标准 level set 编号 > 0；level set 0 专供数字 pin 的 high-Z 状态使用，只支持 OFF（默认）、T、C、A 四种 termination mode。
+
+**文档事实**：`term_mode` 与 pin 类型及参数（`term_pulldown`、`param_1`~`param_3`）有依赖；文档 Termination modes 表列出 OFF、OFF,PULLDOWN、OFF,NONE、DIFHIZ、T、H、L、A、CT、XSE、X、C。要点：T 用指定电压终接；H/L 由 driver 做高/低终接（H/L 不控制 driver，需驱动 1 才以 vih 终接、驱动 0 才以 vil 终接，且 H/L 下 driver 永不进入 high-Z）；A 为 active load（io pin 仅在 driver high-Z 时使能；PS5000 在 fast mode 下不支持 active load 与 highZ）；CT 为差分接收器中心抽头终接，也用于从单端接收器切到差分接收器；XSE 为单端交叉终接；X 当前未使用；C 只把 clamp 设为指定 pin 的 termination mode，且只保留最近一次设置，若要同时用 clamp 与终接、或独立设置 clamp，应使用 CLMP。
+
+**文档事实**：A 的 `l_range` / `h_range` 可选 I5E3（0–5 mA）、I3E4（0–30 mA）、AUTO；`l_range` 不支持 AVI64。C 模式下 param_1/param_2 分别是 clamp 低/高电压。Application 归属 Level setup；Related information 列出 IO PINS resources。
 
 ## 典型用法
 
-（待补）
+**文档事实**（示例）：
+- `TERM 1,T,-1500,,,,,(Q1)`：把 output pin Q1 在 level set 1 终接到 −1500 mV。
+- `TERM 3,A,3000,1500,1000,I3E4,I3E4,(out)`：把 pin 组 out 的 active load 设为 3 V，Iol/Ioh 分别 1.5/1.0 mA，低/高电流范围都用 0–30 mA。
+- `TERM 1,CT,2000,,,,,(o1,o1-)`：对差分输出对 o1/o1- 用中心抽头终接到 2000 mV（level set 1）。
+- `TERM 1,OFF,PULLDOWN,,,,,,(Q1,Q2)` 在 PS1600 上打开指定 pin 的下拉电阻；`TERM 1,OFF,NONE,,,,,,(Q1,Q2)` 关闭。
+
+**文档事实**：查询用 `TERM? {level_set_no | level_set_id}, {(pinlist)}`，返回含 `term_mode` 与已定义的可选参数（`term_pulldown` 仅在该 level set 已定义时才返回）。
+
+**建议**：参数个数与模式强相关——参数过多会报错/警告；设置前按 Termination modes 表核对 pin 类型与参数组合，电流范围要与电流值匹配，clamp 模式下低电压不得高于高电压。
 
 ## 和谁有关
 
-（待补）
+- `DSCP`、`LSUS`：**文档事实**——`level_set_no` 不得超过 DSCP 允许的最大 level set 数，也不得超过 LSUS 定义的已用 level set 数。
+- `PSFC`：**文档事实**——TERM 配置处于 setup focus 的 site 的 setup，正文链接 PSFC。
+- `SPST?`：**文档事实**——正文说 TERM 置位状态位 bit 8 以表示 equation based 值被覆盖，并让读者参考 SPST?；入边显示 SPST 页把 TERM 列为会修改 level/timing data 从而自动置位的命令之一。
+- `CLMP`：**文档事实**——C 模式只设 clamp；要同时用 clamp 与终接、或独立设 clamp 需用 CLMP；入边显示 CLMP 页指向 TERM。
+- `SPEC`：**文档事实**——入边显示 SPEC 命令可查询某 pin 与 level setup 下 TERM 允许的 termination mode。
+- level set 0 / `Defining a level set for sequencer state OFF`：**文档事实**——level set 0 专供 high-Z；正文链接该用法，入边另有 level set 0 保护敏感 DUT 的应用页。
+- `PS1600 driver` / `Pin Scale 5000 driver`：**文档事实**——T、A 等模式的范围与行为参考这两份卡规格；OFF,PULLDOWN 需 PS1600/PS5000，OFF,NONE 与 DIFHIZ,PULLDOWN/NONE 仅 PS1600。
+- `IO PINS resources`、`Level Setup Commands`：**文档事实**——Related information 与 Application 所列。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记：Introduced before SmarTest 6.3.2（哨兵值）；SmarTest 7.1.0 新增 PS1600 的 `OFF,PULLDOWN` 与 `OFF,NONE` 参数；7.1.4 支持 DIFHIZ；7.4.0 新增额外参数 `hr_mode`，并为 DC Scale AVI64 增加 termination mode。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.257_TERM__TERM__-__TERMination_mode.htm`——正文、参数、Termination modes 表、Errors/Warnings、示例、Related information 与 Functional changes 均取自本篇（已用 `show.py 02.06.02.02.257` 读取）。
+- 入边关系取自 `extract/objpack.py` 的 `edges_in`；`PS1600 driver` / `Pin Scale 5000 driver` 的具体电气范围以正文所链卡规格页为准。

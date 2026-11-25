@@ -166,20 +166,43 @@ The sequencer is in RUN or BREAK mode.
 
 ## 是什么
 
-（待补）
+**文档事实**：PALS（Pin ALlocation for multiple Sites）为 site 1 以外的 site 定义 pin 所使用的测试系统通道号；site 1 的通道由 `DFPN` 定义。`site` 必须是大于 1 的整数。
+
+**文档事实**：`channel_1` 是该 site 中该 pin 使用的测试系统通道号：digital 或 DC Scale 通道用五位通道号，utility line 的通道号见 `DFUT`；`channel_2` 在文档中标注为 "currently not used"。
+
+**文档事实**：DC Scale 通道可用括号内的通道列表定义 Master/Slave 配置，列表第一个通道为 master。UHC4/UHC4T 要求通道在同一块板上物理相邻，或是一块板的第 4 通道加另一块板的第 1 通道；不能把 UHC4 与 UHC4T 混在同一组；跨板 ganging 前必须先用 `DDIC` 使能连接。
+
+**文档事实**：`PALS?` 返回每个通道所分配的 pin 名。查询时 `site` 可写 `ALL` 读取所有 site 的通道分配，或写 `PEND` 读取 pending 的通道分配；`@` 可列出 PALS 定义过的全部 pin；查询不存在的 pinlist 时系统不返回内容。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`PALS 2,10201,,(Clock)` 与 `PALS 2,10202,,(D0)`——把 site 2 的 Clock 引脚分配到通道 10201、D0 引脚分配到通道 10202。
+
+**文档事实**：`PALS 2,(10101, 10102),,(dc1)`——为 DC Scale 通道定义 master/slave 配置，第一个通道为 master。
+
+**文档事实**：跨板 UHC4 ganging 的示例先执行 `DDIC CONN, (104GO, 105GI)` 与 `DDIC CONN, (105GO, 107GI)`，再用一条 `PALS 2,(10403, 10404, 10501, ..., 10702),,(dc1)` 列出 8 个通道并指定第一个为 master。
+
+**文档事实**：差分引脚示例先用 `DFAN "MCE231,2,i","",(av8_bbrx_b+)` 等定义 MCE231 上的 `av8_bbrx_b+` / `av8_bbrx_b-`，再在 site 2/3/4 上分别用 PALS 把各 site 的 MCE 通道分配给这两个 pin。
+
+**建议**：多 site 配置中先把该 site 所有 pin 的通道分配完，再启用并行测试；PACT 与 PSTE 的 Errors 段都把"该 site 仍有 pin 未由 PALS 分配通道"列为报错条件。
 
 ## 和谁有关
 
-（待补）
+- `DFPN`：**文档事实**——PALS 的 `site` 参数说明 site 1 的通道由 DFPN 定义，并让读者到 DFPN 查通道号；PALS 只负责 site > 1。
+- `DFUT`：**文档事实**——PALS 的 `channel_1` 说明把 utility line 的通道号指向 DFUT；DFUT 页也说明 `DFUT?` 与 `PALS?` 读回时总是五位格式。
+- `DDIC`：**文档事实**——`DC_scale_channels_list` 说明跨板 ganging 前必须由 DDIC 使能连接。
+- `PSTE` / `PACT`：**文档事实**——两者的 Errors 段都把 "not all pins at the site have had their channels assigned by the PALS command" 列为报错。
+- `DFPS`：**文档事实**——DFPS 页写明多 site 配置由 PALS 和 PSTE 命令定义。
+- `DFUP`：**文档事实**——DFUP 页说明 `PALS?` 与 `DFUT?` 一样，读回 utility line 时总是五位格式。
+- `DUT interface layout`：**文档事实**——PALS 的 Related information 指向该篇。
+- `Pin configuration setup commands`：**文档事实**——PALS 的 Application 段把 PALS 归在 Pin Configuration / Configuration Setup Commands 之下。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced before SmarTest 6.3.2（早于文档集覆盖起点即已存在，不是 6.3.2 的变更）；SmarTest 7.1.3 支持 MBAV8+；SmarTest 7.5.0 为 stacked FVI16 通道新增额外参数 `channel_3`。
+
+**文档事实**：本页语法/参数节仍只列出 `channel_2`（"currently not used"），没有列出 Functional changes 提到的 `channel_3`；两处信息不一致，实际语法应以对应版本文档原文为准。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.173_PALS__PALS__-__Pin_ALlocation_for_multiple_Sites.htm`——首段、语法/参数、四个示例、Errors、Related information 与 Functional changes 均取自本篇。
