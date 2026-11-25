@@ -39,12 +39,14 @@ STAGES = ['project', 'pin', 'level', 'timing', 'pattern',
 NEXT = dict(zip(STAGES, STAGES[1:] + [None]))
 SECTIONS = ['目的', '前置条件', '涉及对象', 'L1 — Firmware / Setup Command',
             'L2 — Test Method API', 'L3 — 外部控制', '产物', '验证', '常见错误', '下一步']
+OBJECT_SECTIONS = ['语法 / 参数', '是什么', '典型用法', '和谁有关', '版本', '出处']
 REQUIRED_FM = ['type', 'title', 'tags', 'related', 'sources', 'created', 'updated', 'verified']
 SLUG_RX = re.compile(r'^[a-z0-9]+(?:[-.][a-z0-9]+)*$')
 RE_WIKILINK = re.compile(r'\[\[([^\]|#]+)')
 RE_H2 = re.compile(r'^##\s+(.+?)\s*$', re.M)
 
 R = []
+DOCS_BY_REL = {}
 
 
 def w(s=''):
@@ -276,11 +278,82 @@ def cat15_skeleton(pages):
     return ok
 
 
+def check_objects():
+    """对象页：必备节、frontmatter、sources。骨架页不判红，只计数。"""
+    ok = True
+    objs = sorted(p for p in (WIKI / 'objects').glob('*.md')
+                  if p.stem != 'index-objects')
+    missing_sec, bad_fm, bad_src, skel = [], [], [], []
+    for p in objs:
+        fm, lines = parse_frontmatter(read(p))
+        secs = h2_map(lines)
+        miss = [s for s in OBJECT_SECTIONS
+                if not any(k.startswith(s) for k in secs)]
+        if miss:
+            missing_sec.append((p.stem, miss))
+            ok = False
+        if fm is None or fm.get('type') != 'object':
+            bad_fm.append(p.stem)
+            ok = False
+        else:
+            for k in ('title', 'sources', 'verified', 'layer', 'stage'):
+                if not fm.get(k):
+                    bad_fm.append(p.stem)
+                    ok = False
+                    break
+            for s in (fm.get('sources') or []):
+                if s not in DOCS_BY_REL:
+                    bad_src.append((p.stem, s))
+                    ok = False
+        if any('（待补）' in ln and '由 LLM 补完' not in ln for ln in lines):
+            skel.append(p.stem)
+
+    w('## 对象页 — 节 / frontmatter / sources')
+    w()
+    w(f'- 对象页 **{len(objs)}** 个')
+    w(f'- 节缺失：**{len(missing_sec)}**'
+      + (f' 例：{missing_sec[:3]}' if missing_sec else ''))
+    w(f'- frontmatter 异常：**{len(bad_fm)}**'
+      + (f' 例：{bad_fm[:5]}' if bad_fm else ''))
+    w(f'- sources 查不到：**{len(bad_src)}**'
+      + (f' 例：{bad_src[:3]}' if bad_src else ''))
+    w(f'- 仍是骨架（有「待补」）：**{len(skel)}**（预期 78，不判红）')
+    w()
+    return ok
+
+
+def check_object_index():
+    ok = True
+    idx = read(WIKI / 'index.md')
+    sub = WIKI / 'objects' / 'index-objects.md'
+    objs = {p.stem for p in (WIKI / 'objects').glob('*.md')
+            if p.stem != 'index-objects'}
+    listed = set()
+    if sub.exists():
+        for t in RE_WIKILINK.findall(read(sub)):
+            listed.add(t.strip())
+
+    w('## 对象页 index 覆盖')
+    w()
+    if '[[index-objects]]' not in idx:
+        w('- ❌ 根 `index.md` 没有链到 `[[index-objects]]`')
+        ok = False
+    missing = sorted(objs - listed)
+    if missing:
+        w(f'- ❌ `index-objects.md` 漏列 {len(missing)} 页，例：{missing[:5]}')
+        ok = False
+    if ok:
+        w(f'- ✅ `index-objects.md` 覆盖全部 {len(objs)} 个对象页')
+    w()
+    return ok
+
+
 def main():
     if (sys.stdout.encoding or '').lower().replace('-', '') != 'utf8':
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     docs = load_docs()
     docs_by_rel = {d['rel']: d for d in docs}
+    DOCS_BY_REL.update(docs_by_rel)
 
     w('# 页面检查报告（html 版）')
     w()
@@ -297,6 +370,8 @@ def main():
         ('第九类 命名合规', cat9_naming(pages)),
         ('第十四类甲 index 覆盖', cat14a_index(pages)),
         ('第十五类 骨架占位符', cat15_skeleton(pages)),
+        ('对象页 节/frontmatter/sources', check_objects()),
+        ('对象页 index 覆盖', check_object_index()),
     ]
     w('## 汇总')
     w()
