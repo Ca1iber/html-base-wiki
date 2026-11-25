@@ -976,20 +976,46 @@ For an example see
 
 ## 是什么
 
-（待补）
+**文档事实** EVENT_WAVEFORM_VFIM 是组合式 force/measure waveform 类，名称含义为 Voltage Force / Current Measure Waveform；它继承 EVENT_BASE，用于定义产生波形的事件，并在采样加到 frontend 的同一时间点进行测量。
+
+**文档事实** 文档把 EVENT_WAVEFORM_VFIM 与 EVENT_WAVEFORM_VFVM 并列为 specialized force/measure waveform classes，后者是 Voltage Force / Voltage Measure Waveform。
+
+**文档事实** API 定义在 /opt/hp93000/soc/prod_com/include/MAPI/Events.h。
+
+**文档事实** 构造函数可接受字符串 id 或整数 id；使用无参构造函数时，事件 ID 由所赋 ANALOG_WAVEFORM 的名称隐式派生，形如 WAV_waveformName。
+
+**文档事实** 文档为该类提供的成员包括 vForce 与 getVForce、sampleVectorDistance 与 getSampleVectorDistance、getSamples、averages 与 getAverages、clampChecks 与 getClampChecks、iClampChecks 与 getIClampChecks、outOfRangeCheck 与 getOutOfRangeCheck、getRepeatCount。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档示例先构造 ANALOG_WAVEFORM rampUp，用 definition(TM::RAMP)、direction(TM::POS)、samples(4)、min(0.1)、max(1.6) 描述电压斜坡波形，再声明事件对象并用 vForce(rampUp) 绑定波形、用 sampleVectorDistance(64) 设置采样向量距离。
+
+**文档事实** vForce 接受 const ANALOG_WAVEFORM 引用作为波形定义对象。
+
+**文档事实** sampleVectorDistance 的参数 vectors 是定义距离的向量数，最小为 32 vectors。
+
+**文档事实** averages 指定用于求平均的内部采样数；对 DC Scale 通道，XPS256 除外，该采样数必须是 2 的幂。
+
+**文档事实** clampChecks 与 iClampChecks 的 failOnLow 和 failOnHigh 分别启用或禁用低端与高端钳位检查；参数表写默认为 clamp check 禁用，而函数签名给出的默认实参是 true。
+
+**文档事实** getRepeatCount 返回波形重复次数；文档注明 DC event 的 getRepeatCount 成员函数总是返回 1。
+
+**文档事实** 文档示例中事件对象实际声明为 EVENT_WAVEFORM_VF rampUpEvent，与本页标题的 EVENT_WAVEFORM_VFIM 不同，阅读示例时需注意。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** EVENT_BASE，语法节说明 EVENT_WAVEFORM_VFIM 派生自它。
+- **文档事实** EVENT_WAVEFORM_VFVM，首页把二者并列为 specialized force/measure waveform classes，且本页语法节跟随了 VFVM 的子主题，二者共用 vForce、getVForce 等同名方法。
+- **文档事实** ANALOG_WAVEFORM，vForce 的参数类型是 const ANALOG_WAVEFORM 引用，示例先构造 ANALOG_WAVEFORM 再绑定。
+- **文档事实** EVENT_VALUE_INT，averages 与 getAverages 使用它作为采样数参数和返回值。
+- **文档事实** EVENT_WAVEFORM_VF 与 EVENT_WAVEFORM_IM，列在本页 Related information，文档示例实际使用了 EVENT_WAVEFORM_VF。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced in SmarTest 6.5.2。
+
+**文档事实** SmarTest 7.4.0 新增成员函数 clampChecks() 与 getClampChecks()。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.38_EVENT_WAVEFORM_VFIM.htm`

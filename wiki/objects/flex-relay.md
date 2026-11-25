@@ -1301,20 +1301,59 @@ true );
 
 ## 是什么
 
-（待补）
+**文档事实** FLEX_RELAY 是数据容器类，保存设置 relay 连接的 task 内容，定义在 `/opt/hp93000/soc/prod_com/include/MAPI/FlexRelay.h`。它可控制 digital channel pin 的 relay 以及由 utility line 控制的 user relay。
+
+**文档事实** 它用统一编程接口控制 digital channel 内的 relay，包括 channel board 与 clock board 上的 relay，也控制 user relay，并支持多 site 测试。
+
+**文档事实** 它包含四个子数据容器 FLEX_PIN_RELAY、FLEX_UTILITY_RELAY、FLEX_UTILITY_PURPOSE_RELAY、FLEX_UTILITY_CHANNEL_RES，分别保存 digital pin、utility line、utility purpose 与 utility line channel resource 的设置。task 执行时这些设置下载到硬件。
+
+**文档事实** 本 API 通过执行 task 激活 utility line 设置，无需 FLUSH API。execute() 会先检查 task 设置是否有效，若有错误则不执行任何动作、不下载任何设置。执行顺序为下载 digital pin relay 设置、下载 util_purpose() 或 util() 的 utility line 设置、等待指定时间。
+
+**文档事实** FLEX_PIN_RELAY 的 set() 控制 per-pin 的 AC、DC 与 pin PMU relay。pin_mode 选项包括 X、IDLE、AC、DC、PPMU、ACDC、BOTH、ACPM、DCPM、ALL、CNCT。utility DC pin 只支持 IDLE、CNCT 与 X。
+
+**文档事实** dc_target 与 RLYC 固件命令的 dc_target 相同，可用该参数的枚举值，也可用五字符字符串逐个控制 ISOL、GND、PMU、EXT、DUT relay。setTMU 目前仅适用于 DC Scale 卡的 TMU 输入。
 
 ## 典型用法
 
-（待补）
+**文档事实** 基本序列是构造 FLEX_RELAY 对象，用 `frelay.pin("PIN1").set("IDLE","X")` 把 PIN1 设为 Hi-Z，用 util_purpose() 或 util() 设置 utility line，可选 wait(time)，最后 execute()。
+
+**文档事实** 单 site 示例用 `frelay.util_purpose("group1,group2").set()` 应用两个 utility purpose，重叠的 16503 由 group2 的设置覆盖。再用 `frelay.util("UTL101").off()` 与 `frelay.util("UTL104, UTL106").on()` 修改。也可把 frelay 加入 TASK_LIST 并由 TASK_LIST.execute() 执行。
+
+**文档事实** 多 site 示例在 ON_FIRST_INVOCATION_BEGIN 与 ON_FIRST_INVOCATION_END 之间，先用 `frelay.pin("PIN1").set("IDLE")` 做所有 site 的共同设置，再在 FOR_EACH_SITE_BEGIN 与 FOR_EACH_SITE_END 之间按 CURRENT_SITE_NUMBER 用 `frelay.util(utilgrp).set(setting_1)` 或 set(setting_2) 设置不同 site 的值，最后 `frelay.execute()` 下载。
+
+**文档事实** FLEX_UTILITY_RELAY 的 set() 接受逗号或空格分隔的 0、1、x 列表，列表元素数量必须等于指定 utility line 的数量。FLEX_UTILITY_CHANNEL_RES 提供 set()、on()、off()，示例为 `flexRelay.util_channelRes("UTI101,UTI102,UTI201").set("110")`。
+
+**文档事实** wait(time) 定义 task 执行时控制完所有 relay 后的等待时间，单位为秒，取正值或零。
+
+**文档事实** 可用 `pin("...").setTMU(connect)` 设置 TMU 连接模式与 TMU 输入 relay，connect 可取 HIGH_BW、HIGH_IMP、HIGH_SPEED、IDLE。
+
+**建议** 在同一个 test method 中只用一种 utility line 控制方式。文档给出的分工是 digital 与 DC 测试用 FLEX_RELAY，混合信号测试用 Routing.util() 与 Routing.util_purpose()。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** FLEX_PIN_RELAY，pin() 返回该子容器的引用，digital pin relay 设置由它的 set() 与 setTMU() 定义，定义头文件为 FlexPinRelay.h。
+- **文档事实** FLEX_UTILITY_RELAY，util() 返回该子容器引用，按 utility line 名设置 user relay，定义头文件为 FlexUtilRelay.h。
+- **文档事实** FLEX_UTILITY_PURPOSE_RELAY，util_purpose() 返回该子容器引用，按 utility purpose 设置 user relay，定义头文件为 FlexUtilPurposeRelay.h。
+- **文档事实** FLEX_UTILITY_CHANNEL_RES，util_channelRes() 返回该子容器引用，按 utility line channel resource 设置，定义头文件为 FlexUtilChannelRes.h。
+- **文档事实** TASK_LIST，execute() 之外的另一条执行路径。FLEX_RELAY task 可加入 TASK_LIST，TASK_LIST.execute() 内部调用 frelay.execute()。TASK_LIST 一个列表最多 10 个 task，可容纳 PPMU_SETTING、PPMU_RELAY、PPMU_MEASURE。
+- **文档事实** FLUSH，FLEX_RELAY 的 task 执行不需要 FLUSH 就能激活 utility line，FLUSH 用于一次性激活其他 API 指定的各类参数。
+- **文档事实** Routing.util() 与 Routing.util_purpose()，这是另一套 utility line 控制方式，其设置由 FLUSH 激活。文档建议同一 test method 只用其中一种。
+- **文档事实** Utility Pins editor，util() 的 utility line 名称可使用该编辑器定义的名字。
+- **文档事实** Utility Purpose Editor，util_purpose() 的 utility purpose 名称可使用该编辑器定义的名字。
+- **文档事实** Pin Configuration window，pin() 指定的 pin 必须在该窗口配置为 i、o、io 或 dc。
+- **文档事实** RLYC 固件命令，dc_target 参数与该命令的 dc_target 相同，五个字符分别对应 ISOL、GND、PMU、EXT、DUT relay。
+- **文档事实** DC Scale 卡，setTMU() 当前仅适用于 DC Scale 卡的 TMU 输入。
+- **文档事实** pattern 控制的测量，mux_select 参数用于把板载 ADC 连接到 pin PMU 或高阻测量路径，这是 pattern 控制测量所需的准备。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced before SmarTest 6.3.2。SmarTest 6.5.2 新增成员函数 util_channelRes()。SmarTest 7.10.1 在 V93000 EXA Scale 系统上支持三位 utility pogo block 标识。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68_FLEX_RELAY.htm`，主源，含类定义、成员函数、Examples 与 Functional changes。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68.01_FLEX_PIN_RELAY.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68.02_FLEX_UTILITY_RELAY.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68.03_FLEX_UTILITY_PURPOSE_RELAY.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68.04_FLEX_UTILITY_CHANNEL_RES.htm`
+- 语法节另逐字收录 `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.240_TASK_LIST.htm` 与 `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.69_FLUSH.htm`。

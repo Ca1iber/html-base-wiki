@@ -196,20 +196,58 @@ POGOCABLING
 
 ## 是什么
 
-（待补）
+**文档事实** device license file 是 licensing-per-device 使用的按 device 划分的许可文件。该机制允许只向 license server 申请某个 device 真正需要的 license。
+
+**文档事实** licensing-per-device 不破坏既有 model file 概念和机制，而是其附加与增强。device license file 只包含 license 相关条目，并沿用 model file 的语法。
+
+**文档事实** licensing-per-device 可离线也可在线工作。
+
+**文档事实** 若 device license file 存在，必须确保其不为空。文件内容覆盖 model file 中所有 license 相关条目。若 device license file 不含任何 licensing capabilities，model file 中的 license 定义会被忽略。
+
+**文档事实** 文件结构是 model file 的子集。它不替代 model file，而是扩展 model file，列出 speed、memory 等需要 license 的特性，test head 等非 license 条目属于 model file。
+
+**文档事实** 使用 licensing-per-device 时，device-directory 下必须有名为 license 的目录，device license file 放在 `<device-directory>/license`。也可用 V93000_LICENSING 环境变量指定文件。
+
+**文档事实** 文档推荐文件扩展名 `.license`，基名可反映测试场景，例如 `finalTest.license`、`waferSort.license`。
+
+**文档事实** 示例 device license file 位于 `/opt/hp93000/soc_<version>/pws/data/per-device-license.def`，该文件说明 device license file 语法并作为示例。
 
 ## 典型用法
 
-（待补）
+**文档事实** 可基于示例文件自行开发 device license file，也可使用 Testflow Analyzer Tool，文档推荐后者。
+
+**文档事实** 文件与 model file 一样分为 GLOBAL、IOCHANNEL、BOARDCONF 等 section。GLOBAL section 指定系统类型与系统级可用特性，各 section 定义 license 相关方面。
+
+**文档事实** device license file 只能包含 license 相关条目，其他条目会导致 parser error。每个包含潜在 license 的 section 需要 header，例如 GLOBAL 或 IOCHANNEL，不需要的 section header 必须删除。
+
+**文档事实** GLOBAL section 接受 DSL 与 DSL_ALTERNATIVE。DSL 指定 Device Specific Licensing 与 device family tag。DSL_ALTERNATIVE 在主 tag 的 license 不足时使用，但 pin configuration 仍须按主 tag 正确签名。这两个参数只在 device license file 中有效，model file 中没有。
+
+**文档事实** 存在多个 device license file 时必须指定使用哪一个。指定方式的优先级为环境变量、Workorder Manager、Change Device。V93000_LICENSING 的优先级高于 Edit Device 对话框与 `.technology` 文件中的 `licensing_file`。
+
+**文档事实** license 在软件启动与 change-device 时请求。评估分两步，先评估 model file，再评估 device license file。指定文件加载失败时会报错，model file 的 licensing 信息仍有效。未指定 device license file 时也是如此。
+
+**文档事实** 每次评估并应用 device license file 或 model file 后，report window 显示 `Dev_license_file: <file name>`。经 V93000_LICENSING 指定时，消息会附加 `specified in V93000_LICENSING`。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** model file，device license file 使用相同语法且是其子集与扩展，license 相关条目被 device license file 覆盖，但 model file 仍须加载以提供 DUT interface、模拟板连线和其它配置数据。
+- **文档事实** License evaluation，该子主题定义两步评估流程，先 model file 后 device license file，并说明文件为空、加载失败与未指定时的行为。
+- **文档事实** Device license file syntax，该子主题给出 section 规则、parser error 条件以及 DSL 与 DSL_ALTERNATIVE 参数。
+- **文档事实** Defining the device license file to be used，该子主题给出环境变量、Workorder Manager、Change Device 的层级。
+- **文档事实** V93000_LICENSING，该环境变量可直接指定 device license file，并具有最高优先级。
+- **文档事实** V93000_MODEL，model file 必须位于默认位置或由该环境变量指定。
+- **文档事实** Testflow Analyzer Tool，文档把它列为生成 device license file 的推荐工具。
+- **文档事实** Licensed V93000 products，需要 license 的 V93000 特性与产品列表在该页。
+- **文档事实** Model file reference (tester.model) 与 Model file reference (model/legacy)，语法节逐字收录这两个 model file 示例，用于对照语法与文件结构。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced before SmarTest 6.3.2。子主题 Device license file syntax 记载 SmarTest 6.5.2 新增 DSL 参数，SmarTest 7.2.0 新增 DSL_ALTERNATIVE 参数。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06_The_device_license_file.htm`，主源，含 The structure、TAT、Related information 与 Functional changes。
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06.01_License_evaluation.htm`
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06.02_Device_license_file_syntax.htm`
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06.03_Defining_the_device_license_file_to_be_used.htm`
+- 语法节子主题 `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.01_Model_file_reference__tester.model.htm` 与 `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02_Model_file_reference__model_legacy.htm`。

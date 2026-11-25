@@ -785,20 +785,59 @@ All columns representing individual flags
 
 ## 是什么
 
-（待补）
+**文档事实** MTPT 包含若干 CSV 表，规定 STP source test programs 如何组合成 MTP master test program 的各个方面。
+
+**文档事实** STP table 描述创建 MTP 所用的 STP。多个 mapping table 描述 STP 对象与 MTP 对象的对应，包括 Pin mapping table、Group mapping table、Test mapping table、Bin mapping table、Test number mapping table、Testflow variable mapping table。若干表描述 MTP 中对象的设置与参数，包括 Test suite table、Special tests table、Shared pins table、Test flag table、Off DC levels table。
+
+**文档事实** 另有两张表，MTPT configuration file 与 STP test information table，分别用于 internal bookkeeping 和 future expansion，不应编辑。
+
+**文档事实** MTPT configuration file 的内部结构是 private，可能不经通知变更。
+
+**文档事实** 这些表可用文本编辑器编辑，但文档推荐使用 MTPT 随附的 OpenOffice spreadsheet 编辑 CSV 文件。
+
+**文档事实** OpenOffice spreadsheet 在每个 sheet 中放一个导入的 CSV 表，提供 Open MTPT、Reload MTPT、Save MTPT、Update Shared Pins 四个控件。标题单元格为浅蓝色的列是与 STP 相关的数据，为中蓝色的列是与 MTP 相关的数据。多个列提供下拉列表。
+
+**文档事实** STP table 每行描述一个 test program，列为 STP、Test Flow Path、Prefix、Bin Offset、Test Number Offset、Tim EQNSET Offset、Lev EQNSET Offset、Test Mode、Apply Prefix On Pin Config、Keep Unused Data、Notes。Bin Offset、Test Number Offset、Tim EQNSET Offset、Lev EQNSET Offset 分别是在把该 STP 合并进 MTP 时加到 bin 号、test 号、timing equation set 号、level equation set 号上的数。
+
+**文档事实** Test mapping table 的 Mode 可取 TG、TS、CCT、CCT_FG、NOP。TG 把 STP 的 test group 连同内部结构整体整合进 MTP，仅适用于 test group；TS 把 test suite 在不带外围 testflow 结构的情况下整合进 MTP，仅适用于 test suite；CCT 把同一行的所有 test suite 合并进同一个 MTP test group 并按 concurrent test framework 并发执行，要求该行至少两个 STP 列列出 test suite；CCT_FG 类似 CCT，但在 fail branch 创建名为 test object 名加 _FG 的 test group；NOP 表示该对象不整合进 MTP，可用于临时排除对象。
 
 ## 典型用法
 
-（待补）
+**文档事实** 在 OpenOffice spreadsheet 中点 Open MTPT，在 Open 对话框选择 .mtpt 后缀的 MTPT configuration file，spreadsheet 会加载其所属 CSV 文件。Reload MTPT 重新加载上次加载的 CSV 集合并覆盖 OpenOffice 中未保存的更改。Save MTPT 把 spreadsheet 当前状态保存到对应 CSV 文件。
+
+**文档事实** Update Shared Pins 为 Pin mapping table 中指定的每个 shared pin 在 Shared pins table 中创建一个条目，所有由该按钮创建的条目都取默认值。
+
+**文档事实** 用文本编辑器直接改 CSV 时需自行保证所有格式正确；文档推荐用 OpenOffice spreadsheet。
+
+**文档事实** 在 Test mapping table 中，MTP Parent Group 指定 STP 的 test suite 或 test group 放到 MTP 的哪个 test group；若 MTP 中已存在与 MTP Test Object 同名的对象，该列被忽略。MTP Test Object 指定在 MTP 中被 STP 对象替换的 test suite 或 test group 名；若 MTP 已有同名对象则替换，否则复制到 MTP Parent Group 指定位置并在必要时改名。若 MTP Parent Group 为空，对象整合到 MTP testflow 末尾。
+
+**文档事实** 在 Pin mapping table 中，MTP Pin 可写成 pin@shared port 形式，未连接任何 MTP pin 的 STP pin 用 __NC__ 表示，Site n 列的通道号必须由用户填写，不由 STPM MCM 自动生成。MTP Pin Attribute 列可为 digital pin 定义 trigger，也可把 analog pin 分配给 trigger。
+
+**文档事实** 在 Test suite table 中，Test Flags 指定的 flag set 名必须匹配 Test flag table 的 FlagSet Id 列；取 __DEFAULT__ 时使用 MTP 的默认 test flags。Limits 与 Parameters 每项一行，多项之间用 CR 分隔并以分号结尾，最后一项除外。
+
+**文档事实** 在 Off DC levels table 中，MTP Pin 列的名字必须与 Pin mapping table 匹配；__DEFAULT__ 条目已预定义，适用于没有显式条目的 inactive STP 引脚。vout 单位 V，ilimit 单位 mA，offcurr 可取 min、act、open。
 
 ## 和谁有关
 
-（待补）
+**文档事实** STPM MCM 使用 mapping tables 识别要整合的模块及其组件关系；STPM MCM operating principles 把 mapping tables 也称为 templates。
+
+**文档事实** STPM MCM control file 规定转换过程，详细合并规则放在 MTPT；STPM MCM parameter settings 的 dir_path 是合并过程使用的 MTPT 目录路径。
+
+**文档事实** 命令 generate_template 从 STP 和参数创建 MTPT mapping template；命令 create_mtp 按 MTPT 设置从 STP 创建 MTP。
+
+**文档事实** MTPT 的每个子主题就是一张表或一个编辑工具，包括 STP table、Pin mapping table、Group mapping table、Test mapping table、Test suite table、Bin mapping table、Test number mapping table、Testflow variable mapping table、Special tests table、Shared pins table、Test flag table、Off DC levels table、STP test information table、MTPT configuration file、OpenOffice spreadsheet for editing the CSV files。
+
+**文档事实** 表间有明确引用。Pin mapping table 与 Group mapping table 的默认名来自 STP table 的 Prefix 与 Apply Prefix On Pin Config。Test suite table 的 Test Flags 必须匹配 Test flag table 的 FlagSet Id。Test mapping table 中作为 CCT group 的 MTP Parent Group 名称必须出现在 Shared pins table 的 CCT Group Name 且 mode 为 CCT；Shared pins table 中列出的 shared port 必须出现在 Pin mapping table 的 MTP Pin 列。Off DC levels table 的 MTP Pin 必须匹配 Pin mapping table。
+
+**文档事实** Testflow variable mapping table 的 Value 对 system testflow flags 可能初始为空，必须由用户补齐，否则 STPM 在创建 MTP 时报错。
+
+**文档事实** Special tests table 引用 special test suite 概念。
 
 ## 版本
 
-（待补）
+**文档事实** MTPT 在 SmarTest 7.1.4 引入。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.09_Test_Program_Management/02.09.03.04_MTPT__STPM_MCM_mapping_tables.htm`
+- 其子主题 `02_System_reference/02.09_Test_Program_Management/02.09.03.04.01` 至 `02.09.03.04.15`

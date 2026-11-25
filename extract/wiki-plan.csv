@@ -9,7 +9,7 @@ pogo-pad-and-via-design,concept,n/a,pin,02_System_reference/02.03_DUT_board_desi
 xps256-pmu-operating-mode,object,L2,level,02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.15_XPS256_programming_-_PMU_operating_mode.htm,done,
 pogo-block-compatibility,concept,n/a,pin,02_System_reference/02.03_DUT_board_design_reference/02.03.07.07.01_Pogo_block_compatibility.htm,todo,
 inter-layer-via-design,concept,n/a,pin,02_System_reference/02.03_DUT_board_design_reference/02.03.07.07.02_Inter-layer_via_design.htm,todo,
-xps256-programming-dps-operating-mode,object,L2,level,02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.07_XPS256_programming_-_DPS_operating_mode.htm,skeleton,
+xps256-programming-dps-operating-mode,object,L2,level,02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.07_XPS256_programming_-_DPS_operating_mode.htm,done,
 xps256-status-flags,object,L2,level,02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.02_XPS256_status_flags.htm,skeleton,
 tpi-program-routines,object,L3,run,02_System_reference/02.09_Test_Program_Management/02.09.01.09_TPI_Program_Routines.htm,skeleton,
 test-suite-control-api,object,L3,run,02_System_reference/02.09_Test_Program_Management/02.09.01.14_Test_Suite_Control_API.htm,skeleton,
@@ -19,16 +19,16 @@ sequencer-controlled-utility-lines,concept,n/a,pattern,03_Use_cases_and_applicat
 dut-board-grounding,concept,n/a,pin,02_System_reference/02.03_DUT_board_design_reference/02.03.07.09.04_Grounding.htm,todo,
 dps-aux-pin-task,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.01_DPS_AUX_PIN_TASK.htm;02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.01.02_DPS_AUX_PIN_TASK.checkPowerFlags.htm,done,
 event-waveform-vfvm,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.39_EVENT_WAVEFORM_VFVM.htm,done,
-hidden-upload,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.10.04.05_Hidden_upload.htm,skeleton,
+hidden-upload,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.10.04.05_Hidden_upload.htm,done,
 mtp-shared-test-commands,object,L2,testmethod,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.25_SHARING_CONFIGURATION.htm;02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.21_SHARED_CONTINUITY_TEST.htm;02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.23_SHARED_LEAKAGE_PARALLEL_TEST.htm,done,
 mtp-maintenance-operations,object,n/a,testmethod,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.04.12_Maintenance_operations.htm,done,
 gpib-lan-communication-conventions,concept,L3,project,02_System_reference/02.09_Test_Program_Management/02.09.01.03.06.01.04_Conventions_for_GPIB_LAN_communication.htm,todo,
 preprocessing-and-postprocessing-scripts,object,file,project,02_System_reference/02.09_Test_Program_Management/02.09.02.03.03_Preprocessing_and_postprocessing_scripts.htm,skeleton,
-mtpt,object,file,project,02_System_reference/02.09_Test_Program_Management/02.09.03.04_MTPT__STPM_MCM_mapping_tables.htm,skeleton,
+mtpt,object,file,project,02_System_reference/02.09_Test_Program_Management/02.09.03.04_MTPT__STPM_MCM_mapping_tables.htm,done,
 logical-boards,concept,n/a,pin,02_System_reference/02.04_Model_File_and_Licensing/02.04.01.02_Concepts_of_logical_boards.htm,todo,
 tp360,object,gui,project,03_Use_cases_and_application_papers/03.13_Test_Program_360_Cookbook/03.13.03_Opening_TP360.htm,skeleton,
 timestamp-attr-type,object,file,results,02_System_reference/02.10_Data_Logging/02.10.01.06.05.65_TimeStampAttrType.htm,skeleton,
-analysis-views,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.02.04.03_Displaying_test_results_in_analysis_views.htm,skeleton,
+analysis-views,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.02.04.03_Displaying_test_results_in_analysis_views.htm,done,
 hv-protection,concept,n/a,pin,02_System_reference/02.03_DUT_board_design_reference/02.03.07.03_HV__High-Voltage__protection.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.01_HV_protection_-_Root_causes_for_high-voltage_damages.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.02_HV_protection_-_Compliance_range.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.03_HV_protection_-_Recommended_protection_circuitry.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.03.01_HV_protection_-_Clamp_diodes.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.03.02_HV_protection_-_Clamp_regulator.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.03.03_HV_protection_-_DC_supply.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.04_HV_protection_-_Impact_on_stimulations_and_measurements.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.04.01_HV_protection_-_Impact_on_leakage_current_example.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.07.03.04.02_HV_protection_-_Impact_on_rise_time_example.htm;02_System_reference/02.03_DUT_board_design_reference/02.03.08.01.01.05_AVI64_HV__High-Voltage__protection.htm,todo,
 pogocabling-section,object,file,pin,02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02_POGOCABLING_section.htm;02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02.01_Pogocabling_entries_for_various_card_types.htm;02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02.02_Conversions__pogo_mapping_file__-__POGOCABLING.htm,skeleton,
 constraint-level-mode-context-match,constraint,L1,level,02_System_reference/02.06_Command_Reference/02.06.03.01.03.01_Mode_contexts.htm,todo,回填（页面先建；sources 共 3 条，此处只记第一条）
@@ -80,7 +80,7 @@ error-map-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Too
 shmoo-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.25_Shmoo_Tool.htm,skeleton,并入 setting-up-a-shmoo-test-with-the-shmoo-tool
 setup-management-tool,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02.04_Setup_Management_Tool.htm,skeleton,
 integrated-result-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13_Integrated_Result_Tool.htm,skeleton,
-digital-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.02_Digital_Pins_editor.htm,skeleton,
+digital-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.02_Digital_Pins_editor.htm,done,
 stpm,object,gui,project,02_System_reference/02.09_Test_Program_Management/02.09.02_SmarTest_Program_Manager.htm,skeleton,
 model-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.01_The_model_file.htm,skeleton,
 testflow-file,object,file,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.05_Testflow_file.htm,skeleton,
@@ -109,7 +109,7 @@ special-test-suites,object,file,testflow,02_System_reference/02.08_Setup_and_Res
 command-reference,concept,n/a,project,02_System_reference/02.06_Command_Reference/02.06_Command_Reference.htm,todo,
 timing-setup-commands,concept,n/a,timing,02_System_reference/02.06_Command_Reference/02.06.06_Timing_Setup_Commands.htm,todo,
 event-base,object,L3,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.01_EVENT_BASE.htm,skeleton,
-event-waveform-vfim,object,L3,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.38_EVENT_WAVEFORM_VFIM.htm,skeleton,和已有的 event-waveform-vfvm 是**两套**（63.38 / 63.39）
+event-waveform-vfim,object,L3,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.38_EVENT_WAVEFORM_VFIM.htm,done,和已有的 event-waveform-vfvm 是**两套**（63.38 / 63.39）
 dc-result-accessor,object,L3,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.28_DC_RESULT_ACCESSOR.htm,skeleton,
 dps-power-flags-get-functions,object,L3,run,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.06_DPS_power_flags_-_get...___functions.htm,done,
 spmu-pin-task-mode,object,L3,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.234.01.24_SPMU_PIN_TASK.mode.htm,skeleton,
@@ -122,10 +122,10 @@ controlling-multiple-sites,concept,n/a,run,02_System_reference/02.07_Test_Method
 how-to-create-a-universal-test-method-class,concept,n/a,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,todo,
 equation-based-level-setup,concept,n/a,level,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14.02_Equation_based_level_setup.htm,todo,
 dpspins-resources,object,L2,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14.02.03.07.01_DPSPINS_resources.htm,done,
-protocol-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.22_Protocol_editor.htm,skeleton,
+protocol-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.22_Protocol_editor.htm,done,
 test-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.01_Test_summary_tab.htm,done,
 setting-chart-display-options,concept,n/a,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.02.04.05_Setting_chart_display_options.htm,todo,
-raw-data-views,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.03.01_Raw_data_views.htm,skeleton,
+raw-data-views,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.03.01_Raw_data_views.htm,done,
 mtp-memory-test,object,L2,pattern,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.17_MTP_MEMORY_TEST.htm,skeleton,
 apg-pattern-file,object,file,pattern,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.02_APG_pattern_file.htm,done,
 apg-program-file,object,file,pattern,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.03_APG_program_file.htm,skeleton,
@@ -143,7 +143,7 @@ mapping-timing,mapping,n/a,timing,01_Getting_started/01.07_Testing_a_Basic_Digit
 pin-configuration-file,object,file,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.04_Pin_configuration_file.htm;02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.05_Pin_configuration_master_file.htm;02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.09.01_Pin_configuration_file.htm,done,
 level-file,object,file,level,02_System_reference/02.06_Command_Reference/02.06.05.01.04.02_Structure_of_an_equation_based_level_setup.htm;02_System_reference/02.06_Command_Reference/02.06.05.01.05_Data_Organization_of_Fixed_Levels.htm,skeleton,
 test-program-explorer,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02_Test_Program_Explorer.htm,skeleton,
-pattern-explorer,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.01_Pattern_Explorer.htm,skeleton,
+pattern-explorer,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.01_Pattern_Explorer.htm,done,
 vector-setup-file,object,file,pattern,02_System_reference/02.06_Command_Reference/02.06.07.01_Concepts_of_vector_setup.htm;02_System_reference/02.06_Command_Reference/02.06.07.01.05_The_pattern_master_file.htm,skeleton,
 device-directory,object,file,project,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.01.01_Device_directory_structure.htm,skeleton,
 flags-page,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01.06_Flags_page.htm,skeleton,
@@ -152,7 +152,7 @@ spec-tool,object,gui,level,02_System_reference/02.08_Setup_and_Result_Tools/02.0
 testflow-tool,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Testflow_Tool.htm,skeleton,
 timing-file,object,file,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.03.01_Data_organization_of_equation_based_timing.htm;02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.04_Example_of_the_equation_based_timing_setup_file.htm,skeleton,
 level-master-file,object,file,level,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14.02.05_Level_setup_master_file.htm;01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02.04.04_Creating_a_level_master_file.htm,skeleton,
-site-control-window,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.27_Site_Control_Window.htm,skeleton,
+site-control-window,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.27_Site_Control_Window.htm,done,
 ci-cpi,object,L3,testflow,02_System_reference/02.09_Test_Program_Management/02.09.01.08.05_Command_Set_Programming_Interface.htm;02_System_reference/02.09_Test_Program_Management/02.09.01.08.05.02.02_Production_Flags.htm;02_System_reference/02.09_Test_Program_Management/02.09.01.08.05.02.03_User_Flags.htm,skeleton,
 flow-sequence-editor,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.02_Flow_Sequence_Editor.htm,skeleton,
 flush,object,L2,run,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.69_FLUSH.htm,skeleton,
@@ -162,7 +162,7 @@ test-suite,object,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/
 bin,object,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.06_Bins.htm,skeleton,
 connect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,skeleton,
 timing-setup-tool,object,gui,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34_Timing_Setup_Tool.htm,skeleton,
-dps-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.03_DPS_Pins_editor.htm,skeleton,
+dps-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.03_DPS_Pins_editor.htm,done,
 flow-data-editor,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01_Flow_Data_Editor.htm,skeleton,
 level-spec,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.124_LEVEL_SPEC.htm,skeleton,
 svlr,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.24_SVLR__SVLR__-__Spec_VaLues_at_Runtime.htm,skeleton,
@@ -176,12 +176,12 @@ spec-value,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07
 spec-variable,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.04_SpecVariable.htm,skeleton,
 timing-spec,object,L2,timing,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm,skeleton,
 wavetable-file,object,file,timing,02_System_reference/02.07_Test_Method_Reference/02.07.11.01.05.03_Wavetable_file.htm,skeleton,
-dfps,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.65_DFPS__DFPS__-__DeFine_Power_Supply.htm,skeleton,
+dfps,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.65_DFPS__DFPS__-__DeFine_Power_Supply.htm,done,
 on-first-invocation-begin,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.138_ON_FIRST_INVOCATION_BEGIN.htm,done,
 on-first-invocation-end,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.139_ON_FIRST_INVOCATION_END.htm,done,
-testflow-properties-view,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.04_Testflow_Properties_view.htm,skeleton,
+testflow-properties-view,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.04_Testflow_Properties_view.htm,done,
 aprm,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.01_APRM_-__Activate_PRiMary_sets.htm,skeleton,
-device-license-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06_The_device_license_file.htm,skeleton,
+device-license-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06_The_device_license_file.htm,done,
 eqfs,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.09_EQFS_-__EQuation_FileS_command_transfer.htm,skeleton,
 eqsp,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.10_EQSP__EQSP__-__EQuation_SPecification_transfer.htm,skeleton,
 testset,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.244_TESTSET.htm,done,
@@ -198,9 +198,9 @@ pattern-controller,object,L2,pattern,02_System_reference/02.07_Test_Method_Refer
 smc-test,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.231.45_SMC_TEST.htm,done,
 digital-offset-search-pins,object,L2,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.36.01_DIGITAL_OFFSET_SEARCH_PINS.htm,done,
 smc-synchronize,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.231.43_SMC_SYNCHRONIZE.htm,done,
-for-each-site-end,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.72_FOR_EACH_SITE_END.htm,skeleton,
+for-each-site-end,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.72_FOR_EACH_SITE_END.htm,done,
 for-each-site-begin,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.70_FOR_EACH_SITE_BEGIN.htm,skeleton,
-digital-capture-test,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.35_DIGITAL_CAPTURE_TEST.htm,skeleton,
+digital-capture-test,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.35_DIGITAL_CAPTURE_TEST.htm,done,
 setting-up-dc-scale-pins-with-smartrdi,concept,n/a,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.13.12.02_Setting_up_DC_Scale_pins_with_SmartRDI.htm,todo,
 smartrdi-tmu-test-setup,concept,n/a,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.13.21_SmartRDI__TMU_test_setup.htm,todo,
 dut-interface-layout,concept,n/a,project,02_System_reference/02.03_DUT_board_design_reference/02.03.03.01_DUT_interface_layout.htm,todo,
@@ -220,7 +220,7 @@ tpt-import-from-device,object,L3,project,02_System_reference/02.09_Test_Program_
 dc-scale-limits-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.06_DC_Scale_Limits_editor.htm,skeleton,同级兄弟 dps-pins-editor / utility-pins-editor 已建，对称
 edl-file,object,file,results,03_Use_cases_and_application_papers/03.14_Application_Papers/03.14.10.04_The_V93000_Data_Logging_Architecture.htm,skeleton,定义句在此篇：「the terms DataCollection file and EDL file have become synonymous」
 flag,concept,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.07_Flags.htm,todo,flag 对象本身；清单侧已建 `alphabetical-list-of-flags`，勿重复
-flex-relay,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68_FLEX_RELAY.htm,skeleton,stages/pin.md 已定 L2；spmu-pin-task-mode 把它写成替代品
+flex-relay,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68_FLEX_RELAY.htm,done,stages/pin.md 已定 L2；spmu-pin-task-mode 把它写成替代品
 flsh,object,L1,run,02_System_reference/02.06_Command_Reference/02.06.02.02.124_FLSH_-__FLuSH_buffered_commands.htm,skeleton,⚠️ 与已建 `flush`（L2）**只差一个字母、是另一件东西**；flush.md 与 stages/run.md 已明写要各建一页
 pin-string,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,skeleton,⚠️ 是 test method 的 PinString **参数类型**，不是 02.06 的 PADS 命令（词面匹配会指错）
 smartcalc,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.10_SmartCalc_framework.htm,skeleton,分界已定：本页讲「怎么调」（API 侧），`smartcalc-framework` 讲「为什么、是什么」
@@ -233,7 +233,7 @@ dps-aux-task,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.
 dtcp,object,L1,project,02_System_reference/02.06_Command_Reference/02.06.02.02.93_DTCP__DTCP__-__Define_Technology_Control_Parameters.htm,skeleton,管 testpoints / extended_dram_factor，需 *RST 激活；补充已建 `dscp`
 error-map,object,file,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.08.01_Error_Map.htm,skeleton,⚠️ error-map-tool.md 已明写「上游，不是同义词」——工具页与格式页两页
 fw-task,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.77_FW_TASK.htm,skeleton,⚠️ 勿挂 02.08.04.32.02.06.01.05_FW_TASK_type.md（Hardware Response Emulator 的对话框，是另一件东西）
-multiport-burst-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.03_Multiport_Burst_Editor.htm,skeleton,原文首句自称 multiport editor（与标题不一致，逐字引用保留）。可追加 99.0136 为第二 source
+multiport-burst-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.03_Multiport_Burst_Editor.htm,done,原文首句自称 multiport editor（与标题不一致，逐字引用保留）。可追加 99.0136 为第二 source
 pattern-object,object,L2,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.142.01_PATTERN.htm,skeleton,⚠️ slug 是 wiki 自造（§5 避撞脊椎 pattern 段），**不许改回 pattern**；sources 只挂 .142.01
 port-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.03_Port_Editor.htm,skeleton,建页前先读 pin-configuration-tool.md:577（Port Editor ↔ Pin Group Editor 关系已写在那里）
 setup-perspective,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02_Setup_perspective.htm,skeleton,勿把父篇 01.01.07_Perspectives（in_src=13）内容吸进来
@@ -272,7 +272,7 @@ smartest-data-formatter,object,gui,results,02_System_reference/02.10_Data_Loggin
 pslv,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.195_PSLV__PSLV__-__Power_Supply_LeVel.htm,skeleton,§12 自发现：被 8 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 table-filter,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.06_Table_filter.htm,skeleton,§12 自发现：被 8 处链；无阶段页链它；stage 取链它的对象页多数（results 4/4），**最近的一段，不是归属**
 hardware-bin-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.04_Hardware_bin_summary_tab.htm,skeleton,§12 自发现：被 7 处链；无阶段页链它；stage 取链它的对象页多数（results 3/5），**最近的一段，不是归属**
-hardware-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.03_Hardware_view.htm,skeleton,§12 自发现：被 7 处链；stage 取自链它的 `[[run]]`（最近的一段，**不是归属**）
+hardware-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.03_Hardware_view.htm,done,§12 自发现：被 7 处链；stage 取自链它的 `[[run]]`（最近的一段，**不是归属**）
 drlv,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.89_DRLV__DRLV__-__DRive_LeVel.htm,skeleton,§12 自发现：被 6 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 rclv,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.204_RCLV__RCLV__-__ReCeive_LeVel.htm,skeleton,§12 自发现：被 6 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 udgp,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.296_UDGP_-__UnDefine_GrouP.htm,skeleton,§12 自发现：被 6 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
@@ -296,7 +296,7 @@ dfut,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.70_DF
 pclk,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.175_PCLK__PCLK__-__Pin_CLocK.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 prlt,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.183_PRLT__-__request_Parallel_ResuLTs.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 sldo,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.223_SLDO_-__Switch_Level_and_Dps_Order.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
-testset-testname,object,L2,results,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.244.23_TESTSET__.testname.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
+testset-testname,object,L2,results,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.244.23_TESTSET__.testname.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
 wafer-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.02_Wafer_summary_tab.htm,skeleton,§12 自发现：被 4 处链；无阶段页链它；stage 取链它的对象页多数（results 4/4），**最近的一段，不是归属**
 wave,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.333_WAVE__WAVE__-__WAVEform.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 begin-extension,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.10_BEGIN_EXTENSION.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
