@@ -682,20 +682,56 @@ Idle(tRFC-1);
 
 ## 是什么
 
-（待补）
+**文档事实**：Device architecture file 描述 DUT 的物理特性，尤其是逻辑地址到物理地址的映射；扩展名 `.dvar`，在 APG pattern file 中用 `:deviceArchitecture:` 关键字引用（`02.12.03.03.05`）。
+
+**文档事实**：文件包含 scrambling、bit inversion、bit ordering 设置；定义 x/y/z 维度与数据位宽等 device parameters，也可定义自定义参数，所有参数在 APG program file 中可用（`02.12.03.03.05`）。
+
+**文档事实**：还可指定 maintenance operation（refresh），详见 [[mtp-maintenance-operations]]（`02.12.03.03.05`）。
+
+**文档事实**：语法遵循 MTL compiler syntax，顶层 `:deviceArchitecture: { ... }` 内可含 `:version:`（可选），以及任意多个命名 `:scramble:`、`:bitInversion:`、`:bitOrdering:`、`:crc:`、`:dbi:`、`:maintenanceOperation:`，另有 `:operationOrder:` 和 `:deviceParam:`；关键字顺序不强制（`02.12.03.03.05.01`）。
+
+**文档事实**：`:scramble:`、`:bitInversion:`、`:bitOrdering:`、`:crc:`、`:dbi:`、`:maintenanceOperation:` 都是「定义命名表」，由 APG pattern file 按名字选用；`:bitInversion:`/`:bitOrdering:` 是使用 data scrambling 的前提（`02.12.03.03.05.01`）。
+
+**文档事实**：`:operationOrder:` 决定 DBI 与 CRC 谁先执行：`{ dbi crc }` 或 `{ crc dbi }`（`02.12.03.03.05.01`）。
+
+**文档事实**：`:deviceParam:` 定义 `xBits`/`yBits`/`zBits`（z 可选）和 `dBits`，也可定义自定义参数；这些参数供 device access file 的 `:deviceParam:` 导入（`02.12.03.03.05.01`、`02.12.03.03.04.01`）。
+
+**推断**：`.dvar` 是「器件物理模型」：地址如何打乱、数据位如何反转/重排、CRC/DBI 如何计算、刷新如何插入都在这里参数化；同一套 pattern 通过 APG pattern file 选择其中一组命名表。
 
 ## 典型用法
 
-（待补）
+**文档事实**：示例 DRAM 文件同时给出地址 scrambling 表（如 `xa0 "not x0"`）、bit inversion 表、bit ordering 表、CRC（bitSequence + bitExpression + configuration）、maintenance operation（`maintop_a refreshBurst`）和 deviceParam（xBits 10、yBits 8、dBits 16）（`02.12.03.03.05`）。
+
+**文档事实**：CRC 配置由三部分组成：`:bitSequence:`（pinList 与 sequence 的对应）、`:bitExpression:`（每个 CRC 位的表达式，可用 `e[...]` 引用引脚）、`:configuration:`（把前两者组合成命名配置）（`02.12.03.03.05`）。
+
+**文档事实**：maintenance operation 的 `:table:` 把 `:operation:` 映射到 `:subroutine:`，并可选 `:timerMode:`（示例值 static/dynamic）与 `:intervalMode:`（示例值 accumulated/compensated）；APG pattern file 选择该 maintenance operation，APG program file 写对应 subroutine，timing file 提供 `maintop_time_*` 值（`02.12.03.03.05.01`、`02.12.03.04.12` 示例）。
+
+**文档事实**：维护操作可在程序里控制：示例用 `REFRESH_CTRL(STOP/START/SWITCH, ...)` 手动启停或切换 refresh；多个 static refresh 用 `static_maintop_time_a/_b` 区分，`refreshCount()` 可用于条件切换（`02.12.03.04.12.02` 示例）。
+
+**文档事实**：地址 scrambling 表把逻辑地址位映射到物理地址位（示例 `xa0 "not x0"`）；bit inversion / bit ordering 表按 `:bit:` 与 `:expression:` 成对书写（`02.12.03.03.05`）。
+
+**建议**：同类表可定义多份命名版本，在 APG pattern file 中按测试条件选择，而不是改 `.dvar` 本体（依据：文档允许任意多个同名关键字，并由 pattern file 按名引用）（`02.12.03.03.05.01`）。
 
 ## 和谁有关
 
-（待补）
+- **APG pattern file**（[[apg-pattern-file]]）— **文档事实**：用 `:deviceArchitecture:` 引用本文件，并通过 `:scramble:`、`:bitInversion:`、`:bitOrdering:`、`:crc:`、`:dbi:`、`:maintenanceOperation:` 选择其中的命名表（`02.12.03.03.05`、`02.12.03.03.05.01`）。
+- **Device access file**（[[device-access-file]]）— **文档事实**：`.dvac` 的 `:deviceParam:` 参数必须在本文件定义；`data()` 宏按 `dBits`/`xBits`/`yBits`/`zBits` 掩码，并应用 APG pattern file 当前选中的、定义在本文件中的 bit inversion / bit ordering 表；`dbi()` 宏使用本文件的 DBI configuration（`02.12.03.03.04.01`、`02.12.03.03.04.02`）。
+- **APG program file**（[[apg-program-file]]）— **文档事实**：本文件定义的 device parameters 全部可在 APG program 中使用；maintenance operation 的 subroutine 也在 APG program 中实现（`02.12.03.03.05`、`02.12.03.03.05.01`）。
+- **Maintenance operations**（[[mtp-maintenance-operations]]）— **文档事实**：本文件可指定 refresh，具体概念与用法见该主题（`02.12.03.03.05`）。
+- **Timing file**（[[timing-file]]）— **文档事实**：维护操作示例在 timing file 中定义 `maintop_time_a`/`static_maintop_time_a` 等参数并与 `refreshTime` 绑定（`02.12.03.04.12.02` 示例）。
+- **MTL compiler** — **文档事实**：文件语法遵循 MTL compiler syntax（`02.12.03.03.05.01`）。
+- **MTL Configuration Files** — **文档事实**：本页 Related information 指向该主题（`02.12.03.03.05`）。
 
 ## 版本
 
-（待补）
+**文档事实**：主文档 Functional changes 只有 “Introduced before SmarTest 6.3.2”；这是文档集覆盖起点之前的哨兵值，不能当作 6.3.2 的变更（`02.12.03.03.05`）。
+
+**文档事实**：语法子主题另记 MTP 版本变化：MTP 2.4.0 增加 `:crc:`、`:dbi:`、`:operationOrder:` 及其下属关键字；MTP 3.1.6（MTP on SOC 103.3.0）为多 refresh 维护操作的 `:operation:` 列新增 `static_maintop_time_x`（x 可为任意字母）（`02.12.03.03.05.01`）。
+
+**文档事实**：文件内 `:version:` 是任意字符串、可选的「本文件版本」，与 SmarTest 版本无关（`02.12.03.03.05.01`）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.05_Device_architecture_file.htm`（主文档，含 maintenance 示例与 Related information）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.05.01_Device_architecture_file_syntax.htm`（结构、关键字、MTP 版本变化）
+- 关联：`02.12.03.03_MTL_Configuration_Files.htm`、`02.12.03.04.12_Maintenance_operations.htm`

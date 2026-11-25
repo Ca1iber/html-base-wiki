@@ -428,20 +428,53 @@ throw myException();
 
 ## 是什么
 
-（待补）
+**文档事实** SmartCalc（SMC）是 SmarTest 的多线程框架：利用系统控制器的多核，把耗时的计算与测试数据上传移到独立的后台线程，这些“隐藏”线程尽可能与 SmarTest 前台进程并行，从而缩短测试时间（主页面正文）。
+
+**文档事实** 框架目标（主页面原文列举）：易用、对测试代码与程序流影响最小；不同 site 的并行（多线程）计算；随多 site 自动伸缩；用 delayed binning 隐藏计算与数据上传；最小开销、最大 multi-site 效率；线程与 CPU core 自动分配。
+
+**文档事实** SmartCalc 只工作在 Universal Test Method（UTM）框架内，并支持数字 capture 的隐藏（分段）上传。SMC API 属于 MAPI，`#include "mapi.hpp"` 后可用；宏 `SMC_VERSION` 标识 SmartCalc 版本（SmartCalc test program structure 页）。
+
+**文档事实** SMC API 以共享库实现，加载共享库与解析动态引用会带来小延迟：典型小于 1 ms，但依文件系统与操作系统负载可能显著更高（SmartCalc implementation 页 Note）。
+
+**文档事实** 多线程本身并不易用，需要大幅改动编码与测试流程；SmartCalc 的定位就是用高层 API 克服这一限制。框架使用多线程技术但不止于此，它隐藏了大部分内部线程处理（Multithreading considerations 页）。
+
+**推断** 本页讲“为什么要有、整体怎么组织”，具体 API 调用方式属于 [[smartcalc]] 页；两页共用同一主源（见「出处」）。
 
 ## 典型用法
 
-（待补）
+**文档事实** 四步实现：① 按并行执行组织测试程序，在 `FOR_EACH_SITE_BEGIN/END` 内调用 `SMC_ARM(...)`；② 把上传、计算与测试语句封装进名为 `SMC_backgroundProcessing()` 的 public 方法，其签名必须与对应 `SMC_ARM()` 完全一致，多个此类方法需要不同签名；③ 用 `SMC_SYNCHRONIZE()` 同步计算、执行 binning 与数据记录；④ 用 SMC API 做 hidden upload（可由 wrapper API 隐式触发，也可用 `SMC_BACKGROUND_ENABLE()` / `SMC_BACKGROUND_DISABLE()` 显式触发）（Four-step SmartCalc implementation）。
+
+**文档事实** 后台过程有两种组织方式：“Thread per site”在 `ON_FIRST_INVOCATION` 块外 arm，推荐低 site 数；“Common thread”（单线程）在块内 arm，推荐高 site 数。前者每个 site 一个线程、线程内无需 site 循环；后者需用传入的 site 列表自行循环，且 `SMC_SITE_NUMBER()` 在 common thread 中不可用（SmartCalc "Thread per site" and "Common thread"）。
+
+**文档事实** 三种 use model：Parallel multisite calculation、Hidden multisite calculation、Hidden upload and calculation（SmartCalc use models）。
+
+**文档事实** 后台线程中只能使用线程安全的 API，例如 `SMC_...`、`DSP_...`、TESTSET 与 Wave 类 API；`SMC_backgroundProcessing()` 中调用的外部函数若抛出未知异常，会触发 SIGABRT 并终止测试方法进程，因此异常必须自行捕获并重新抛出（Thread safety、SmartCalc recommendations）。
+
+**文档事实** 使用 multibin 才能让 `SMC_TEST()` 正确给 DUT 分 bin；binning 之后应运行特殊测试套件 bin_disconnect，用 `SMC_CLEANUP()` 或 `SMC_SYNCHRONIZE()` 终止 SmartCalc 线程（SmartCalc recommendations、Terminate SmartCalc threads after binning）。
+
+**建议** 保持默认开启的线程安全自动检查（环境变量 `SMC_CONCURRENCY_CHECKING`，未定义时默认 `ErrorAndLog`）；文档称该检查不显著增加测试时间且强烈建议常开。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Universal Test Method（UTM）：文档明确 SmartCalc 只工作在 UTM 内，每个 site 调用一次 `run()`，测试方法参数作为成员变量。
+- **文档事实** SMC API reference（`02.07.04.01.231`）：API overview 页把详细 API 描述指向它，本框架的调用面都在那里。
+- **文档事实** smartCalc 测试方法库（`02.07.05.06`）：主页面 Related information 列出；recommendations 还提到其中的 `SMC__SYNCHRONIZE_ALL`。
+- **文档事实** Multi-Site Efficiency and Throughput（`03.14_Application_Papers/03.14.10.03`）：主页面 Related information 把它作为效率背景。
+- **文档事实** [[test]]：API overview 说 `SMC_TEST()` 的语法与参数与 TEST 类似，并负责缓冲结果、延迟到 `SMC_SYNCHRONIZE()` 才写数据记录。
+- **文档事实** `ON_FIRST_INVOCATION_BEGIN/END`：两种线程模型的 arm 位置由它界定，`SMC_SYNCHRONIZE()`、`SMC_CLEANUP()` 都要求在块外按 site 调用。
+- **文档事实** DSP_ APIs、TESTSET、Wave：Thread safety 页把它们列为后台过程中允许的线程安全 API。
+- **文档事实** bin_disconnect、multibin / `SET_MULTIBIN`：recommendations 要求用 bin_disconnect 正确终止 SMC，并说明 multibin 是正确分 bin 的前提。
+- **文档事实** `RESULT_AREA_CONFIG`：hidden digital upload 需要 result area，result area 由该 API 定义。
+- **文档事实** SmartRDI：Thread per site / Common thread 页的 Related information 指向 “Using SmartCalc (SMC) with SmartRDI”。
+- **推断** [[smartcalc]]：与本页同源，本页讲框架背景与结构，另一页讲 API 调用侧；按 `extract/wiki-plan.csv` 的记录分工。
 
 ## 版本
 
-（待补）
+**文档事实** 主页面 `Functional changes`：Introduced in SmarTest 6.5.3。
+
+**文档事实** 子主题另有记录：SmartCalc test program structure 页 SmarTest 7.1.0 要求 Red Hat Enterprise Linux 5 update 6；Thread safety 页 SmarTest 7.1.4 使 Wave 类线程安全、SmarTest 7.5.3 新增线程安全 API 自动检查；SmartCalc "Thread per site" and "Common thread" 页记 Introduced in SmarTest 7.5.2。
 
 ## 出处
 
-（待补）
+- 主源：`02_System_reference/02.07_Test_Method_Reference/02.07.10_SmartCalc_framework.htm`（框架定义、目标列举、Related information、Functional changes）。
+- 子主题：`02.07.10.01`（multithreading basics）、`02.07.10.02`（considerations）、`02.07.10.02.01`（Thread per site 与 Common thread）、`02.07.10.02.02`（Thread safety）、`02.07.10.03`（use models）、`02.07.10.04`（implementation）、`02.07.10.04.01`（test program structure）、`02.07.10.04.02`（API overview）、`02.07.10.04.03`（Four-step implementation）、`02.07.10.04.11`（Disabling SmartCalc）、`02.07.10.04.12`（Terminate SmartCalc threads after binning）、`02.07.10.05`（recommendations）。

@@ -452,20 +452,46 @@ Fail cycles for pin ... : ...
 
 ## 是什么
 
-（待补）
+**文档事实** GET_FUNCTIONAL_RESULT() 定义在 `/opt/hp93000/soc/prod_com/include/MAPI/Execute.h`，用于取回功能测试的通过/失败结果；调用必须位于 `ON_FIRST_INVOCATION` 块外，任何重启 sequencer 的动作都会清除功能测试结果。
+
+**文档事实** 该 API 有两类返回形式：Boolean 版本返回选中 pin、端口全体 pin 或指定 port + label 的全局 pass/fail；void 版本通过 `std::vector<FUNC_TEST_BURST_RESULT>&` 引用返回 burst 级结构，包含执行的 label、起始 cycle、cycle 数、pass/fail 结果，以及可选的 fail cycle map。
+
+**文档事实** 无参数版本只有在所有 pin 都 pass 时才返回 TRUE，否则返回 FALSE；多端口测试可用 port 名代替单个 pin。按 label 与 port 取结果时，`TM::FUNCIONAL_RESULT_TYPE` 必须设为 `TM::FTST_BURST`，文档称当前该枚举只支持 `FTST_BURST`。
+
+**文档事实** `FUNC_TEST_BURST_RESULT` 的字段为 `labelname`、`id`（burst 内 label 索引，首个为 0）、`startCyc`、`numberOfCycles`、`result`、`failCyclesMap`、`isFailCyclesValid`；多 pin 或 port 的 `result` 只有在所含 pin 全部 pass 时才为 TRUE。
+
+**文档事实** `failCyclesMap` 仅在参数 `bReadPinFailCycles` 为 TRUE 时填充；`isFailCyclesValid` 为 -1 表示未读（调用时该参数为 FALSE）、0 表示已读但不有效（`ERCC?` 的 valid_code flag 为 OVFL 或 LESS）、1 表示读取成功。
 
 ## 典型用法
 
-（待补）
+**文档事实** 取单个 pin 的结果：在 `ON_FIRST_INVOCATION_BEGIN()` 内执行 `FUNCTIONAL_TEST()`，在块外用 `Boolean result = GET_FUNCTIONAL_RESULT("PIN1");` 取得 PIN1 的结果。
+
+**文档事实** 取整次 PPMU 测量涉及的所有 pin 的总体结果：执行 `Ppmu_task.execute()` 后，在块外调用无参的 `GET_FUNCTIONAL_RESULT()`。
+
+**文档事实** 取所有已执行 pattern 的 burst 结果：在块外声明 `std::vector<FUNC_TEST_BURST_RESULT> mpResult;`，用 `GET_FUNCTIONAL_RESULT("dig12_dc1Port", mpResult);` 后遍历 vector 读 `labelname` 与 `result`。
+
+**文档事实** 取在特殊 sequencer context 上执行的结果：先用 `SEQUENCER_CONTEXT_ITEM context1(sContext); context1.setPorts("port1");` 与 `SEQUENCER_CONTEXT context; context.add(context1).apply();` 定义并 apply，再 `START_TEST(sContext)` / `WAIT_TEST_DONE(36000, &a, &b, sContext)`，最后 `GET_FUNCTIONAL_RESULT("port1", sContext, result);`。
+
+**文档事实** 读取每个 pin 的 fail cycle 数量：在 vector 版本传入 `bReadPinFailCycles = true`，遍历 `mpResult` 输出 `isFailCyclesValid` 与 `failCyclesMap`（按 pin 名与 fail cycle 数）。
+
+**建议** 只在确实需要 per-pin fail cycle 时才把 `bReadPinFailCycles` 设为 TRUE；文档两次提醒，填充 fail cycle map 需要从硬件读数据，可能显著增加测试时间，默认值为 FALSE。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** FUNCTIONAL_TEST：示例在 `FUNCTIONAL_TEST()` 之后取结果，Related information 也列出它。
+- **文档事实** START_TEST：Example 4 用 `START_TEST(sContext)` 在特殊 context 上执行，再用本 API 取该 context 的结果。
+- **文档事实** EXECUTE_TEST、DIGITAL_CAPTURE_TEST：Related information 列出，作为功能结果的来源路径。
+- **文档事实** SMC_EXECUTE_TMU_TEST、SMC_FUNCTIONAL_TEST、SMC_EXECUTE_TEST、SMC_DIGITAL_CAPTURE_TEST：Related information 列出，属 SmartCalc 侧的执行入口。
+- **文档事实** TEST：TEST 页说明要取特定 pin 的 pass/fail 结果应使用 GET_FUNCTIONAL_RESULT（TEST 页正文）。
+- **文档事实** SEQUENCER_CONTEXT、SEQUENCER_CONTEXT_ITEM：Example 4 用它们构造 `sequencer_execution_context` 参数。
+- **文档事实** `TM::FUNCIONAL_RESULT_TYPE` 与 `FUNC_TEST_BURST_RESULT`：分别是 type 参数与返回结构的类型，后者定义结构见参数表。
+- **文档事实** `STRING_VECTOR`：`portlist` 参数要求按该类型组织。
+- **文档事实** `ERCC?`：`isFailCyclesValid = 0` 的判据是 `ERCC?` 的 valid_code flag 为 OVFL 或 LESS。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 记录：Introduced before SmarTest 6.3.2（哨兵值，不能当作 6.3.2 的变更）；SmarTest 7.2.1 支持返回 multiport burst pattern 中执行的功能测试结果并新增返回值 `startCyc`；SmarTest 7.3.1 新增返回值 `numOfCyc`；SmarTest 7.4.2 新增使用 `portlist` 参数的语法；SmarTest 7.5.1 新增用于读取 pin fail cycle 的可选参数。
 
 ## 出处
 
-（待补）
+- 主源：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.88_GET_FUNCTIONAL_RESULT.htm`（Syntax、Parameters、Return value、Examples 1–5、Related information、Functional changes）。

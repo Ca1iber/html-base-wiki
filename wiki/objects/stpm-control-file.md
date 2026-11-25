@@ -3244,20 +3244,56 @@ above:
 
 ## 是什么
 
-（待补）
+**文档事实** STPM control file 是给 SmarTest Program Manager（STPM）的脚本，告诉 STPM 如何执行一次 conversion process；其中包含用于添加、替换、删除 test 的命令，以及参数和 setup 命令。
+
+**文档事实** 该文件的结构遵循 Python 编程语言的约定，可用普通文本编辑器创建和修改。STPM 本身从命令行控制；控制文件由命令行指定（`-setup` 选项），STPM 的具体操作由控制文件内容决定。
+
+**文档事实** 控制文件中可包含三类设置：指定文件的设置（`mtp_device_testflow`、`mtp_template_dir`、`merge_rules`），定义环境的设置（`ate_target`、`ate_model`、`ate_version`），以及其他设置（`temp_dir`、`enable_backup`）。`mtp_device_testflow` 是必需的；其余设置可选。`merge_rules` 省略时不使用 merge rules file；`mtp_template_dir` 虽为可选，但部分命令要求存在有效的 TPT。路径可为绝对或相对路径，相对路径以调用 STPM 时的当前工作目录为基准。
+
+**文档事实** 可选设置的文档默认值：`ate_target` 只列出 `'93000SS'`（Smart Scale system）；对应 `'93000SS'` 的 `ate_model` 可指定 `'PS1600'`，省略时默认值取决于 `ate_target`；`ate_version` 省略时用 `"7.1.4"`；`temp_dir` 省略时用 `/tmp`（且目录必须已存在、STPM 对其有写权限）；`enable_backup` 省略时用 1。备份放在原文件所在目录的 `back` 子目录，文件名追加 `_YYMMDD_HHMMSS` 时间戳。
+
+**文档事实** 命令包括：`write_tp`；test 级操作 `add_test`、`add_burst`、`add_test_to_burst`、`add_empty_test_group`、`remove_test`、`replace_test`、`remove_label`；pattern 级操作 `add_pattern`、`replace_pattern`；TPT 操作 `tpt_generate_template`、`tpt_import_from_device`、`tpt_generate_device_dir`、`tpt_merge`、`tpt_add_test`、`tpt_replace_test`、`tpt_generate_tp`、`tpt_compare_tp`、`tpt_generate_test_stages`；subflow 操作 `extract_subflow`、`merge_subflow`、`remove_subflow`；清理操作 `clear_duplicated`、`clear_unused`。
+
+**文档事实** 命令参数中的 MTP、STP、TPT 分别指 master test program、source test program、test program template：`mtp_device_testflow` 指向 MTP 的 testflow；`add_test` 等的 `test_flow_file` 指向 STP；`mtp_template_dir` 指向 TPT 目录。
+
+**文档事实** 各命令都可带可选的 `pre_proc` 与 `post_proc`：前者在命令执行前运行，后者在执行后运行。两者的值使用同一语法：`<script>` 加上可选的 26 个以 `&` 开头的占位符（`&mdir`、`&sdir`、`&mtp_tf`、`&mtp_pmf`、`&mtp_conf`、`&mtp_tim`、`&mtp_lev`、`&mtp_tt`、`&mtp_rout`、`&mtp_wf`、`&mtp_anctrl`、`&mtp_chatt`、`&mtp_prot`、`&mtp_att`、`&stp_tf`、`&stp_pmf`、`&stp_conf`、`&stp_tim`、`&stp_lev`、`&stp_tt`、`&stp_rout`、`&stp_wf`、`&stp_anctrl`、`&stp_chatt`、`&stp_prot`、`&stp_att`），以及原样传给脚本的 `<user_parameters>`。除脚本名外，其余元素都是可选的；`<user_parameters>` 不得包含以 `&` 开头的词。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档给出的示例控制文件是典型骨架：先写 `mtp_device_testflow = '...project.tf'` 与可选的 `merge_rules = '...merge_rules.py'`，再用两个 `add_test(...)` 从外部 testflow 引入 test（第二个带 `position = 'first'`、`lev_reuse = 'auto'`），最后写出 MTP 的目标路径。
+
+**文档事实** 需注意：示例控制文件把写回写成赋值形式 `write_tp = '<path>'`，而 `write_tp` 命令子主题给出的语法是函数调用形式 `write_tp(path = '<mtp_target_file>', [pre_proc = ...], [post_proc = ...])`；两种写法在文档中并存。
+
+**文档事实** `write_tp` 的 `path` 可与 `mtp_device_testflow` 相同，此时原文件被就地修改；是否生成备份由 `enable_backup` 控制。
+
+**文档事实** `add_test` 的常用参数：`test_flow_file`（必需）；`test_source`（STP 含多个 test 时必需）；`test`（MTP 中的新名字，若 MTP 已有同名 test 则不添加并报错）；`test_group`（省略时 test suite 生成在 MTP 根、testflow 末尾）；`position`（默认 `optimal`，可选 `first`、`last`、`after:<test_name>`、`before:<test_name>`；未指定 `test_group` 时 `position` 被忽略）；`tim_reuse`/`lev_reuse`/`pat_reuse`（默认均为 `none`，可选 `auto`、`test:<test-name>`、显式 primary keys 等）；`reuse_scope`；`pat_dir`（默认 `patterns`，即 `vectors/patterns/`）；`test_flags`；`test_method`；`test_params`；以及 `sbin_num`/`sbin_label`/`hbin_num`/`hbin_label`。
+
+**文档事实** 其余 test/pattern 命令：`add_burst` 在 MTP 中创建空 burst，之后可向其中加 test；`add_test_to_burst` 把外部 STP 中的 test 加到 MTP 中已有的 test（burst）；`add_empty_test_group` 创建新 test group，`parent` 必须已存在（省略时建在顶层），`position` 默认 `last`；`remove_test` 默认删除 test suite（`test_remove = 1`），并按 `unused` 策略处理 timing/level/pattern，`keep_pat_label` 默认 0；`replace_test` 的 `copy_test_method` 默认 0（保留 MTP 的属性），reuse 默认 `none`、remove 默认 `unused`；`remove_label` 的 `pmf_only` 默认 0（从 MTP 删除 pattern），设为 1 时保留 pattern、只从 pattern master file 移除其条目；`replace_pattern` 的 `pat_remove` 默认 `unused`，`waveforms_compare_mode` 默认 `none`。
+
+**文档事实** `pre_proc` / `post_proc` 示例：执行 `write_tp` 前运行当前目录的 `preparation.py`（不传参数）；执行后运行 `/usr/tools/scripts/cleanup.pl`，后者收到 `--mdir '/user/johndoe/mtp' --cmd write --stage 3` 这样的参数串（`&mdir` 被替换为 MTP 路径，其余文本原样传递）。
+
+**文档事实** TPT 相关命令构成一套模板工作流：`tpt_generate_template` 生成新的空 TPT；`tpt_import_from_device` 从现有 device 目录生成 TPT（可选 `include_groups`、`empty_groups`、`copy_static_content`、`allow_overwrite`，后者默认 0）；`tpt_generate_device_dir` 从 TPT 生成 device 目录（`device_dir` 必须不存在或为空，`device_name` 默认 `"device"`）；`tpt_add_test` / `tpt_replace_test` 在 TPT 中增加/替换 test；`tpt_generate_tp` 由现有 test program 与 TPT 生成新 test program；`tpt_compare_tp` 比较 MTP 与 TPT 规范并输出报告（默认 `compare_log.html`）；`tpt_merge` 合并多个 TPT（冲突时 source TPT 覆盖 target，列表中靠后的 source 覆盖靠前的）；`tpt_generate_test_stages` 从 TPT 的 test stage table 生成 data log profile。
+
+**文档事实** subflow 工作流：`extract_subflow` 把 MTP 的一部分导出为新的 STP；`merge_subflow` 把先前用 `extract_subflow` 导出的 STP 重新导入 MTP；`remove_subflow` 从 MTP 删除某 STP 导入的部分。`merge_subflow` 与 `remove_subflow` 的 `include_groups` 与 `exclude_groups` 互斥。
+
+**文档事实** 清理命令：`clear_duplicated` 删除 MTP 中的重复 primaries，并把对重复项的引用改为指向原项；`clear_unused` 删除未使用的 primaries、patterns 与 objects。两者的 `analyze_only = 1` 都表示只生成报告、不实际删除；`analyzer_path` 指定报告路径（默认分别为 `<device directory>/reports/duplicated_report.csv` 与 `unused_report.csv`）。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** 与 SmarTest Program Manager（STPM）：控制文件决定 STPM 的操作；STPM 从命令行运行，`-setup` 选项指定控制文件。入边 `Using SmarTest Program Manager` 的表述是 STPM 的操作细节由其 control file 内容决定。
+- **文档事实** 与 `STPM command line options`：入边说明 `-setup` 用于在命令行指定控制文件，因此两者是“入口参数—配置文件”的关系。
+- **文档事实** 与 `STPM merge rules file`：入边说明使用哪个 merge rules file 由 STPM control file 指定；对应本文件的 `merge_rules` 设置。
+- **文档事实** 与 `Creating and editing an STPM control file`：该主题说明控制文件可用标准文本编辑器创建/修改，并遵循 Python 语法约定；本页是其语法与命令的汇总入口。
+- **文档事实** 与 Test program template（TPT）主题：`mtp_template_dir` 指定 TPT 目录，`tpt_*` 命令围绕 TPT 的生成、导入、合并、对比以及从 TPT 生成 test program/device 目录。
+- **文档事实** 与各命令子主题：`02.09.02.03.01`–`02.09.02.03.27` 分别记录结构、文件/参数设置、预处理/后处理脚本以及各命令的完整参数表；本页 `Subtopics` 是这些页面的索引。
+- **文档事实** 与 `STPM UI plug-in`、`STPM MCM parameter settings`：入边显示 `STPM UI plug-in` 的相关页引用本控制文件；`STPM MCM parameter settings` 则是 STPM MCM 的平行控制文件设置页，说明其参数用于指定 STPM MCM 操作的目录与 testflow。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 只记载 `Introduced in SmarTest 7.0.4`，未列后续变更。
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.09_Test_Program_Management/02.09.02.03_STPM_control_file.htm`（Subtopics、Functional changes）。
+- 语法/参数材料另取自其全部子主题 `02.09.02.03.01`–`02.09.02.03.27`（Structure、File and parameter settings、Preprocessing and postprocessing scripts、write_tp、add_*、remove_*、replace_*、tpt_*、*_subflow、clear_*；objscaffold 逐字汇总，已读）。
+- 「和谁有关」另参考 `extract/edges.jsonl` 中指向/离开该页的边记录（含 STPM 总览、命令行、merge rules、UI plug-in 等页的 context）。

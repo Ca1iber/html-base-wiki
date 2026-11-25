@@ -1555,20 +1555,75 @@ See the example in
 
 ## 是什么
 
-（待补）
+**文档事实**：`MTP_MEMORY_TEST` 是 MTP 的 test method API 类，在执行 memory test 后生成 address-based results 并执行 redundancy analysis（RA），支持 multiport；该 API 仅适用于 MTP，定义在 `/opt/93000mts/mts/execution_engine/include/MtpMemoryTest.h`（`02.12.06.17`）。
+
+**文档事实**：它有两个构造函数——`MTP_MEMORY_TEST(void)`，以及 `MTP_MEMORY_TEST(const std::string& resultArea)`；后者用于 hidden upload 算法，`resultArea` 是预先定义、用来存放 functional test error map 的结果区名（`02.12.06.17`）。
+
+**文档事实**：成员函数覆盖执行与判定（`execute()`、`startTest()`、`waitTestDone()`、`judgeAndLog()`、`generateBitmapFile()`、`print()`）、结果查询（`getPassFailResult()`、`isRepairable()`、`getMemoryPort()`、`getMemoryPortNamesList()`、`getMemoryPatternNamesList()`）、bit fail map 生成与命名（`setImmediateBitmapToFile()`、`setBitmapMode()`、`setBitMapFileName()`、`setBitMapFilePath()`、`addBitMapFileUserComments()`、`setFailListStyle()`）、fail bit count（`enableFailBitCount()`、`setFBCLimit()`）、capture 范围与数量（`setStartCaptureCycle()`、`setStopCaptureCycle()`、`setNumberOfFailCyclesToAcquirePerPin()`、`restrictToChannelCaptureMemorySize()`）、address filter（`addAddressFilter()`）、结果 pin 与多 pattern 模式（`setResultPins()`、`setMultiPatternResultMode()`、`setOptions()`）以及冗余分析（`setRA*` 系列）；完整签名以本页「语法 / 参数」为准（`02.12.06.17`）。
+
+**文档事实**：执行结果可分为 address-based results（失败地址表）和 bit fail map（BFD）文件；`setFailAddressListOrdering()` 的选择决定失败地址的检索接口——`MTP_MEMORY_PATTERN.getFailingAddressList()`、`getFailingCycleAddresses()` 或 `getFailingCycleAddressList()`（`02.12.06.17` 子主题 `setFailAddressListOrdering()`）。
+
+**推断**：它是「一次 memory test 的配置 + 执行 + 结果」门面：先对对象做配置，再 `CONNECT()` 后 `execute()`，最后用 `judgeAndLog()` 判定并记录；示例 5 的 hidden upload 路径则把判定与 bitmap 生成放到 `SMC_ARM()` 的后台计算中（`02.12.06.17` Examples）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：最小可用的执行流程来自 Example 2（address-based results + bit fail map，示例注释说明执行只对 first site 调用）（`02.12.06.17`）：
+
+```cpp
+void MemoryTest::run()
+{
+MTP_MEMORY_TEST memoryTest;
+memoryTest.enableAddressBasedResults(true).setImmediateBitmapToFile(true);
+
+// Execution is called only for first site
+ON_FIRST_INVOCATION_BEGIN();
+{
+CONNECT();
+memoryTest.execute();
+}
+ON_FIRST_INVOCATION_END();
+
+memoryTest.judgeAndLog();
+}
+```
+
+**文档事实**：需要以 fail bit count 判定时，先 `enableFailBitCount(true)`，再用 `setFBCLimit()` 分别设 device / bank / data bit 的上限（`02.12.06.17` Example 3）。注意 Example 3 原文写作 `enableFailCount(true)` 与 `MTP:DEVICE`，与同页成员名 `enableFailBitCount()`、枚举 `MTP::FBC_DEVICE` 的拼写不一致，此处照录，使用时以参数表的拼写为准。
+
+**文档事实**：要取失败地址时按 Example 4 组合 `enableAddressBasedResults(true)`、`setMaxFailingAddressesToReconstructPerPin()`、`setFailAddressListOrdering()`，执行后通过 `getMemoryPort(...).getMemoryPattern(...)` 取得 `MTP_MEMORY_PATTERN`，再调 `getFailingAddressList()`（`02.12.06.17`）。
+
+**文档事实**：hidden upload 用带 `resultArea` 的构造；`execute()` 后用 `SMC_ARM(memoryTest)` 启动后台计算线程，在后台函数里 `judgeAndLog()` + `generateBitmapFile()`；等待 functional test 结束的 `startTest()` + `waitTestDone()` 写法见 `startTest()` 示例（`02.12.06.17`）。
+
+**建议**：若只做特征化或失效分析，可用 `setMaxFailingAddressesToReconstructPerPin()`、`setMaxFailingAddressesToLogPerPin()`、`setNumberOfFailCyclesToAcquirePerPin()` 把重建/记录的地址数与失败周期数限制在分析所需范围，文档说明这些限制用于改善性能（`02.12.06.17`）。
 
 ## 和谁有关
 
-（待补）
+- **MTP_MEMORY_PATTERN** — **文档事实**：该类的文档说它取回「由 `getMemoryPattern()` 指定、由 `MTP_MEMORY_TEST` 测试」的 pattern 的 fail bit / functional 结果；本页 Example 4 也是这条链路（`02.12.06.15`、`02.12.06.17`）。
+- **MTP_MEMORY_PORT** — **文档事实**：`getMemoryPort()` 返回该子类；MTP 3.2.1 为 multiport 新增它，并把 `getMemoryPatternNamesList()`/`getMemoryPattern()` 从 `MTP_MEMORY_TEST` 移到 port 上（本页 Functional changes 与语法节；`02.12.06.16`）。
+- **MTP_ADDRESS_FILTER / MTP_MULTI_FILTER** — **文档事实**：`addAddressFilter()` 的两个重载分别接受单地址范围 filter 与多地址范围 filter（本页语法节 `addAddressFilter()`）。
+- **Setting up the MTP_MEMORY_TEST API** — **文档事实**：MTP 3.3.2 之前的版本需要按该主题完成额外配置，之后系统自动完成预设置（本页 Functional changes；`02.12.02.05.06.01.04` 入边语境）。
+- **Hidden upload** — **文档事实**：带 `resultArea` 的构造函数专用于 hidden upload 算法（本页 Syntax；`02.07.10.04.05`）。
+- **Address-based results API / 冗余分析 API** — **文档事实**：这两篇主题都把 `MTP_MEMORY_TEST` 列为 fundamental reading；本页 Functional changes 说明 MTP 3.2.1 起支持 multiport 与 RA（`02.12.01.10.06.02`、`02.12.01.08.08`、`02.12.01.08.09` 入边语境）。
+- **MTP API Reference** — **文档事实**：该索引把本类列入 MTP API 清单（`02.12.06` 入边语境）。
+- **标准 L2 test method 环境** — **文档事实**：本页示例使用 `CONNECT()`、`ON_FIRST_INVOCATION_BEGIN/END`、`SMC_ARM()`、`PUT_DATALOG()` 等接口，说明它运行在 test method 的 `run()` 中（本页 Examples）。
 
 ## 版本
 
-（待补）
+**文档事实**（`02.12.06.17` 的 Functional changes）：
+
+- Introduced in MTP 3.1.3
+- MTP 3.1.6（MTP on SOC 103.3.0）：新增成员函数 `addAddressFilter()` 与 `getMemoryPatternNamesList()`。
+- MTP 3.1.6（MTP on SOC 103.3.0）：新增成员函数 `setMultiPatternResultMode()`。
+- MTP 3.2.1：支持 multiport 与 redundancy analysis。
+- MTP 3.2.1：移除成员函数 `getMemoryPatternNamesList()` 与 `getMemoryPattern()`；由支持 multiport 的新子类 `MTP_MEMORY_PORT` 提供两个类似函数。
+- MTP 3.3.2：使用 `MTP_MEMORY_TEST` API 的预设置改由系统自动完成。
+- MTP 3.3.2：新增构造函数语法 `MTP_MEMORY_TEST(const std::string& resultArea)`。
+
+注：3.1.6 新增的 `getMemoryPatternNamesList()` 在 3.2.1 又被移除，两处均按原文记录。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.17_MTP_MEMORY_TEST.htm`（主文档，含 Syntax、Examples 与 Functional changes）
+- 同目录 `02.12.06.17.01`–`02.12.06.17.41`（41 个成员函数子主题，语法节逐字来源）
+- `02.12.06.15_MTP_MEMORY_PATTERN.htm`、`02.12.06.16_MTP_MEMORY_PORT.htm`、`02.12.06.18_MTP_MULTI_FILTER.htm`
+- `02.12.02.05.06.01.04_Setting_up_the_MTP_MEMORY_TEST_API.htm`、`02.12.01.10.06.02_Address-based_results_API.htm`、`02.12.01.08.08_APIs_for_redundancy_analysis.htm`、`02.12.01.08.09_APIs_to_support_multiport_with_MTP_MEMORY_TEST.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.10.04.05_Hidden_upload.htm`

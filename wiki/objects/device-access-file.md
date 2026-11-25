@@ -1050,20 +1050,61 @@ read_burst (rowAddr, colAddr, data);
 
 ## 是什么
 
-（待补）
+**文档事实**：Device access file 描述「在器件上执行某个操作时，需要向器件引脚发送哪些 bitstream」，即把逻辑调用翻译成具体波形；其中定义的 device access 由 APG program file 调用（`02.12.03.03.04`）。
+
+**文档事实**：扩展名为 `.dvac`，在 APG pattern file 中用 `:deviceAccess:` 关键字引用；文件还声明从 device architecture file 引入、供 device access 使用的参数，并可定义常量（`02.12.03.03.04`）。
+
+**文档事实**：文件语法遵循 MTL compiler syntax，顶层是 `:deviceAccess: { ... }`，可含 `:version:`（可选）、`:deviceParam:`、`:groups:`、`:subGroups:`（可选）、`:constants:`（可选）、`:muxModeDefinition:`（可选）、多个 `:apgAccess:`，以及 `:countedMatchPad:`；关键字书写顺序是典型顺序、不强制（`02.12.03.03.04.01`）。
+
+**文档事实**：每个 `:apgAccess:` 定义一次 access：`:name:` 是 APG program 中的调用名（相当于 C 函数名），`:interface:` 声明的参数相当于 C 函数参数（可传 data、key、string），`:table:` 描述调用时各引脚收到的数据（`02.12.03.03.04.01`）。
+
+**文档事实**：`:groups:` 声明 Pin configuration file 中已定义的 pin 组，`:subGroups:` 是组的子集；文档明确建议改用 pin mapping file 中配置的 bus（目的相同且更易用），并停止使用 groups/subgroups（`02.12.03.03.04.01`）。
+
+**文档事实**：`:deviceParam:` 列出的参数必须在 device architecture file 中定义，导入后可像常量一样在 access 中使用（`02.12.03.03.04.01`）。
+
+**文档事实**：access 内可用宏 `bitCount`、`crc`、`data`、`dbi`、`xaddr`、`yaddr`、`zaddr`，以及控制指令 `for`/`forend`、`delay`/`delayend`、`countedMatch`/`matchend`（`02.12.03.03.04.02`、`02.12.03.03.04.03`）。
+
+**推断**：`.dvac` 相当于「操作/波形模板库」——调用点在 APG program，选择与编译入口在 APG pattern，`.dvac` 本身保存每个操作对各引脚的状态与数据定义。
 
 ## 典型用法
 
-（待补）
+**文档事实**：典型写法是在一个 `:apgAccess:` 里用 `:interface:` 声明参数，再按行写 `:pin:`/`:states:`/`:data:`（可选 `:instruction:`、`:operation:`、`:comment:`）。示例的 `write_access`、`read_access` 分别固定 CS_/OE_/WE_ 等控制脚，并用 `xaddr(xAddr,yAddr)`、`yaddr(xAddr,yAddr)`、`data(dataw,xAddr,yAddr)` 产生地址和数据（`02.12.03.03.04`、`02.12.03.03.04.01`）。
+
+**文档事实**：`:data:` 的结果位选择 `:states:` 列的左/右状态；`:pin:` 是 pin 组时，结果第 1 位给第 1 个 pin、第 2 位给第 2 个 pin……文档示例 `{ PinGroup {0 1} 0x5 }` 得到 PinGroup.000=0、.001=1、.002=0、.003=1（`02.12.03.03.04.01`、`02.12.03.03.04.02`）。
+
+**文档事实**：`data()` 按 APG pattern file 中的 bit inversion / bit ordering 表做 scrambling，并按 `dBits`/`xBits`/`yBits`/`zBits` 掩码（如 xBits=8 时 258 变成 2）；至少给两个参数，缺省参数按 0；凡需要 Reconstruction information 的引脚都必须用 `data` 宏（`02.12.03.03.04.02`）。
+
+**文档事实**：`dbi()` 在指定条件满足时反转 bus；含 `dbi` 的 device access 不能用于 padding routine。`crc()` 用在 `:operation:` 列；CRC 全局启用时该 access 的 `:data:` 列被忽略（`02.12.03.03.04.02`）。
+
+**文档事实**：控制指令用于写循环/时序：`for (...)`…`forend` 之间按循环重复求值；`delay(<latency>)`…`delayend` 把中间语句推迟若干 edge，禁止把前块推迟到后块之后、推到 access 末尾之外、与 non-transparent x-mode 组合或使用负延迟（违反会触发 compiler error）；`countedMatch(n)`…`matchend` 最多循环 n 次（`02.12.03.03.04.03`）。
+
+**文档事实**：`forend`/`delayend`/`matchend` 等结束行必须独占一行，其余列填 `~`；整个 device access 也可在 APG program 的调用处延迟（见 Device access delays）（`02.12.03.03.04.03`）。
+
+**建议**：新写的 access 优先用 pin mapping file 的 bus 而非 `:groups:`；常量和常用参数放 `:constants:` 便于维护（文档称其为 good practice）（`02.12.03.03.04.01`）。
 
 ## 和谁有关
 
-（待补）
+- **APG pattern file**（[[apg-pattern-file]]）— **文档事实**：用 `:deviceAccess:` 引用 `.dvac`；`data` 宏使用的 bit inversion / bit ordering 表、`crc` 宏使用的 CRC configuration 也由该文件指定；`:countedMatchPad:` 的 padding setup 同样从该文件引用（`02.12.03.03.04`、`02.12.03.03.04.01`、`02.12.03.03.04.02`）。
+- **APG program file**（[[apg-program-file]]）— **文档事实**：本文件定义的 device access 由 APG program 代码调用；`:name:`/`:interface:` 分别对应 C 函数名/参数；整个 access 也可在调用处延迟（`02.12.03.03.04`、`02.12.03.03.04.01`、`02.12.03.03.04.03`）。
+- **Device architecture file**（[[device-architecture-file]]）— **文档事实**：`:deviceParam:` 列出的参数必须在该文件中定义；`data` 宏的掩码用其 `dBits`/`xBits`/`yBits`/`zBits`，`dbi` 宏用其 DBI configuration（`02.12.03.03.04.01`、`02.12.03.03.04.02`）。
+- **Pin configuration file** — **文档事实**：`:groups:` 声明的组来自 Pin configuration file（`02.12.03.03.04.01`）。
+- **Pin mapping file**（[[pin-mapping-file]]）— **文档事实**：文档建议用其 bus 取代 groups/subgroups，且 `:port:` 必须来自 pin mapping file 中 "using port" 指定的端口（`02.12.03.03.04.01`）。
+- **MTL compiler** — **文档事实**：语法遵循 MTL compiler syntax；违反 delay 规则会触发 compiler errors（`02.12.03.03.04.01`、`02.12.03.03.04.03`）。
+- **Counted match padding** — **文档事实**：文件可用 `:countedMatchPad:` 定义 padding setup；含 `dbi` 宏的 access 不能用于 padding routine（`02.12.03.03.04.01`、`02.12.03.03.04.02`）。
 
 ## 版本
 
-（待补）
+**文档事实**：主文档 Functional changes 只有 “Introduced before SmarTest 6.3.2”；这是文档集覆盖起点之前的哨兵值，不能当作 6.3.2 的变更（`02.12.03.03.04`）。
+
+**文档事实**：语法子主题另记 MTL/MTP 版本变化：MTP 2.4.0 增加 `:operation:` 列；MTP 2.6.6 增加 `:countedMatchPadding:` 段；MTP 3.0.1 起不再推荐 groups/subgroups；MTP 3.0.3（MTP on SOC 103.0.0）把 `:countedMatchPadding:` 改名为 `:countedMatchPad:`；MTP 3.3.2 interface 参数支持 string 类型、string 参数可用于 `:states:` 列，并新增 `:port:` 必须来自 pin mapping file “using port” 的限制（`02.12.03.03.04.01`）。
+
+**文档事实**：文件内 `:version:` 是任意字符串、可选的「本文件版本」，与 SmarTest 版本无关（`02.12.03.03.04.01`）。
+
+**文档事实**：旧关键字 `:devCyc:`/`:stateParam:` 仍受支持，但不应再用于新程序，未来版本可能移除（`02.12.03.03.04.01`）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.04_Device_access_file.htm`（主文档）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.04.01_Device_access_file_syntax.htm`（结构、关键字、groups 建议、MTP 版本变化）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.04.02_Macros_and_functions_in_device_accesses.htm`、`02.12.03.03.04.03_Control_instructions_in_device_accesses.htm`（宏与控制指令，内容见本页「语法 / 参数」）
+- 关联：`02.12.03.03_MTL_Configuration_Files.htm`（Related information）

@@ -373,20 +373,54 @@ true );
 
 ## 是什么
 
-（待补）
+**文档事实**：`TASK_LIST` 是数据容器，保存要执行的 `PPMU_SETTING`、`PPMU_RELAY`、`PPMU_MEASURE` 任务；任务按加入任务表的顺序执行（`02.07.04.01.240`）。
+
+**文档事实**：定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/TaskList.h`；构造函数 `TASK_LIST()` 无参数（`02.07.04.01.240`）。
+
+**文档事实**：成员函数为 `add()`（把任务加入列表，可链式调用）、`setup()`（下载任务设置）、`execute()`（下载设置并执行任务）（`02.07.04.01.240`）。
+
+**文档事实**：一个任务表最多容纳 10 个任务（`02.07.04.01.240`）。
+
+**文档事实**：`setup()` 按注册顺序顺序下发任务设置；用于测试方法执行期间任务输入参数发生变化的场景，可修改已有 MSET 的参数并复用，以避免 MSET 用尽（文档指向 FlexDC 与 Managing DC Tests with Variable Parameters）（`02.07.04.01.240`）。
+
+**文档事实**：`execute()` 执行任务表即完成一次测试；执行后，对未包含在已执行任务中的数字 pin 不能再定义任务。示例：执行过含 `pin("pin1")` 的列表后，改 `pin1` 可以，改 `pin2` 会报错（`02.07.04.01.240`）。
+
+**文档事实**：若把 `TASK_LIST` 对象定义为全局，测试方法结束后对象不会被销毁，任务表会在每次 testflow 重复时变长，导致测试时间逐次增加（`02.07.04.01.240`）。
+
+**文档事实**：`add(task, measurementName)` 重载把测量与离线数据关联，用于 Parametric offline result emulation；离线结果仿真在 SmarTest 7.1.3 引入（`02.07.04.01.240`）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：典型顺序是「声明任务对象 → 配置 pin、量程、继电器、测量 → 依次 `add()` → `execute()` → 用 `getValue()`/`getPassFail()` 取结果并 `TEST()`」（`02.07.04.01.240`）。
+
+**文档事实**：示例 1 把 `ppmuSetting`、`ppmuClamp_on`、`ppmuRelay_on`、`ppmuClamp_off`、`ppmuMeasure`、`ppmuRelay_off` 按顺序加入任务表，在 `ON_FIRST_INVOCATION_BEGIN()` 内执行；示例中的 `PPMU_CLAMP` 用于避免 current force setup 上的 hot switching（`02.07.04.01.240`）。
+
+**文档事实**：示例 2 先用 `setup()` 下发第二组任务，在 `FOR_EACH_SITE_BEGIN()`/`FOR_EACH_SITE_END()` 之间按 site 修改 `iForce`，再 `execute()`；其中 `ppmuSetting2` 是避免 DC set 用尽的 dummy setting（`02.07.04.01.240`）。
+
+**文档事实**：`DPS_TASK`、`SPMU_TASK`、`PPMU_MEASURE` 可以直接调用 `execute()`，也可以放入 `TASK_LIST` 排队、由 `TASK_LIST.execute()` 统一执行；后一种需要 `add(task, measurementName)` 重载（`02.07.04.01.240`）。
+
+**文档事实**：`setup()` 可以只下载设置而不执行，随后再改参数并 `execute()`；示例 2 正是这种两段式用法（`02.07.04.01.240`）。
+
+**建议**：不要把 `TASK_LIST` 定义成全局对象——文档明确说明会逐次累积任务并拉长测试时间（`02.07.04.01.240`）。
 
 ## 和谁有关
 
-（待补）
+- **PPMU_SETTING / PPMU_RELAY / PPMU_MEASURE** — **文档事实**：这三类对象就是任务表保存并顺序执行的任务（`02.07.04.01.240`）。
+- **DPS_TASK**（[[dps-task]]）/ **SPMU_TASK**（[[spmu-task]]）— **文档事实**：离线结果仿真时可直接 `execute()`，也可经 `TASK_LIST` 排队执行（`02.07.04.01.240`）。
+- **FlexDC / Managing DC Tests with Variable Parameters** — **文档事实**：`setup()` 通过修改已有 MSET 参数并复用来避免 MSET 用尽，文档把这两篇列为细节来源（`02.07.04.01.240`）。
+- **Parametric offline result emulation / Offline Result Emulation** — **文档事实**：`add(task, measurementName)` 的 `measurementName` 用于把测量与离线数据关联（`02.07.04.01.240`）。
+- **FOR_EACH_SITE_BEGIN / FOR_EACH_SITE_END**（[[for-each-site-begin]]）— **文档事实**：多 site 示例在二者之间按 site 修改任务参数（`02.07.04.01.240`）。
+- **ON_FIRST_INVOCATION_BEGIN / ON_FIRST_INVOCATION_END、`TEST()`** — **文档事实**：示例用前者包住一次性建立/执行，用后者上传结果（`02.07.04.01.240`）。
+- **PPMU_CLAMP** — **文档事实**：示例代码用到了它，但类说明与 `add()` 参数说明只把任务类型列为 `PPMU_SETTING`、`PPMU_RELAY`、`PPMU_MEASURE`；此处照原样记录（`02.07.04.01.240`）。
+- **MSET / DC set** — **文档事实**：`setup()` 可修改已有 MSET 的参数并复用它，以避免 MSET 用尽；示例以 “dummy setting” 规避 DC set run out（`02.07.04.01.240`）。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记 “Introduced before SmarTest 6.3.2”（文档集覆盖起点前的哨兵值，不能当作 6.3.2 的变更），以及 “SmarTest 7.1.3: Offline result emulation introduced”（`02.07.04.01.240`）。
+
+**文档事实**：正文描述的 `add(const TASK& task, const string& measurementName)` 重载正对应 7.1.3 引入的离线结果仿真；它把任务执行结果与离线数据关联（`02.07.04.01.240`）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.240_TASK_LIST.htm`（主文档：类定义、成员函数、示例、Functional changes）
+- 关联（正文回链）：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.157_PPMU_MEASURE.htm`、`02.07.04.01.158_PPMU_RELAY.htm`、`02.07.04.01.160_PPMU_SETTING.htm`、`03_Use_cases_and_application_papers/03.01_Performance_Cookbook__How_to_reduce_test_times/03.01.05.02_FlexDC.htm`、`02_System_reference/02.07_Test_Method_Reference/02.07.03.02.06.03_Managing_DC_Tests_with_Variable_Parameters.htm`；Parametric offline result emulation 见正文 raw `128581.htm`

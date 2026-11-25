@@ -2559,20 +2559,51 @@ true );
 
 ## 是什么
 
-（待补）
+**文档事实** `SPMU_TASK` 是 MAPI 的 test method API，用于定义并执行并行 DC 测量：既覆盖 PMU 模式下的 DC Scale 卡，也覆盖数字卡的 BADC（board ADC）。该 API 定义在 `/opt/hp93000/soc/prod_com/include/MAPI/SpmuTask.h`。
+
+**文档事实** 文档明确 `SPMU_TASK` 是历史遗留名称（legacy name），并注明 SmarTest 7.10 不支持 High Precision PMU（System PMU）。
+
+**文档事实** 与其他 API 的配合方式由文档给出：与 `TASK_LIST` 联用时，可定义多个 DC 测量并按顺序执行；与 `SPMU_PIN_TASK` 联用时，可更改测量所需的 relay 设置。
+
+**文档事实** 该类对象用于为 DC 测量定义条件并并发执行这些测量；每个 pin 的测量条件由 `pin()` 返回的 `SPMU_PIN_TASK&` 对象承载。成员函数包括 `pin()`、`execMode()`、`preAction()`、`setup()`、`execute()`、`getValue()`、`getPassFail()`、`getFunctionalResult()`。
+
+**文档事实** 构造函数无参数、无返回值。文档 Note 明确：不要在 test method 中创建该类的静态对象，也不要创建该类的 test method 成员变量。
+
+**文档事实** `execMode()` 的执行模式包括 `"GPF"`（默认，`TM::GPF`）、`"PPF"`、`"PVAL"`、`"FORCE_ON"`、`"FORCE_OFF"`、`"FORCE_AUTO"`、`"DCTEST_AUTO"`；`preAction()` 的动作包括 `"NONE"`（默认）、`"NPRM"`、`"FTST"`。
 
 ## 典型用法
 
-（待补）
+**文档事实** 主文档的 DC Current Measurement 示例展示了完整链式流程：`pin("pmu1")` 后依次设置 `mode("VFIM")`、`vForce()`、`clamp()`、`min()`/`max()`、`vForceRange()`、`iForceRange()`、`compare()`、`samples()`、`settling()`、`relay()`、per-pin `execMode("SER")`；随后 `preAction("NPRM").execMode(TM::PVAL).execute()`；最后在 `ON_FIRST_INVOCATION_END()` 之后用 `getValue("pmu1")` 读取结果。
+
+**文档事实** 高阻测量示例使用 `mode("VM_HIZ")`、`settling(1 ms)`、`relay("TERM")`、`min()`/`max()` 配置端接高阻测量，再以 `preAction("NONE").execMode("PVAL").execute()` 执行，并在 first-invocation block 之外读取 `getValue("pinName")`。
+
+**文档事实** `execute()` 在测量条件尚未下载到 firmware 时会先执行 `SPMU_TASK.setup()`。`getValue()` 返回 `DOUBLE`，单位按测量模式为 A 或 V；文档注明使用 DC Scale 卡时，结果超出范围会返回 `999999999`。
+
+**文档事实** `setup()` 示例展示“先测量、再按 site 设置 force 值”的两步流程：`spmuVMeas` 配置并 `execute()` 测电压；`spmuIMeas` 配置后先 `setup()` 把定义写入 HW；随后在 `FOR_EACH_SITE_BEGIN()` / `FOR_EACH_SITE_END()` 中用 `spmuVMeas.getValue("dc_pin")` 逐 site 设置 `vForce()`；最后 `spmuIMeas.execute()`。
+
+**文档事实** `SPMU_PIN_TASK` 的 `connect()` / `disconnect()` 文档指出：同一 task 内，在 `connect()` 或 `disconnect()` 之前调用的其他函数不会被考虑；若同一 `SPMU_TASK` 中有的 pin 要 connect、有的要 disconnect，必须拆成两个 task 分别 `execute()`。
+
+**建议** 需要复用测量定义或按序执行多个 DC 测量时，把 `SPMU_TASK` 放入 `TASK_LIST`；单次测量则可直接调用 `execute()`（`TASK_LIST` 文档说明这两种方式都存在）。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** 与 `SPMU_PIN_TASK`：文档说明 `SPMU_PIN_TASK` 对象只能通过 `SPMU_TASK.pin()` 取得；主文档同时说明与 `SPMU_PIN_TASK` 联用时可更改测量所需的 relay 设置。`pin()` 因此是进入 per-pin 设置的入口。
+- **文档事实** 与 `TASK_LIST`：主文档说明与 `TASK_LIST` 联用可定义多个 DC 测量并按顺序执行；`TASK_LIST` 文档说明 `SPMU_TASK` 等任务对象既可直接 `execute()`，也可放入 `TASK_LIST` 由它排队执行。
+- **文档事实** 与本类成员子主题：`02.07.04.01.234.02`–`.09` 分别记录 `SPMU_TASK.execMode()`、`execute()`、`getFunctionalResult()`、`getPassFail()`、`getValue()`、`pin()`、`preAction()`、`setup()`；主文档 `Subtopics` 列出这些入口。
+- **文档事实** 与 DC Scale 卡（DPS128/64、XPS256）：多个 `SPMU_PIN_TASK` 成员注明仅特定卡支持（如 `clamp()` 双参数形式、`connectState()`、`forceDropMax()`/`returnDropMax()`、`loadCap()`、`openLoopProtection()`、`preCharge()` 的 `"SAFE_CON"` 等）；入边还显示 XPS256 文档称 PMU operating mode 的 force/clamp/measure 与电压降测量由 `SPMU_TASK`/`SPMU_PIN_TASK` 覆盖。
+- **文档事实** 与 PS1600 / Pin Scale 5000 的 DC value measurements：入边说明 BADC 的 AMUX 可在功能测试前通过 `FLEX_RELAY` 或 `SPMU_TASK` API 设置。
+- **文档事实** 与 `PPMU_SETTING`、`PPMU_RELAY`、`BADC_SETTING`、`BADC_MEASURE`、`PATTERN_CONTROLLER`、`DC_RESULT_ACCESSOR`：主文档 Example 2 用它们搭建 pattern-controlled 高阻电压测量并读取结果（示例级关系）。
+- **文档事实** 与 `DC Test Programming`、`Offline Result Emulation`：主文档 `Related information` 列出这两个主题；入边另有 `Offline result emulation for Class SPMU_TASK`，以及 `TESTSET::judgeAndLog_Spmu`（其说明为“指定要判定的 `SPMU_TASK` 对象”）。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 原文记录：
+- Introduced before SmarTest 6.3.2
+
+**文档事实** 该节未列出后续版本新增项；本页语法节中出现的 `connectState()`、`forceDropMax()`、`returnDropMax()`、`highAccuracy()` 等成员，其引入版本未在本页 `Functional changes` 中给出。
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.234_SPMU_TASK.htm`（Subtopics、Syntax、Example、Related information、Functional changes）。
+- 语法/参数材料另取自其子主题 `02.07.04.01.234.01_SPMU_PIN_TASK.htm` 及 `02.07.04.01.234.01.01`–`.38`、`02.07.04.01.234.02`–`.09`、`02.07.04.01.240_TASK_LIST.htm`（objscaffold 逐字汇总，已读）。
+- 「和谁有关」另参考 `extract/edges.jsonl` 中指向/离开该页的边记录。

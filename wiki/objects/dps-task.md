@@ -1585,20 +1585,77 @@ true );
 
 ## 是什么
 
-（待补）
+**文档事实** `DPS_TASK` 是 MAPI 的 test method API，用于为 DPS 通道、或处于 DPS operating mode 的 DC Scale 卡设置并执行测量，并取回测量值。定义在 `/opt/hp93000/soc/prod_com/include/MAPI/DpsTask.h`。
+
+**文档事实** 文档列出的支持任务为：为每个 DPS 定义测量条件；并行执行本类定义的测量；取回测量结果；支持 triggered 与 un-triggered 的 DPS 测量。
+
+**文档事实** 该类可加入 `TASK_LIST`，使使用 PPMU、DPS 与 DC Scale pin 的各类 DC 测量能够无缝地一起执行。
+
+**文档事实** 成员函数包括 `pin()`、`execMode()`、`execute()`、`measRangeMode()`、`preAction()`、`primaryActivation()`、`samples()`、`setup()`、`trigMode()`、`wait()`、`getFunctionalResult()`、`getNumberOfUsedChannelsFromLastMeasurement()`、`getPassFail()`、`getValue()`、`getValues()`、`getVbump()`、`getWaveform()`；每个 pin 的具体条件由 `pin()` 返回的 `DPS_PIN_TASK&` 承载。
+
+**文档事实** `pin()` 之后必须调用 `DPS_PIN_TASK` 的成员函数；调用 `pin()` 之后不能再调用其他 `DPS_TASK` 成员函数。
+
+**文档事实** `execMode()` 的模式为 `TM::GPF`/`"GPF"`（默认）、`TM::PPF`/`"PPF"`、`TM::PVAL`/`"PVAL"`、`TM::DCTEST_AUTO`/`"DCTEST_AUTO"`。`DCTEST_AUTO` 按 test suite flags 决定实际行为：`"Pass value"` 或 `"Fail value"` 打开时按 PVAL 执行；二者关闭且 `"Per pin on pass"` 或 `"Per pin on fail"` 打开时按 PPF 执行；否则按 GPF 执行。
+
+**文档事实** `trigMode()` 选择 `TM::INTERNAL`（默认，内部触发）或 `TM::EXTERNAL`（外部触发）。外部触发模式下，测量在 trigger 持续送入 DPS 期间继续；该模式会在 DC 测量前强制做一次 functional test，并激活 Testsuite dialog 中当前指定的数字 primaries。
+
+**文档事实** `preAction()` 的动作包括 `"NONE"`（默认）、`"FTST"`、`"FTST_NO_RESULT"`。文档特别说明：外部触发模式下 `"NONE"` 与 `"FTST"` 相同，都会强制先做 functional test。
 
 ## 典型用法
 
-（待补）
+**文档事实** 示例 “DPS per-pin value measurement”：在 `ON_FIRST_INVOCATION_BEGIN()` 内 `CONNECT()` 后，用 `dpsTask.pin("Vcc").min(0 A).max(0.1 A)` 与 `dpsTask.pin("Vee").min(0 A).max(0.2 A)` 设置上下限，`wait(5 ms)`，`execMode(TM::PVAL)`，`trigMode(TM::INTERNAL)`，执行 `FUNCTIONAL_TEST()`，再 `dpsTask.execute()`；最后用 `getValue("Vcc")`/`getValue("Vee")` 取电流值并用 `getPassFail()` 判定。
+
+**文档事实** 示例 “DPS measurement with different settings for different sites”：先用 `dpsTask.setup()`，再在 `FOR_EACH_SITE_BEGIN()` / `FOR_EACH_SITE_END()` 中按 site 修改 `dpsTask.pin("Vcc").max(...)`，最后 `execute()`。文档说明该示例通过 user flag `"DPS_DUMMY_VAR"` 为不同 site 定义不同设置，并在所有 site 上并行执行全局 pass/fail 测量。
+
+**文档事实** 示例 “DPS measurement with external trigger”：用 `MULTI_LIMITS` 建 8 组 limit，`dpsTask.pin("Vcc").limits(templ)`，`trigMode(TM::EXTERNAL).execMode(TM::PVAL)`，`execute()` 后由 `getWaveform("Vcc")` 取回每次触发测量值并逐组判定。
+
+**文档事实** `execute()` 在测量条件尚未下载到 firmware 时会先调用 `setup()`；执行时会应用 primaries。
+
+**文档事实** `setup()` 把 `DPS_TASK` 与 `DPS_PIN_TASK` 中定义的测量条件下载到 firmware layer，但在 `execute()` 之前不会应用到测试卡硬件；若该类加入 `TASK_LIST`，由 `TASK_LIST` 的 `setup()` 调用它。
+
+**文档事实** 文档 Note：由 `DPS_PIN_TASK` 的 min/max 决定的 current range 在 `DPS_TASK.execute()` 之后仍保持。由于电流采样电阻会影响 DPS 的调节性能，低电流测量后应把电流测量量程恢复到尽可能高的量程；做法是按需要重新编程 `DPS_PIN_TASK` 的 min/max，然后再次调用 `execute()`。
+
+**文档事实** `samples()` 指定测量次数并取平均（默认 1）。实际采样数可能不同于指定值：DPS128-HC/64-HC 与 UHC4T 有各自的最小实际采样数（按测量类型与量程），XPS256 的实际采样数等于指定值；最大采样数分别为 DPS128/64: 8192、UHC4T: 16384、XPS256: 262144。DPS128/64 与 UHC4T 会把非 2 的幂的实际采样数向上取整到下一个 2 的幂；XPS256 可设 1 到最大值之间的任意值。
+
+**文档事实** `wait()` 在测量前（在必要的量程切换和/或通道 unganging 之后）施加等待时间，单位为秒。静态 DPS 测量已有内部 settling time，但负载板设计或大电容可能还需要额外 settling；动态 DPS 测量没有内部 settling time，因为它与数字通道一起运行，settling 需在 pattern 中处理。
+
+**文档事实** `measRangeMode()` 的文档同时写着“no longer supported and silently ignored”，以及 `TM::KEEP_RANGE`/`TM::RESTORE_RANGE` 的用法；参数说明还注明对 DPS128 与 XPS256 该函数被静默忽略，测量量程会恢复到 force 或 clamp 量程。
+
+**建议** 由于 `measRangeMode()` 的文档描述互相矛盾，实际使用前应按目标卡型核对；需要把低电流测量后的量程恢复时，可按上述 Note 重新编程 `DPS_PIN_TASK` 的 min/max 并再次 `execute()`。
+
+**文档事实** 结果读取接口：`getValue()` 取单 pin 的电流或电压值（需 PVAL 模式；电压结果仅 DC Scale 支持）；`getValues()` 取 ganged 通道的全部测量值（按 gang 定义顺序）；`getWaveform()` 用于外部触发模式下取一串测量值，带 `channelIndex` 的重载取 ganging group 中指定通道的值（索引是 gang 内索引，不是板上物理通道号）；`getVbump()` 返回指定 pin 的 voltage bump 值。
+
+**文档事实** `getFunctionalResult()` 仅在执行过 functional pre-test（`"FTST"` 或外部触发测量）时返回 Pass/Fail，否则报错；`getFunctionalResult(pinlist)` 返回指定 pin 的结果。`getNumberOfUsedChannelsFromLastMeasurement()` 在 `DPS_PIN_TASK.measurementMode()` 设为 `TM::MEASURE_CURRENT_UNGANGED` 时，返回上次测量中实际贡献的通道数。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** 与 `DPS_PIN_TASK`：主文档说明 `pin()` 返回 `DPS_PIN_TASK&`，且 `DPS_PIN_TASK` 是 `DPS_TASK` 的 subsidiary data container，只能通过 `DPS_TASK.pin()` 访问；per-pin 的 `min()`/`max()`、`measurementMode()`、`limits()`、`switchableCap()`、`targetCap()` 都在该类上。
+- **文档事实** 与 `TASK_LIST`：主文档说明 `DPS_TASK` 可加入 `TASK_LIST`；`TASK_LIST` 文档说明其 `setup()`/`execute()` 会调用所包含 task 的对应成员。
+- **文档事实** 与 DPS operating mode / DC Scale 卡：主文档的 `measurementMode()` 表列出支持卡型（DC Scale 卡包括 DPS64、DPS128、XPS256、UHC4T）以及各模式（电压/电流、waveform、unganged、voltage drop 等）；入边显示 XPS256 文档称其 DPS operating mode 的电压/电流测量由 `DPS_TASK` 覆盖，DPS128/64 文档称自动 down-ranging 同时支持 `SPMU_TASK`/`DPS_TASK` 的代码式编程。
+- **文档事实** 与 `MULTI_LIMITS` / `LIMIT`：`limits(LIMIT)` 用于普通判定；外部触发测量以及 `TM::VOLTAGE_WAVEFORM`/`TM::CURRENT_WAVEFORM`/`TM::VOLTAGE_WAVEFORM_HDIG` 模式必须使用 `MULTI_LIMITS`。
+- **文档事实** 与 `FOR_EACH_SITE_BEGIN`：主文档示例用它在 `setup()` 之后、`execute()` 之前按 site 改写测量条件。
+- **文档事实** 与 `DPS_VFIM`：入边显示 `DPS_VFIM` 页建议优先使用 `DPS_TASK`，因为 `DPS_TASK` 测试时间更短。
+- **文档事实** 与 `MTP_DPS_MEASURE`：入边说明它提供与 `DPS_TASK` 相同的功能，但 `DPS_TASK` 不能用于 driver sharing test，因为多次执行会覆盖先前结果。
+- **文档事实** 与 `TESTSET::judgeAndLog_Dps`、`DC_RESULT_ACCESSOR`：入边分别说明前者判定 `DPS_TASK` 对象，后者支持 DPS operating mode pin 与 PMU operating mode pin 的结果获取。
+- **文档事实** 与离线结果仿真：主文档 `execute()` 说明其 `measurementName` 重载用于 ORE；入边另有 `Offline result emulation for Class DPS_TASK`、`for the FlexDC API`、`for Class TASK_LIST`。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 原文记录：
+- Introduced before SmarTest 6.3.2
+- SmarTest 6.3.3: New member function wait().
+- SmarTest 6.3.3: New member function: measRangeMode(), (introduced with 6.1.5.0 and 6.3.3.).
+- SmarTest 6.5.3: New member function getVbump().
+- SmarTest 7.0.4: New member function primaryActivation().
+- SmarTest 7.1.3: Offline result emulation introduced.
+- SmarTest 7.2.1: samples() values for DPS128/64 added.
+- SmarTest 7.3.1: samples() values for PVI8 added.
+- SmarTest 7.4.0: samples() values for AVI64 added.
+- SmarTest 7.5.0: samples() values for FVI16 added.
+- SmarTest 7.5.3: New member function getNumberOfUsedChannelsFromLastMeasurement().
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.50_DPS_TASK.htm`（Subtopics、Class definition、Member functions、Examples、Related information、Functional changes）。
+- 语法/参数材料另取自其子主题 `02.07.04.01.50.01_DPS_PIN_TASK.htm` 与 `02.07.04.01.240_TASK_LIST.htm`（objscaffold 逐字汇总，已读）。
+- 「和谁有关」另参考 `extract/edges.jsonl` 中指向/离开该页的边记录。

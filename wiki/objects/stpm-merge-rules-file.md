@@ -4913,20 +4913,55 @@ above:
 
 ## 是什么
 
-（待补）
+**文档事实**：STPM merge rules file 用于细调 SmarTest Program Manager（STPM）把测试集成进已有 master test program（MTP）的方式（`02.09.02.04`）。
+
+**文档事实**：使用哪份规则文件由 [[stpm-control-file]] 指定，因此可以为开发的不同阶段准备不同规则，例如早期较宽松以便快速改动、后期较严格以保护已调试好的程序（`02.09.02.04`）。
+
+**文档事实**：merge rules file 是可选件；未指定时使用默认规则集（`02.09.02.04`、`02.09.02.04.01`）。
+
+**文档事实**：文件由一组 flag 组成，每个 flag 告诉 STPM 在合并过程中出现某类动作时应怎么做，例如 `new_digital_pin` 控制是否允许新增 pin（`02.09.02.04.01`）。
+
+**文档事实**：flag 可取 `allow`、`ignore`、`reject`（并非所有 flag 都支持全部三种）：`allow` 执行合并并自动解决冲突（可能有副作用，如 pin 号改变）；`ignore` 执行合并且不解决冲突（通常需手工修 processed MTP）；`reject` 中止合并、不修改 MTP（需在源 STP 和/或原 MTP 中手工解决）（`02.09.02.04.01`）。
+
+**文档事实**：规则分为 pin/port/site、timing and levels、pattern、testflow 四类；规则的书写顺序不重要，但同一条规则不得出现多次（`02.09.02.04.01`）。
+
+**文档事实**：多数 flag 的各个取值会在日志中写入对应的 warning 或 error 文本（各 flag 子主题逐条给出）；也有例外，例如 `overwrite_label_wvt` 明确说明无论取值都不产生 warning（`02.09.02.04.01`–`02.09.02.04.29`）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：文件内容是一行行赋值式设置，例如 `new_digital_pin = 'reject'`；未写出的选项使用默认值（`02.09.02.04.01`）。
+
+**文档事实**：完整示例把全部选项都写出来，示例本身说明并非必须，缺失的选项会采用默认设置（`02.09.02.04.01`）。
+
+**文档事实**：STPM control file 中用 `merge_rules = '<rules_file>'` 指定规则文件，且该参数用于 adding 或 replacing tests；示例值为 `/home/user/setup/merge_rules.py`（`02.09.02.04` 中取自 Structure of an STPM control file 的示例）。
+
+**文档事实**：按开发阶段准备多份规则文件是文档明确给出的用法：早期更 permissive 以允许快速变更，后期更 restrictive（`02.09.02.04`）。
+
+**文档事实**：单条规则的典型用途例如：`new_digital_pin = 'reject'` 确保不向 MTP 添加任何数字 pin，需要新增 pin 的合并会失败；`overwrite_port = 'reject'`（默认值）确保端口定义不被改写（`02.09.02.04.02`、`02.09.02.04.11`）。
+
+**文档事实**：`new_pin_group = 'allow'`（默认）让 STPM 在合并测试需要时自动创建新 pin 组（`02.09.02.04.07`）。
 
 ## 和谁有关
 
-（待补）
+- **STPM control file**（[[stpm-control-file]]）— **文档事实**：`merge_rules` 参数指定本文件，且该参数描述为 “the merge rules file to use when adding or replacing tests”；未指定则不用规则文件（`02.09.02.04`）。
+- **STPM**（[[stpm]]）— **文档事实**：合并由 STPM 执行，规则决定是自动解决冲突、保留冲突还是中止合并并报错（`02.09.02.04`、`02.09.02.04.01`）。
+- **add_test / replace_test** — **文档事实**：控制文件的 `merge_rules` 参数说明其用于 adding 或 replacing tests，即这些命令会套用规则（`02.09.02.04`）。
+- **MTP（master test program）** — **文档事实**：合并目标；`allow` 可能改写 MTP 中的 pin 号/端口等，`ignore` 后通常需手工修 MTP，`reject` 则不修改 MTP（`02.09.02.04.01`）。
+- **STP（source test program）** — **文档事实**：被合并的来源；`reject` 时需在 STP 和/或原 MTP 中手工解决（`02.09.02.04.01`）。
+- **日志** — **文档事实**：多数 flag 的各个取值会在日志中写入固定的 Warning/Error 文本，作为合并结果的证据；`overwrite_label_wvt` 明确不产生 warning（`02.09.02.04.01`–`02.09.02.04.29`）。
+- **各 flag 子主题** — **文档事实**：`02.09.02.04.02`–`02.09.02.04.29` 逐个说明 flag 的可用设置、默认值和日志文本（`02.09.02.04.01`）。
 
 ## 版本
 
-（待补）
+**文档事实**：本页 Functional changes 记 “Introduced in SmarTest 7.0.4”（`02.09.02.04`）。
+
+**文档事实**：语法子主题另记 “SmarTest 7.2.1: Added merge_unused_pin_group, create_timing_on_demand, create_levels_on_demand, and overwrite_flow_var_value settings”（`02.09.02.04.01`）。
+
+**文档事实**：本页「语法 / 参数」的 flag 总表列出了 `merge_unused_pin_group` 和 `overwrite_flow_var_value`，但没有列出 `create_timing_on_demand`、`create_levels_on_demand`；此处照文档原样记录该不一致（`02.09.02.04.01`）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.09_Test_Program_Management/02.09.02.04_STPM_merge_rules_file.htm`（主文档、Functional changes）
+- `02_System_reference/02.09_Test_Program_Management/02.09.02.04.01_STPM_merge_rules_file_syntax.htm`（flag 总表、allow/ignore/reject 语义、示例、7.2.1 变更）
+- `02_System_reference/02.09_Test_Program_Management/02.09.02.04.02_new_digital_pin.htm`–`02.09.02.04.29_overwrite_flow_var_value.htm`（逐 flag 说明，内容见本页「语法 / 参数」）
+- 关联：`02.09.02.03_STPM_control_file.htm`（`merge_rules` 参数与示例控制文件）

@@ -551,20 +551,65 @@ TEST
 
 ## 是什么
 
-（待补）
+**文档事实** TEST 是测试方法 API，用于对测试结果做 pass/fail 判断并写入数据记录。它针对功能测试、AC/任意测试、DC 测试、Flexible DC、DC dynamic、spec search、ppTIA 提供多组重载，返回 Boolean 表示该次判定结果。
+
+**文档事实** 对功能测试，可用无参版本或 port 版本取最近一次功能测试结果；但只有在 `FUNCTIONAL_TEST` 与 TEST 之间没有执行其他 sequencer-based 测试时，才能取到该结果。
+
+**文档事实** `continue` 控制 FAIL 后是否继续：TRUE 或 `TM::CONTINUE` 表示继续，FALSE（默认）表示终止；PASS 总是继续。在多 site 设置中，第一个 site 无论 `continue` 取何值、TEST 是否返回 FAIL，测试都会继续，因此该 site 的所有 TEST 调用都会执行。
+
+**文档事实** `limit` 省略时使用 Properties view 中指定的限值；传入 `LIMIT` 对象可按该对象判定，传 `TM::Pass` 可无条件返回 pass、传 `TM::Fail` 可无条件返回 fail。凡支持 limit 的重载，也可改传 TMLimits 对象。
+
+**文档事实** `reliability` 用 `TM::RELIABLE` / `TM::UNRELIABLE` 标记数据记录的可靠性，省略等价于 `RELIABLE`。文档说明 TEST 只记录 `UNRELIABLE` 状态，即使设为 `RELIABLE` 也不会记录该状态。
+
+**文档事实** `logTestNumber` 会覆盖实际测试号；`softBin` / `hardBin` 是 multibin 的软件/硬件 bin 号，详见 `SET_MULTIBIN`。
+
+**文档事实** 带 `continue` 连续多次调用 TEST 时，最终返回给 testflow 的结果是所有 TEST 调用结果的逻辑与（AND），在其余语句执行结束时计算；只要有一次 FAIL，总体就是 FAIL。
+
+**文档事实** 用 TEST 记录数据并用该数据生成测试报告时，必须把 report formatter 设为 `EventFormatter` 并启用所需 flag；TEST 产生类型为 “TestEventType” 的数据记录事件。
+
+**文档事实** 对 spec search，TEST 判定最后一次 spec search 结果：若发现 pass/fail 或 fail/pass 转换则返回 TRUE，否则返回 FALSE；若此前没有执行 spec search，会报错。
+
+**文档事实** 对 Flexible DC，TEST 基于 Global Pass Fail（GPF）判定；由于每个 pin 可有不同限值条件，TEST 为每个 limit 条件各创建一个 test event，把各事件结果写入 Event Data Log（EDL），再按每个 limit 条件放入 MPR 记录并转换进 STDF。
 
 ## 典型用法
 
-（待补）
+**文档事实** 用 Properties view 中的限值判定一个 AC 结果：`TEST("dgtz_pin", "THD", thd_result);`。
+
+**文档事实** 连续判定两个结果：第一个调用写 `TEST("dgtz_pin", "THD", thd_result, TM::CONTINUE);`，第二个写 `TEST("dgtz_pin", "SNR", snr_result);`；由于第一个带 `TM::CONTINUE`，即使第一个 FAIL，第二个仍会执行。
+
+**文档事实** 用 `LIMIT` 指定限值范围：`TEST("Aout", "THD", LIMIT(TM::GT, low_limit, TM::LT, high_limit), thd_result);`。
+
+**文档事实** 取当前 PMU 测量的判定：`TEST(PMU_VFIM("PIN1"));`，本 API 用连接到 PIN1 的 Pin PMU 所指定限值与结果做判定。
+
+**文档事实** 在测量条件不可信时强制 fail 并标为不可靠：`TEST("","",TM::Fail,0,TM::CONTINUE,TM::UNRELIABLE);`（示例用于 digitizer 未收到预期触发的情形）；要强制 pass 则用 `TEST("","",TM::Pass,0)`。
+
+**文档事实** 需要特定 pin 的 pass/fail 结果时，应改用 `GET_FUNCTIONAL_RESULT`（本页 Important points）。
+
+**文档事实** 若要把 event data log 转成 STDF 做分析，AC/任意测试与 DC 测试的 `pin` 参数必须是已存在的已定义 pin 名；把 Check Testmethod API flag 设为 “on” 可在运行时对不存在的 pin 名产生 fatal error。
+
+**建议** 只在确实要标记不可靠结果时才传 `TM::UNRELIABLE`；文档说明系统自带 Event Formatter 不会把不可靠状态写进 report window，只会让对应 pass/fail 显示为空白，且仅对 DC/功能测试的全局 pass/fail 生效，需要写入该状态时要自行开发 report formatter。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** GET_FUNCTIONAL_RESULT：TEST 页明确说明取特定 pin 的 pass/fail 结果应使用该 API；两者互相出现在 Related information。
+- **文档事实** FUNCTIONAL_TEST、DIGITAL_CAPTURE_TEST、NB_DIGITAL_CAPTURE_START、PMU_VFIM、PMU_IFVM、DPS_VFIM：TEST 页列出这些是能执行功能测试的 API，本 API 取最近结果。
+- **文档事实** LIMIT：`limit` 参数是该 API 的类对象；`TM::Pass`、`TM::Fail` 也是 LIMIT 的类对象，可强制结果。
+- **文档事实** TMLimits / `tmLimit`：凡支持 limit 的重载都可改传 TMLimits 对象，限值数据取自该对象。
+- **文档事实** SET_MULTIBIN：`softBin`、`hardBin` 参数的 multibin 说明指向它。
+- **文档事实** SPEC_SEARCH：对应 spec search 重载，TEST 判定最后一次 spec search 的转换结果。
+- **文档事实** PPTIA_TASK：ppTIA 测量的重载来源。
+- **文档事实** PPMU_MEASURE：Flexible DC 重载的来源；其判定规则围绕 GPF 与多 limit 条件展开。
+- **文档事实** DC_RESULT_ACCESSOR：DC dynamic 重载的数据来源。
+- **文档事实** PMU_IFVM、PMU_VFIM、DPS_VFIM：DC 重载的测量对象。
+- **文档事实** TESTSET：Related information 列出，作为测试方法与数据记录的相关项。
+- **文档事实** EventFormatter / Event Data Logging：TEST 产生 “TestEventType” 事件，报告需要 EventFormatter 与相应 flag；自行开发 formatter 时需按 EDL 事件类型处理。
+- **文档事实** SMC_TEST：SmartCalc 侧的对应 API，语法与参数与 TEST 类似，但结果先缓冲到 `SMC_SYNCHRONIZE()` 才写数据记录（SMC API overview 正文）。
+- **文档事实** Check Testmethod API flag：用于校验 `pin` 参数是否为已定义 pin 名（STDF 转换场景）。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes`：Introduced before SmarTest 6.3.2（哨兵值，不能当作 6.3.2 的变更）；SmarTest 7.5.3 在部分 TEST() 变体上新增可选参数 `logTestNumber`、`softBin`、`hardBin`。
 
 ## 出处
 
-（待补）
+- 主源：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.241_TEST.htm`（Syntax、Parameters、Important points、Examples 1–5、Related information、Functional changes）。

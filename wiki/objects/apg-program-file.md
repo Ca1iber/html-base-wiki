@@ -841,20 +841,79 @@ value
 
 ## 是什么
 
-（待补）
+**文档事实**：APG program file 包含编译成 test pattern 的实际代码，也可能包含可复用的 maintenance operations；扩展名为 `.prog`，由 APG pattern file 用 `:apgProgram:` 关键字引用（`02.12.03.03.03` 首段）。
+
+**文档事实**：代码是 C 语言的子集；必须包含一个 `main()` 函数，并可包含任意多个由 `main()` 按名调用的 subroutine；文件中还可包含来自 Device architecture file 的 device parameters（同页首段）。
+
+**文档事实**：例外情况是：若程序只有一个不带参数的 subfunction，可用于编译 reusable maintenance operation；maintenance routine 像普通 subroutine 一样定义，但不得期待传入参数；只含 maintenance routine（没有 `main()`）的文件会被编译成 reusable maintenance routine（同页「Maintenance routines」与 Note）。
+
+**文档事实**：C 子集支持所有 C 预处理语句（如 `#include`）、`Operators` 列出的运算符、`for` 与 `if`、subroutine 定义与调用、数组、`DC_EVENT()`/`DC_EVENT_RANGE()` 预定义调用，以及基于 APG pattern file 当前设置的 macro（子主题 APG program file syntax）。不支持数据定型（数组类型除外）、指针与地址、`for` 以外的循环、有返回值的函数（同子主题）。
+
+**文档事实**：可用的预定义宏/函数为 `DC_EVENT(<event>)[.delay(<edges>)]`、`DC_EVENT_RANGE(<sequence>,<parameters>)[.maxRepeats()][.initialDelay()] { … }`、`pad(<paddingRoutine>) {}` 和 `REFRESH_CTRL(<command>)`（command 为 `START`/`STOP`/`SWITCH`）（子主题 Macros and functions in program files）。
+
+**文档事实**：`is{}` / `nis{}` 用于标记 device maintenance operation 的插入点/禁止区；`nis` 的 body 不能以 `for` 循环开头（子主题 Other control structures 的示例注释）。
+
+**推断**：它相当于 MTL pattern 的「源程序」：device access 提供具体 pin 波形调用，device architecture 提供参数/维护操作名，program file 用 C 子集把它们编排成测试流程；`.apg` 只是引用入口（依据本页首段与 APG pattern file 页的 `:apgProgram:` 说明）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：本页 Example 给出完整的 `.prog` 结构（`02.12.03.03.03`）：
+
+```cpp
+// solid.prog
+#include "../../device_defs/access_defs/ddr3_operations.inc"
+#include "../basic_access_sequences.inc"
+
+main ()
+{
+#define zStop 4
+for (bank=zStart; bank<zStop; bank+=1)
+{
+WriteBackground(bank,DW1,DW2,DW3,DW4,DW5,DW6,DW7,DW8);
+ReadBackground(bank,DW1,DW2,DW3,DW4,DW5,DW6,DW7,DW8);
+}
+pad(EndProgPad){}
+}
+
+EndProgPad()
+{
+CLK(); CTRL(1,1); DES(); DBUS_IDLE();
+}
+```
+
+**文档事实**：`#include` 引入 device access 定义与公共 access sequence；`main()` 用 `for` 遍历 bank，并调用由 device access 文件定义的 access（如 `WriteBackground`/`ReadBackground`）；`pad(EndProgPad){}` 调用本文件末尾定义的无参数 subroutine（同页 Example）。
+
+**文档事实**：`pad()` 的 routine 必须是本文件中不带参数定义的 subroutine；`DC_EVENT()` 的事件必须在 DC event file 中定义，`DC_EVENT_RANGE()` 的 sequence 必须在 DC event file 中用 `:dcSequence:` 定义（子主题 Macros and functions in program files）。
+
+**文档事实**：`DC_EVENT(...).delay(<edges>)` 的 delay 以 waveform edge 计，可为负（事件提前执行）；表达式可含普通变量但不能含随循环变化的变量；`delay()` 不能用于 pmu 类型的 DC event（同子主题）。
+
+**文档事实**：维护操作可用 `REFRESH_CTRL(START|STOP|SWITCH)` 在程序中手动开关；`is{}`/`nis{}` 分别表示允许/禁止 maintenance operation 的区间（子主题；`02.12.03.04.12.02` 入边语境）。
+
+**建议**：把 maintenance routine 单独放在不带 `main()` 的 `.prog` 文件里，可被编译成 reusable maintenance routine 供多个 pattern 复用；这是文档「Maintenance routines」给出的用法，不是要求（同页）。
 
 ## 和谁有关
 
-（待补）
+- **APG pattern file** — **文档事实**：`.apg` 用 `:apgProgram:` 引用 `.prog` 文件；两者同属 MTL configuration files（`02.12.03.03.02` 入边语境；本页首段）。
+- **Device access file** — **文档事实**：device access 调用在 APG program code 中使用；device access file 语法页说明 `apgAccess` 是「for use in the APG program code」的调用（`02.12.03.03.04`、`.04.01` 入边语境）。
+- **Device architecture file** — **文档事实**：program file 可包含该文件定义的 device parameters；maintenance operation 的 subroutine 名由 device architecture file 的 `:subroutine:` 列指定（本页首段；`02.12.03.04.12.01` 入边语境）。
+- **DC event file** — **文档事实**：`DC_EVENT()` / `DC_EVENT_RANGE()` 引用的事件与 sequence 必须在 DC event file 中定义（本页宏表；`02.12.03.03.08`）。
+- **APG program file syntax** — **文档事实**：本页子主题，说明 C 子集、运算符、数据类型、循环、条件、子程序等（`02.12.03.03.03.01` 及各 `.01.xx` 子主题）。
+- **MTL compiler** — **文档事实**：`.prog` 是 MTL 编译器编译 pattern 的输入之一；MTL compiler 目录/扩展名主题列出 `.prog`（`02.12.03.05.01` 入边语境）；`Creating an MTL pattern` 把创建 `.prog` 列为步骤（`02.12.02.04.04`）。
+- **Maintenance operations** — **文档事实**：maintenance routines 在 program file 中定义；`Enabling and disabling maintenance operations in APG program file` 说明 `REFRESH_CTRL` 的用法（`02.12.03.04.12`、`.12.02` 入边语境）。
+- **MTL arrays / Variables / Expressions with more than 64 bits** — **文档事实**：数组、变量与 32–320 bit 表达式语法都可用于 `.prog`（`02.12.03.03.03.01.05`、`.07`、`.09`、`02.12.03.04.15` 入边语境）。
+- **TDEX** — **文档事实**：TDEX 的 `apgFilePath` 指向编译后的 APG program file（`02.06.02.02.255` 入边语境）。
 
 ## 版本
 
-（待补）
+**文档事实**（`02.12.03.03.03` 的 Functional changes）：
+
+- Introduced before SmarTest 6.3.2（哨兵值：表示文档集覆盖起始之前已存在，不是 6.3.2 的变更）
+
+除此之外没有更细的版本变更记录；更早版本情况文档未覆盖。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.03_APG_program_file.htm`（主文档，含 Syntax、Maintenance routines、Example 与 Functional changes）
+- 同目录 `02.12.03.03.03.01_APG_program_file_syntax.htm`、`02.12.03.03.03.01.02_Loops.htm`、`02.12.03.03.03.01.03_Conditional_execution.htm`、`02.12.03.03.03.01.04_Other_control_structures.htm`、`02.12.03.03.03.01.08_Macros_and_functions_in_program_files.htm`、`02.12.03.03.03.01.01.01_Data_types_relevant_to_operators.htm`、`02.12.03.03.03.01.01.02_Index_operator.htm`、`02.12.03.03.03.01.01.03_Select_operator.htm`
+- `02.12.03.03.02_APG_pattern_file.htm`、`02.12.03.03.04_Device_access_file.htm`、`02.12.03.03.05_Device_architecture_file.htm`、`02.12.03.03.06_Pin_mapping_file.htm`、`02.12.03.03.08_DC_event_file.htm`、`02.12.03.04.12_Maintenance_operations.htm`
+- `02.12.03.05.01_MTL_compiler_directories_and_file_name_extensions.htm`、`02.12.02.04.04_Creating_an_MTL_pattern.htm`
