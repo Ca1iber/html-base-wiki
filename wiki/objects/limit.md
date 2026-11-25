@@ -416,20 +416,29 @@ TEST()
 
 ## 是什么
 
-（待补）
+**文档事实** LIMIT 类访问一个保存 lower limit、upper limit 与比较运算符的数据容器；成员函数修改对象中的上 / 下限值与比较符，构造函数可一次给定。该对象作为 `TEST()` API 的参数，用于判定测量结果 pass/fail。定义于 `/opt/hp93000/soc/prod_com/include/MAPI/Limit.h`。
+**文档事实** 支持的 `TM::COMPARE` 为 LT / LE / GT / GE / NA；常量对象 `TM::Pass`（恒通过）与 `TM::Fail`（恒失败）可无视实际测量来控制 TEST() 的判定。
+**文档事实** 文档明确 LIMIT API 不能在 ON_FIRST_INVOCATION block 内使用，即使在 FOR_EACH_SITE block 内也不行。
 
 ## 典型用法
 
-（待补）
+**文档事实** 可在 TEST() 里临时构造：`TEST("Aout", "THD", LIMIT(TM::GT, low_limit, TM::LT, high_limit), thd_result);`；也可先建对象，用 `low(TM::GT, ...)`、`high(TM::LT, ...)`、`unit("dB")` 配置后再传给 TEST()。
+**文档事实** `unit()` 只用于 data logging，不影响 pass/fail；可写单一单位，或用 `"lower_unit;lower_power;upper_unit;upper_power"` 形式按较小的 power 缩放记录值。
+**文档事实** `TM::Pass` / `TM::Fail` 作为 LIMIT 常量用于强制通过 / 失败。
 
 ## 和谁有关
 
-（待补）
+- TEST()：LIMIT 对象作为其判定参数（源文明确 "used as a parameter of the TEST API"）。
+- TMLimits / GET_LIMIT_OBJECT：TMLimits 返回内部 LIMIT 对象，GET_LIMIT_OBJECT 返回 LIMIT 对象引用（入边）。
+- SMC_TEST：接受 LIMIT 类对象，也可用 TM::Pass / TM::Fail 强制结果（入边）。
+- SPMU_PIN_TASK.limits 与各 DC event 的 `.limits`（EVENT_CFIM / CFVM / VCIM / VM / IM / VFIM / VFVM 等）：以 LIMIT 对象承载上下限（入边）。
+- Hidden data logging：引用 LIMIT 对象或 TMLimits 的 SMC_TEST 会被立即执行，不依赖 test suite 限值（入边）。
+- ON_FIRST_INVOCATION_BEGIN / FOR_EACH_SITE_BEGIN：文档禁止在其中使用 LIMIT（源内链接）。
 
 ## 版本
 
-（待补）
+**文档事实** 文档未覆盖（本页无 Functional changes 节）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.126_LIMIT.htm`。

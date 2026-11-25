@@ -116,20 +116,25 @@ are enabled and then the measurements are done on all connected sites.
 
 ## 是什么
 
-（待补）
+**文档事实** ON_FIRST_INVOCATION_END 声明由 ON_FIRST_INVOCATION_BEGIN 开始的 first-invocation block 的结束；二者必须成对使用，围起的区域称为 "first-invocation block"。块内所有 API 只在程序为第一个被测 site 运行时、对所有 site 并行执行一次。定义于 `/opt/hp93000/soc/prod_com/include/MAPI/MapiUtil.h`，无参数、无返回值。
 
 ## 典型用法
 
-（待补）
+**文档事实** 最小形式为 `ON_FIRST_INVOCATION_BEGIN(); ... ON_FIRST_INVOCATION_END();`；可选的一对 `{}` 仅用于借助 Eclipse 工具简化缩进。
+**文档事实** 示例 3 在该块内完成整站 setup 与测量：`Routing.pin("Aout").connect(...)`、`Analog.DGT("Aout").enable()`、`EXECUTE_TEST(...)`、读取 waveform，再 `disconnect` / `disable` 并 `FLUSH()`；文档说明这样所有连接 site 的模拟模块被启用后测量在所有 site 上完成。
+**推断** 由于块内 API 对所有 site 并行且只执行一次，它适合放置各 site 共享的一次性硬件 setup。
 
 ## 和谁有关
 
-（待补）
+- ON_FIRST_INVOCATION_BEGIN：必须与本 API 成对使用（源文明确 "must be used as a pair"，且互为 Related information / 入边）。
+- ON_LAST_INVOCATION_BEGIN / ON_LAST_INVOCATION_END：Related information 列出，且各自入边引用本页。
+- FOR_EACH_SITE_BEGIN / FOR_EACH_SITE_END、FOR_SEMI_PARALLEL_TEST_BEGIN / END：文档要求 semi-parallel 块必须放在 ON_FIRST_INVOCATION_BEGIN 与 ON_FIRST_INVOCATION_END 之间；SET_TEST_FOCUS / UNSET_TEST_FOCUS 用于该 first-invocation block（FOR_EACH_SITE 循环除外）。
+- Controlling Multiple Sites / Parallel Execution / Site States and Test Method Programs：相关主题（Related information 与入边）。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记为 "Introduced before SmarTest 6.3.2"。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.139_ON_FIRST_INVOCATION_END.htm`。

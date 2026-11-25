@@ -1400,20 +1400,29 @@ to execute the pattern when it adds waveforms to existing wavetables.
 
 ## 是什么
 
-（待补）
+**文档事实** Pin mapping file（扩展名 `.pmap`）把 Device access file 中的 pin 定义映射到 SmarTest Pin configuration file 的 pin / pin group 规格；MTL compiler 只为在该文件中指定了 APG pin 名的 SmarTest pin 生成 test pattern，per-pin subroutine 也只对列出的 pin 生成。
+**文档事实** 它由 APG pattern file 的 `:pinMap:` 关键字引用；在文件中可指定每个 DUT pin 的 APG pin 分配、Transparent x-modes（全局或按 pin），以及 Automatic waveform generation 所需的 mode context。
+**文档事实** 它属于 MTL Configuration Files 之一，是纯配置文件，而非 API。
 
 ## 典型用法
 
-（待补）
+**文档事实** 主体是逐行映射 `<mtlPinName>=<smartestPinName>`，例如 `DQi.000=DQ_i.00`、`CK=CK`。
+**文档事实** 子主题给出扩展语法：用 `configure bus <busName> (<pinList>)` 定义 bus（列出 pin、其他 bus 或留空）；用 `<mtlPinName>(<refPinName>)=<smartestPinName>@(bitseq=copy)` 从参考 pin 复制向量，参考 pin 可写成 APG pattern file 中 `:define:` 定义的 reference macro。
+**文档事实** 可用 `using pinconfig` 引用 Pin configuration file，用 `using port` 在多端口操作中声明端口，用 `using defaultxmode` 设定 Transparent x-mode。
+**建议** 在 MTL 建 pattern 流程中与 Device access file、Device architecture file 一起维护，并通过 APG pattern file 的 `:pinMap:` 引入。
 
 ## 和谁有关
 
-（待补）
+- APG pattern file：通过 `:pinMap:` 关键字引用本文件（入边 `02.12.03.03.02_APG_pattern_file`）。
+- Device access file：其中列出的 pin / pin group 必须先在 Pin mapping file 中指定（入边 `02.12.03.03.04.01_Device_access_file_syntax`）。
+- Pin configuration file：本文件可用 `using pinconfig` 可选引用它（入边 `02.12.03.03.09.01_Pin_configuration_file`）。
+- Buses、Reference pins、Copying vectors：本页子主题，分别定义 bus、参考 pin 与向量复制。
+- Multiport operation、Wavetable syntax、Waveform mapping file、DC event file：这些主题都要求 pin 名先在本文件完成映射（各自入边有明确说明）。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记为 "Introduced before SmarTest 6.3.2"。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.06_Pin_mapping_file.htm`（主语料；语法节并按子主题 `…03.06.02_Buses`、`…03.06.03_Reference_pins`、`…03.06.04_Copying_vectors` 等展开）。

@@ -2273,20 +2273,37 @@ true );
 
 ## 是什么
 
-（待补）
+- **文档事实** — `DIGITAL_OFFSET_SEARCH_PINS` 保存用 `DIGITAL_OFFSET_SEARCH_TASK.pin()` 指定的 pins 的 timing/level offset 搜索条件。
+- **文档事实** — 该类没有 constructor，不能直接创建对象；它是 `DIGITAL_OFFSET_SEARCH_TASK` 的子类，实例由 `DIGITAL_OFFSET_SEARCH_TASK.pin()` 返回。
+- **文档事实** — 该 API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/DigitalOffsetSearchPins.h`。
+- **文档事实** — 可搜索 timing resource（RECEIVE、DRIVE、FAST_DRIVE、SLOW_DRIVE、ALL_EDGES）与 level resource（VIH、VIL、VIOFFSET、VTH、VOH、VOL、VOOFFSET、VISWING、VOSWING）；搜索类型为 LB（fail 到 pass 的左边界）、RB（pass 到 fail 的右边界）、EYE（pass 区中点）。level resource 多数只能搜一个边界（LB 或 RB），EYE 只适用于同时移动两个 level 的 VTH、VIOFFSET、VOOFFSET 等。
+- **文档事实** — 搜索条件包括 `start`、`numSteps`、`stepWidth`、`minPassCount`、`minStableErrorCount`、`transitionDetection`、`errorCountLimit`、`resolution`、`resolutionHistogramSearch`、`restoreFlag`、`resourceType`、`searchType`，另有 `setConfiguration`/`getConfiguration` 与 `setExecutionContext`；执行接口为 `setup`、`execute`、`search`。
+- **文档事实** — 结果接口包括 `getOffset`、`getLatestLBTransitionOffset`、`getLatestRBTransitionOffset`、`TransitionOffsetFound`、`getStatus`，以及 `uploadOffset`、`uploadResult`、`uploadLatestTransition`、`DigitalOffsetResultCopy`、`DigitalOffsetResultReset`、`remove`。`TransitionOffsetFound` 返回 FOUND、NOT_FOUND、LB_NOT_FOUND 或 RB_NOT_FOUND。
+- **文档事实** — timing 搜索的单位是秒 [s]，level 搜索的单位是伏特 [V]。
 
 ## 典型用法
 
-（待补）
+- **文档事实** — 先建 `DIGITAL_OFFSET_SEARCH_TASK`，用 `pin(...)` 选 setup pins，再链式设置 `resourceType`、`searchType`、`start`、`numSteps`、`stepWidth`、`minPassCount`、`transitionDetection`、`resolution`、`errorCountLimit`、`restoreFlag`。
+- **文档事实** — 需要不同 result pins 时用 `resultPin(setupPins).setResultPin(resultPins)`；setup pin 与 result pin 相同则只调用 `resultPin(...)`。
+- **文档事实** — 调用顺序为 `setup()` → `execute()` → `uploadLatestTransition()`（或 `uploadOffset`/`uploadResult`），随后用 `TransitionOffsetFound()` 与 `getLatestLBTransitionOffset()`/`getLatestRBTransitionOffset()` 取边界。
+- **文档事实** — 多个搜索可放进 `TASK_LIST`；`enableAutoTransitionUpload()`、`enableAutoOffsetUpload()`、`enableAutoResultsUpload()` 可让 task 执行后自动上传。
+- **文档事实** — 示例覆盖 VIH/VIL 的 LB/RB 搜索、VTH 的 EYE 搜索、RECEIVE/DRIVE 的 timing 搜索；`print(std::ostream&)` 可输出配置。
 
 ## 和谁有关
 
-（待补）
+- `DIGITAL_OFFSET_SEARCH_TASK`（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.36_DIGITAL_OFFSET_SEARCH_TASK.htm`）— 父类；`pin()` 返回本类实例，`resultPin()` 返回 `DIGITAL_OFFSET_SEARCH_RESULT_PINS`，`remove()` 删除本类实例，上传函数触发本类实例上传。
+- [[timing-set-selector]] — `getOffset`、`uploadOffset`、`uploadResult` 接受 `TimingSetSelector` 选择 timing sets。
+- [[level-set-selector]] — 同一组函数接受 `LevelSetSelector` 选择 level sets。
+- [[task-list]] — 文档示例用 `TASK_LIST` 排队多个 digital offset search 并统一 `execute()`。
+- `DigitalOffsetSearchConfigDataType`（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.36.01.32_DigitalOffsetSearchConfigDataType.htm`）— `getConfiguration`/`setConfiguration` 的配置数据类型。
+- `SEQUENCER_CONTEXT` 与 `SQEC`（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.36.01.23_DIGITAL_OFFSET_SEARCH_PINS.setExecutionContext.htm`）— `setExecutionContext` 的 context 必须先由这两个接口之一定义。
 
 ## 版本
 
-（待补）
+- **文档事实** — Functional changes 写明 "Introduced in SmarTest 7.2.1"。
+- **文档事实** — 该页未另列后续版本变更。
 
 ## 出处
 
-（待补）
+- 主文档 `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.36.01_DIGITAL_OFFSET_SEARCH_PINS.htm`（`show.py 02.07.04.01.36.01` / `objpack.py`）。
+- 语法节另逐字取自 `DIGITAL_OFFSET_SEARCH_TASK` 及其 pin/resultPin/... 子主题、`DIGITAL_OFFSET_SEARCH_RESULT_PINS` 和 `TASK_LIST`，完整清单见本节开头。

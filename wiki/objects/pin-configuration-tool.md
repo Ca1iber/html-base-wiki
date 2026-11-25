@@ -259,20 +259,40 @@ NOOP "6.5.2",,,
 
 ## 是什么
 
-（待补）
+**文档事实** Pin Configuration tool 用于编辑 pin configuration file；文档称 pin configuration file 是测试新器件前必须首先完成的 setup 文件，若 pin configuration 尚未录入，软件不会允许在其他 setup 窗口中输入 DUT 信息。
+
+**文档事实** 该工具的主题覆盖 pin、pin group、port、alias set 与 utility purpose，并包含 Digital Pins、DPS Pins、Utility Pins、Port Editor、DC Scale Limits editor 等子编辑器与元素。
+
+**文档事实** 除该工具外，也可以用文本编辑器按 firmware 命令集合的形式创建或编辑 pin configuration file。
 
 ## 典型用法
 
-（待补）
+**文档事实** 在工具中定义 pin、pin group、port 与 utility purpose；Port Editor 的 Available Pin List 中，pin 名前的 "√" 表示该 pin 已加入相应 port。
+
+**文档事实** Pin Name 列的 filter line 可按名称过滤（例如输入 I/O 会显示所有名称含 I/O 的 pin），该列也支持升序/降序排序。
+
+**文档事实** 可用 DC Scale Limits editor 设置 DC Scale 电压/电流限制；文档还提供导入/导出 CSV、应用、保存和丢弃修改的步骤。
+
+**文档事实** pin configuration file 也可由文本编辑器直接编辑；多 port 文件用 DFPT 定义 port；master file 由 Setup Management Tool 按其中的 package/alias 引用组装。
 
 ## 和谁有关
 
-（待补）
+- Pin configuration file：**文档事实** 主页面与 Introduction 子主题说明该工具的作用就是编辑此文件。
+- Pin configuration master file：**文档事实** 该子主题说明 Setup Management Tool 依据 master file 把 package 文件与各 alias 子文件组装成完整的 pin configuration。
+- Level Setup window：**文档事实** 该页面说明其前两列 pin/group 名和 pin type 显示的是在 Pin Configuration window 中定义的数据，且不能在该窗口编辑。
+- DPS Setup window：**文档事实** 该页面说明 DPS pin 名来自在 Pin configuration tool 中定义或导入的名称。
+- Pogo mapping：**文档事实** 该页面说明 signal-to-pogo pin 分配在 Pin configuration tool 中配置。
+- Sequencer-controlled utility lines：**文档事实** 该页面要求按 DUT board 设计使用 Pin configuration tool 设置 pin configuration。
 
 ## 版本
 
-（待补）
+**文档事实** 主页面本身没有 `Functional changes` 段；`Introduction of the Pin Configuration Tool` 子主题记为 Introduced before SmarTest 6.3.2。
+
+**文档事实** `Elements of the Pin Configuration Tool` 子主题记录：SmarTest 6.5.2 增加 Alias Sets editor；7.1.0 增加 Protocol Assignments；7.1.3 将 utility purpose editor 迁到 Pin Settings；7.2.1 增加 DC Scale Limits；7.4.0 增加 DC Scale Extensions；7.10.1 增加 DC Scale Regulation 与 DC Scale Safety；7.10.3 增加 Ground sense。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18_Pin_configuration_tool.htm`
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.01_Introduction_of_the_Pin_Configuration_Tool.htm`
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.02_Using_the_Pin_Configuration_Tool.htm`
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03_Elements_of_the_Pin_Configuration_Tool.htm`（仅 `Functional changes` 段）

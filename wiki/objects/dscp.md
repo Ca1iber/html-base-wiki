@@ -189,20 +189,54 @@ The specified number of timing sets is smaller than the number of waveform sets.
 
 ## 是什么
 
-（待补）
+**文档事实** DSCP 用于定义不同类型的 parameter set 可创建的最大实例数，并在 Sequencer Memory 中预留所需空间；由于同类型每个实例大小相同，所需空间可由实例数算出。`DSCP?` 查询返回当前设置。
+
+**文档事实** DSCP 取代先前版本中的 `CNTR, CNTR?` 命令。
+
+**文档事实** 每次调用 DSCP 都会删除 Sequencer Memory 中原有的全部数据；因此用 DSCP 修改参数后，必须重新加载 device setup。
+
+**文档事实** 每次切换到另一个 device 时都会调用 DSCP。这次调用的参数值可在 `.technology` 文件中指定；该文件位于每个 device 的主目录。未在 technology file 中定义的参数使用文档给出的默认值。
+
+**文档事实** 文档 `Application` 段把该命令归入 Test Setup，参见 Introduction to firmware commands。
 
 ## 典型用法
 
-（待补）
+**文档事实** 调用形式为 `DSCP [device_cycle], [waveform_set], [timing_set], [level_set], [dps_set], [pmu_set], [devicecycle_set], [routing_set], [period_res_prec]`；文档示例为 `DSCP 256,16,256,32,32,1024,16,1,256,`。
+
+**文档事实** 用 `DSCP?` 读回当前值；返回的列表中除调用参数外还包含 `period_res_compatibility_model`。
+
+**文档事实** `device_cycle` 定义单个 pin 可创建的 device cycle 绝对上限，默认 256、最大 16384。device cycle 总量在 waveform sets 与 wavetables 的合计数量之间均分：使用默认值时 256 除以 32，得到每个 waveform set/wavetable 8 个 device cycle；若不能整除，则向上取整到 `waveform_set` 参数的下一个倍数。
+
+**文档事实** `timing_set` 的数量必须大于或等于 `waveform_set`，因为每个 waveform set 至少需要一个 timing set。
+
+**文档事实** `period_res_prec` 定义系统计算 period resolution 的精度，不影响用户自定义的 period resolution（例如 equation set 中的 `period_res` 关键字）。若 `.technology` 文件不含该参数，默认值为 4；若含，则以 technology file 的值为默认；创建 device 时该值被设为最大值 9。
+
+**文档事实** 其余参数的默认值与最大值：`devicecycle_set` 1 / 128（用于 selective digital capture 的 device cycle sets）、`dps_set` 32 / 256、`level_set` 32 / 256（fixed 与 equation based levels 合计）、`pmu_set` 1024 / 12800（所有 PPMU DC set 的全部 measurement set 内的 action 上限）、`routing_set` 256 / 512（由 MCD 提供给固件的 routing sets）、`timing_set` 256 / 999、`waveform_set` 32 / 128（fixed timing 的 waveform sets 与 equation based timing 的 wavetables 合计）。
+
+**文档事实** 文档给出的参数语义示例：`waveform_set` 设为 32 时，可以创建 10 个 waveform set 和 22 个 wavetable。
+
+**文档事实** 创建新测试配置前必须先定义控制参数，DSCP 就是为此提供的命令；文档的 System preparation by firmware commands 页面描述参数选择流程。
 
 ## 和谁有关
 
-（待补）
+**文档事实** `.technology` 文件（`01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.01.02_Technology_file_for_a_device.htm`、`02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.03.03_Technology_file_for_a_device.htm` 等）：DSCP 每次切换 device 时被调用，其参数可在 `.technology` 中指定；technology file 页面说明其中的参数对应 Command Reference 里的 DSCP 参数，未定义的参数使用 DSCP 默认值。
+
+**文档事实** Sequencer Memory：DSCP 按各类 set 的最大实例数在 Sequencer Memory 中预留空间，且每次调用都会清空其中原有数据。
+
+**文档事实** 创建 level set 的页面（`02.06.05.01.05.01_Create_a_fixed_level_set.htm`）：可创建的 level set 数量上限由先前 DSCP 定义的最大值决定。
+
+**文档事实** 创建 DPS set 的页面（`02.06.05.01.05.04_Set_Fixed_Power_Supply_Levels.htm`）：可创建的 DPS sets 数量上限由 DSCP 先前定义的最大值决定。
+
+**文档事实** 引用 set 编号的固件命令：`SPRM`、`TSUS`、`WSUS`、`LSUX`、`TORC`、`TORS`、`TORR`、`DRLV`、`RCLV`、`TERM`、`SQPG`、`UDRS`、`DSUS` 等页面都把合法编号范围追溯到 DSCP 定义的对应最大值。
+
+**文档事实** `DTCP, DTCP?`（`02.06.02.02.93`）：在 Related information 中列为相关命令。
+
+**文档事实** `CNTR, CNTR?`：DSCP 取代旧版本的该命令。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 段只写「Introduced before SmarTest 6.3.2」，未列出后续变更。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.90_DSCP__DSCP__-__Define_System_Control_Parameter.htm`（主源：命令说明、语法、参数、Application、Errors、示例、Related information、Functional changes）

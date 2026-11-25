@@ -534,20 +534,50 @@ MAPPING
 
 ## 是什么
 
-（待补）
+**文档事实** Pattern Editor 是 SmarTest 的 pattern 显示与编辑工具。文档列出三项能力：显示当前已加载 setup 的 patterns、编辑 patterns、分析错误。
+
+**文档事实** 它有两种显示模式：expanded 模式按实际执行顺序显示 cycle，并显示失败数据；collapsed 模式不显示 sequencer 指令的动态行为。只有当前的 primary pattern（start label）能在 expanded 模式下查看。
+
+**文档事实** 工具栏提供以下功能图标：在 collapsed/expanded 间切换；仅展开 burst 中选中的 CALL 指令（对 port burst 也适用，启用后 expanded 页面会显示 "Expand Selection Mode" 项）；在 expanded 模式围绕标记行生成失败注解；切换到水平 pattern 视图；显示失败数据时与其它结果分析工具对齐；隐藏/显示 header instructions、vectors、x-mode areas、protocols、header comments；放大/缩小；跳到下/上一个注解；后退/前进导航。多数功能在主菜单也有对应项。
+
+**文档事实** Pattern Editor 的状态行位于 SmarTest 主窗口底部。
+
+**文档事实** 缩小到一定程度后，缩放会把多行 vector 或 cycle 合并为一行，编号从连续（1, 2, 3, 4, 5, …）变为不连续（如 1, 3, 5, … 或 1, 5, 9, …）；被隐藏行的 vector 数据（含错误信息）不再显示，需要放大才能看到。
 
 ## 典型用法
 
-（待补）
+**文档事实** 常规用途是打开当前 setup 的 pattern、编辑 vector 与 sequencer 指令，并借助失败数据显示定位错误。文档的 Pattern Editor tasks 子主题覆盖打开 Pattern Editor、配置编辑器布局、编辑 pattern、插入/编辑/删除 sequencer 指令、在信号或 vector 间跳转、复制 pattern、插入/编辑注释、屏蔽与激活信号、显示失败数据、对齐显示等操作。
+
+**文档事实** 在 expanded 模式显示失败数据时，如果已获取的失败数量很大，注解数量会受到限制；此时可先标记一行，再用工具栏按钮围绕该行生成注解。
+
+**文档事实** 选中 vector、test point 或 vector variable 时，可在 properties view 查看属性。vector 属性视图不能编辑，修改要在 pattern editor 中进行；该视图始终显示物理波形，drive edges 与 receive edges 分两行显示。collapsed 模式基于 base wavetable，expanded 模式的属性取自 primary wavetable。
+
+**文档事实** vector variable 的 properties view 可编辑 assigned pins、transfer mode 等参数；点 Show Advanced Properties 图标可显示额外的数据上传格式参数（Upload Parameters）。文档提醒：这里显示的 Upload Parameters 是系统上一次使用的值。
+
+**文档事实** 在用于动态 DC 测试的 test point 属性视图中，会高亮 force 值；动态 DC measure test point 的属性视图还会显示测量结果。
+
+**文档事实** 文档示例中的 `RPTV 3 2` 表示后续三个 vector 执行两次；在 expanded 模式下可以看到解析后的 sequencer 指令和 Cycle# 列。
 
 ## 和谁有关
 
-（待补）
+**文档事实** Pattern Explorer（`02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.01_Pattern_Explorer.htm`）：位于本页 Related information；另一文档说明可将 Pattern Explorer 与 Pattern Editor 配合，创建、克隆、编辑和调试 patterns 与 bursts，并保存 partial patterns。
+
+**文档事实** Multiport Burst Editor（`02.08.04.16.03`）：其主工具栏图标在很大程度上与 Pattern Editor 相同（包括红色单元格着色和失败数据图标），另有附加图标；Pattern Editor 中也有针对 burst/port burst 的「仅展开选中 CALL 指令」按钮。
+
+**文档事实** Pattern Editor tasks 系列子主题（`02.08.04.16.02.06.*`）：打开、布局、编辑、跳转、失败数据、对齐、屏蔽信号等操作的具体步骤在这些页面中。
+
+**文档事实** STATEMAP 段（本页子主题 STATEMAP section of the wavetable）：`statechars` 定义的就是 Pattern Editor 中显示的状态字符，Pattern Editor 与 Configure Layout 对话框把状态字符列为 SC；字符集为 `[a-z][A-Z][0][1]`，x1/N 模式长度恒为 1，xN 模式长度为 N。
+
+**文档事实** Creating a Digital Capture setup（`02_System_reference/02.08_Setup_and_Result_Tools/02.08.01.02.07.02.05.01_Creating_a_Digital_Capture_setup.htm`）：vector variable 参数的定义参见该页。
+
+**文档事实** Signal Analyzer：`Functional changes` 记载 SmarTest 7.0.3 新增了用 Signal Analyzer 编辑 vector 的快捷菜单。
+
+**文档事实** Editor status line（`02.08.04.16.04.02`）：编辑器状态行页面被列为本页相关主题，用于说明 Pattern Editor 底部状态行的内容。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 记载：Introduced before SmarTest 6.3.2；SmarTest 7.0.3 新增用 Signal Analyzer 编辑 vector 的快捷菜单；SmarTest 7.1.3 增强编辑器数据表的控制；SmarTest 7.5.1 起，测试程序重跑后保持已打开 Pattern Editor 的位置。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.02_Pattern_Editor.htm`（主源：能力列表、工具栏、缩放、Related information、Functional changes）

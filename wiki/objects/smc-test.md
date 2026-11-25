@@ -591,20 +591,70 @@ Testsuite: Test_2 PASSED on site 8
 
 ## 是什么
 
-（待补）
+**文档事实** `SMC_TEST()` 是 SmartCalc 框架中的 API，用于判定测试数据的 pass/fail 并记录日志；它保存定义某个 test suite 中结果编号流程的信息。
+
+**文档事实** `testname` 与 `testNumber` 参数用于给具体 test 指定用户定义的名称和编号；此外还支持 softbin 与 hardbin。
+
+**文档事实** `SMC_TEST()` 缓冲 data log 值，在到达同步点 `SMC_SYNCHRONIZE()` 时，按各后台线程启动的顺序输出；第一个 fail 决定 `SMC_SYNCHRONIZE()` 最终 bin 到哪个 fail bin。
+
+**文档事实** 它组合了 `TESTSET.judgeAndLog_ParametricTest()` 与 `SET_MULTIBIN()` 的功能。由于内部使用 `SET_MULTIBIN()`，必须在包含 `SMC_SYNCHRONIZE()` 的 test suite（通常是 testflow 中最后一个 test suite）里定义 multibin；未插入 multibin 会导致行为异常。
+
+**文档事实** 该 API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/SMART_CALC2.h`，没有返回值。
+
+**文档事实** 文档提供以 `INT site` 为首参数的重载，可显式指定站点；并为 `const char *` 形式的 `testtext` 提供显式重载，避免编译器优先把 `const char *` 转换为 `Boolean Continue`，而不是经 `STRING` 构造函数转换。
 
 ## 典型用法
 
-（待补）
+**文档事实** 最基本的调用是 `SMC_TEST("dgtz_pin", "THD", thd_result);`：它把 `thd_result` 与 `SMC_SYNCHRONIZE()` 参数对话框中指定的 limit 范围比较，判定 pass/fail。
+
+**文档事实** 可以显式传入 `LIMIT` 对象，例如 `SMC_TEST("Aout", "THD", LIMIT(TM::GT, low_limit, TM::LT, high_limit), thd_result);`。在 `LIMIT` 中指定 `TM::Pass` 会无条件通过，指定 `TM::Fail` 会无条件失败；不传 limit 时，使用包含 `SMC_SYNCHRONIZE()` 的 test suite 的 properties view 中的 limit。
+
+**文档事实** `Continue` 默认为 `FALSE`，结果为 FAIL 时终止 test；设为 `TRUE` 则即使真实结果为 FAIL 也继续。多站点场景下第一个 site 是例外：即使 `Continue=FALSE`，该 site 仍会继续，后续 site 才会在 FAIL 时终止。
+
+**文档事实** 可用 `V93kLimits::TMLimits` 从 test table（`*.csv` 文件）读取 limits 与 bins，例如 `SMC_TEST("dgtPinName", "PowerOut0", tmLimits, result, true);`。文档警告不要在后台处理中使用 `tmLimits.getLimitObj("PowerOut0")`，因为它会使用系统预置的 `TestSet` 对象，而该对象不是线程安全的。
+
+**文档事实** 站点数很大（例如 96 或更多）时 `SMC_ARM()` 的开销会显著增加。此时可在 `ON_FIRST_INVOCATION_BEGIN()/...END()` 中只调用一次 `SMC_ARM()`，再在 `SMC_backgroundProcessing()` 中用带 site 参数的重载逐个调用 `SMC_TEST(site, ...)`。数据通过成员变量传递比通过 `SMC_ARM()` 参数传递更快，因为传给后台进程的数据都必须由 `SMC_ARM()` 复制。
+
+**文档事实** 文档示例包含 hidden data logging 的写法：在 `FOR_EACH_SITE_BEGIN()/END()` 中对每个 site 调用 `SMC_ARM(lim)`，再在 `SMC_backgroundProcessing(LIMIT lim)` 中调用 `SMC_TEST(site, "PinName", "TestName", lim, result)`；该写法不依赖 testflow 的 `hidden_datalog_mode` 标志。
+
+**文档事实** 文档还给出 `testNumber`、`softbin`、`hardbin` 的用法示例：`SMC_TEST("Aout", "THD", LIMIT(...), thd_result, false, testNumber, "softbin", hardbin);`。
+
+**文档事实** 后台处理中不得使用 `cout`：它不是线程安全的，会导致 `ui_report` 窗口输出错乱，并可能产生其他非预期行为；生产测试中后台进程绝不能使用 `cout`。
+
+**文档事实** 在 SmartCalc 应用中不要使用系统预置的 `TestSet` 对象（非线程安全）；应使用 `SMC_TEST()` 或动态创建的 `TESTSET().judgeAndLog_...()`。
 
 ## 和谁有关
 
-（待补）
+**文档事实** `SMC_SYNCHRONIZE()`（`02.07.04.01.231.43`）：SMC_TEST 缓冲结果，到该同步点才输出；第一个 fail 决定它最终的 fail bin。未指定 limit 时，limit 取自包含 `SMC_SYNCHRONIZE()` 的 test suite 的 properties view。
+
+**文档事实** `SMC_ARM()`（`02.07.04.01.231.01`）：用于启动后台处理线程；SMC_TEST 的输出顺序按各后台线程的启动顺序。站点数很大时其开销会显著增加。
+
+**文档事实** `SET_MULTIBIN()`（`02.07.04.01.212`）：SMC_TEST 内部使用它完成 binning；`softbin`、`hardbin` 的细节参见该 API。文档要求在与 `SMC_SYNCHRONIZE()` 相同的 test suite 中定义 multibin。
+
+**文档事实** `TESTSET.judgeAndLog_ParametricTest()`（`02.07.04.01.244.10`）：SMC_TEST 组合了它的功能；反向地，当 hidden data logging 关闭时，`judgeAndLog_ParametricTest()` 内部使用 `SMC_TEST()`。
+
+**文档事实** `LIMIT` 类（`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.126_LIMIT.htm`）：可作为 SMC_TEST 的 limit 参数；`TM::Pass` / `TM::Fail` 可强制判定结果。
+
+**文档事实** `V93kLimits::TMLimits`（`02.07.04.01.250_TMLimits.htm`）：作为 limit 参数时，从 test table 提取 testNumber、softbin、hardbin 及 limit 数据；相关用法见 Working with TMLimits。
+
+**文档事实** `SMC_TEST_TEXT()`：给先前调用的 SMC_TEST 增加文本，写入 data log stream。
+
+**文档事实** `SMC_SET_HLM_FORMAT()`、`SMC_SET_LLM_FORMAT()`、`SMC_SET_RES_FORMAT()`：分别格式化前一次 SMC_TEST 在 data formatter 输出中的上限、下限和结果。
+
+**文档事实** `CCT_TEST()`（`02.07.04.01.15`）：并发测试框架中用于数据记录的 API，是 SMC_TEST 与 TESTSET 的 wrapper。
+
+**文档事实** `SMC_DISABLE()` 与 `SMC_IS_DISABLED()`：控制与查询 SMC 是否被禁用；禁用时 SMC_TEST 语句的求值时机与立即同步标志有关。
+
+**文档事实** `SMC_backgroundProcessing()`：SmartCalc 的后台回调，文档示例在其中调用 SMC_TEST 完成逐 site 判定与记录。
+
+**文档事实** Virtual pins（`02.08.04.18.02.07.01_Virtual_pins.htm`、`02.08.04.18.03.01.06_Virtual_Pins_editor.htm`）：使用 virtual pin 功能时，可以用 SMC_TEST()、`TESTSET().judgeAndLog_ParametricTest()` 和 TEST 记录测试结果。
 
 ## 版本
 
-（待补）
+**文档事实** `Functional changes` 记载：Introduced in SmarTest 6.5.3；SmarTest 7.3.4 Patch 4 新增字符串参数 `testtest`；SmarTest 7.4.5 Patch 1 新增把 `testtest` 定义为 `const char *` 的语法；SmarTest 7.5.3 为两个变体新增可选参数 `logTestNumber`，并给一个变体增加 `softBin` 与 `hardBin` 参数；SmarTest 7.5.3 还删除了一个冗余的 `SMC_TEST` 版本。
+
+**推断** 版本记录中的参数名 `testtest` 与参数表及签名中的 `testtext` 不一致，看起来是文档笔误。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.231.45_SMC_TEST.htm`（主源：说明、全部重载、参数表、示例、Related information、Functional changes）

@@ -1572,20 +1572,35 @@ return;
 
 ## 是什么
 
-（待补）
+- **文档事实** — 这是 `DPS_AUX_TASK` 类的一组 get...() 成员函数，读取 DPS 在 DPS、PMU、Digital I/O 三种工作模式下的 accumulated power supply status flags。
+- **文档事实** — 读取的是自上次 `DPS_AUX_PIN_TASK.checkPowerFlags()` 或自上次 connect/disconnect 以来被置位的标志；`checkPowerFlags()` 必须先在前面调用，把硬件标志读进 test method cache。
+- **文档事实** — 返回值类型为 `TM::DPS_POWER_FLAG_STATUS`：`TM::POWER_FLAG_STATUS_PASS`（值 0）表示被检查的单个标志未置位或多个标志都未置位，`TM::POWER_FLAG_STATUS_FAIL`（值 1）表示单个标志置位或多个标志中至少一个置位。
+- **文档事实** — 函数族覆盖全部标志（`getAllStatus`）、除 constant current 外的全部标志（`getStatusWithoutConstCur`）、除 constant voltage 外的全部标志（`getStatusWithoutConstVol`），以及每个单项：constant voltage/current、unregulated、overvoltage、overcurrent（overpower / power budget exceeded）、overtemperature、voltage drop force/return 及二者的 warning、DUT board disconnect、safety line、current limit disconnect、low headroom、current limiter protection detected、range overflow、clamp distance too low。
+- **文档事实** — offline 模式下 constant voltage 标志总被置位，因此 `getAllStatus`、`getConstantVoltage` 等返回 FAIL；`getStatusWithoutConstVol` 在 offline 返回 PASS。
+- **文档事实** — 各 DPS 卡支持哪些标志不同：DPS128/DPS64 只支持部分标志，UHC4T 与 XPS256 支持更多；UHC4T 的 safety line 位实际映射到 DUT board disconnect 位。
 
 ## 典型用法
 
-（待补）
+- **文档事实** — 先构造 `DPS_AUX_TASK`，在 `ON_FIRST_INVOCATION_BEGIN()` 内连续两次 `pin("dps1,dps2").checkPowerFlags()`：第一次读 latched state 并清标志，第二次读 actual state 并清标志。
+- **文档事实** — 随后用 `getAllStatus("dps1")`、`getConstantCurrent("dps1")` 等逐 pin 判定，把返回值与 `TM::POWER_FLAG_STATUS_PASS` 比较。
+- **文档事实** — `checkPowerFlags(TM::LOW_HEADROOM)` 可只读并清除指定标志；文档示例中只读、清、判定 low headroom，其余标志不受影响。
+- **文档事实** — 所有 DPS 状态标志在 connect（PSST ON）与 disconnect（PSST OFF）时复位为 0；若置位条件仍成立则不会被复位。
 
 ## 和谁有关
 
-（待补）
+- [[dps-aux-task]] — 这些 get...() 都是该类的成员函数，主文档把本节挂在 `DPS_AUX_TASK` 下。
+- [[dps-aux-pin-task]] — `checkPowerFlags()` 是本节的强制前置；主文档与 checkPowerFlags 文档双向互指，并说明它把标志读入 cache。
+- [[xps256-status-flags]] — 卡相关的标志细节交给该页，主文档的 DPS flag description 直接指向它。
+- [[dpspins-resources]] — voltage drop force/return 与 `ms_const_curr_disconnect` 的阈值来源在该页。
+- [[dps128-dps64-cards]] — 主文档的 flag implementation 表按 DPS128/DPS64、UHC4T、XPS256 列出支持差异。
+- [[psas]] — 主文档 Related information 把 `PSAS`（Power Supply Accumulated Status）列为相关命令。
 
 ## 版本
 
-（待补）
+- **文档事实** — Functional changes 写明 "Introduced in SmarTest 7.4.0"。
+- **文档事实** — 同页脚注补充 UHC4T 的 safety line 位映射（见上文），这是硬件结构说明，不是另一条版本变更。
 
 ## 出处
 
-（待补）
+- 主文档 `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.06_DPS_power_flags_-_get...___functions.htm`（`show.py 02.07.04.01.43.06` / `objpack.py`）。
+- 语法节另逐字取自 `DPS_AUX_PIN_TASK.checkPowerFlags` 与 20 个 `DPS_AUX_TASK.get...()` 子主题，完整清单见本节开头。

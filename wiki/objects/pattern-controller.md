@@ -672,20 +672,27 @@ cout << "Low current clamp at vector 32 (expect 0.001): " << current << " A" << 
 
 ## 是什么
 
-（待补）
+**文档事实** PATTERN_CONTROLLER 用于在 pattern 内执行 DC Scale 的 DC 测试与 PPMU BADC 测试：它下载由 `PPMU_...` / `BADC_...` API 定义的测量集，把执行这些集合的指令插入预定义 subpattern，并执行当前 primary sets，还可取回全局 pass/fail；由此可在同一 pattern run 中让不同端口上的 digital 与 DC 测试并行或交替，而无需停止 / 启动 sequencer。
+**文档事实** 它调用 PATTERN 类对象（保存各 subpattern 的测量数据）。对 digital 卡的 PPMU BADC 测试，subpattern 必须为空，因为测量会按 add 顺序动态链接进去，且使用随 test suite / testflow 执行而变化的内部 ID，链接后的 subpattern 不能永久保存。定义于 `/opt/hp93000/soc/prod_com/include/MAPI/PatternController.h`。
 
 ## 典型用法
 
-（待补）
+**文档事实** 设置格式为 `obj.label().add(dc_task_1)...add(dc_task_n);`，执行或取值格式为 `obj.func();`。示例先 `controller.label("DC_Sub_Q0","Q0_Port")` 逐个 `add(...)` PPMU task，再 `controller.execMode("PPF").execute();`，最后用 `controller.getPassFail("S0")` 上传结果。
+**文档事实** `label()` 之后必须接 PATTERN 的成员函数，不能在同一对象上再调 PATTERN_CONTROLLER 的其他成员；执行模式由 PATTERN_CONTROLLER 的 `execMode()` 决定，`PPMU_MEASURE` 的 execMode 被忽略但仍须指定。也可通过 `PATTERN::vecEvents()` 在 pattern 向量上编辑 DC event。
+**文档事实** 示例代码把 setup、execute 与结果取回放在 `ON_FIRST_INVOCATION_BEGIN()` / `ON_FIRST_INVOCATION_END()` 块内。
 
 ## 和谁有关
 
-（待补）
+- PATTERN：本页子主题；`label()` 返回 PATTERN 引用，PATTERN 提供 `add(TASK)`、`add(PPMU_TASK)`、`add(BADC_TASK)`、`add(DC_WAVEFORM)`、`vecEvents()` 等。
+- PPMU_SETTING / PPMU_RELAY / PPMU_MEASURE / PPMU_CLAMP 与 BADC_SETTING / BADC_MEASURE：`add()` 接收这些 task；`BADC_MEASURE` / `BADC_SETTING` 的入边明确写其测量由 PATTERN_CONTROLLER 执行。
+- VEC_EVENTS：`PATTERN_CONTROLLER` 页引用 `VEC_EVENTS`，用于在向量中定义 DC event（入边 `02.07.04.01.267_VEC_EVENTS`）。
+- EVENT_*（DC event 类）：多份入边写 "has to be assigned to the PATTERN_CONTROLLER which is responsible for further handling"。
+- SPMU_TASK / DC_RESULT_ACCESSOR / FLEX_RELAY / PS1600 DC value measurements：Related information 明列。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记为 "Introduced before SmarTest 6.3.2"。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.142_PATTERN_CONTROLLER.htm`（主语料；语法节含子主题 `02.07.04.01.142.01_PATTERN.htm`）。

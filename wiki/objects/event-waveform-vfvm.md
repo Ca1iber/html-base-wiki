@@ -976,20 +976,34 @@ For an example see
 
 ## 是什么
 
-（待补）
+**文档事实** EVENT_WAVEFORM_VFVM 是组合式 force/measure waveform 类，名称含义为 Voltage Force / Voltage Measure Waveform；它继承 `EVENT_BASE`，用于定义产生波形的事件，并在采样加到 frontend 的同一时间点进行测量。
+
+**文档事实** API 定义在 `/opt/hp93000/soc/prod_com/include/MAPI/Events.h`；构造函数可接受字符串或整数 id，无参构造时事件 ID 由所赋 `ANALOG_WAVEFORM` 的名称隐式派生，形如 `WAV_waveformName`。
+
+**文档事实** 该类提供 `vForce(ANALOG_WAVEFORM)` 绑定波形、`sampleVectorDistance()`（最小 32 vectors）、`averages()`/`getAverages()`、`vForceCheckLow()`/`vForceCheckHigh()`/`clearVForceCheck()`、`clampChecks()`/`iClampChecks()`/`outOfRangeCheck()` 及对应 getter、`getRepeatCount()` 等成员。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档示例先定义 `ANALOG_WAVEFORM`（`TM::RAMP`、`TM::POS`、`samples(4)`、`min(0.1)`、`max(1.6)`），再声明事件对象并用 `vForce(rampUp)` 绑定、`sampleVectorDistance(64)` 设置采样向量距离。
+
+**文档事实** 示例用 `vForceCheckLow(-10 mV)` 要求校验每一步达到的 force voltage、允许低电压偏差 -10 mV 且不检查上限，并用 `iClampChecks(false, true)` 设置上钳位检查。
+
+**文档事实** `averages()` 指定用于求平均的内部采样数；对 DC Scale 通道（XPS256 除外），该采样数必须是 2 的幂。
+
+**文档事实** 文档示例代码中的事件对象实际声明为 `EVENT_WAVEFORM_VF rampUpEvent`，与本页标题的 `EVENT_WAVEFORM_VFVM` 不同，阅读示例时需注意。
 
 ## 和谁有关
 
-（待补）
+- EVENT_BASE：**文档事实** 语法节说明该类派生自 `EVENT_BASE`。
+- EVENT_WAVEFORM_VFIM：**文档事实** 首页说明二者是同一族的 specialized force/measure waveform 类；本页 vForce/getVForce 子主题也与 VFIM 共用同名方法。
+- ANALOG_WAVEFORM：**文档事实** `vForce()` 的参数类型是 `const ANALOG_WAVEFORM &`，示例先构造 `ANALOG_WAVEFORM` 再绑定。
+- EVENT_VALUE_INT：**文档事实** `averages()`/`getAverages()` 使用 `EVENT_VALUE_INT` 作为采样数参数/返回值。
+- EVENT_WAVEFORM_VF / EVENT_WAVEFORM_VM：**文档事实** 本页 Related information 列出这两个波形类，文档示例实际使用了 EVENT_WAVEFORM_VF。
 
 ## 版本
 
-（待补）
+**文档事实** Introduced in SmarTest 6.5.2；SmarTest 7.4.0 新增 `clampChecks()` 与 `getClampChecks()`；其余成员子主题的 `Functional changes` 多为 Introduced in SmarTest 6.5.2。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.39_EVENT_WAVEFORM_VFVM.htm`

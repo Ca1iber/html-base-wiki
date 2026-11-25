@@ -670,20 +670,43 @@ rss_buffer_pins:
 
 ## 是什么
 
-（待补）
+**文档事实** SHARING_CONFIGURATION 类提供访问 Sharing configuration file 中所含数据的 API，可读取 pin_configuration、fixture_delay_files、domains、utility_control、topology、fxdl_ignore_pins、groups、rss_buffer_pins 等配置。
+
+**文档事实** 该 API 仅适用于 MTP；定义在 `/opt/93000mts/mts/solution_tools/import/SHARING_CONFIGURATION.h`。
+
+**文档事实** 使用前必须先调用 `getInstance()` 取得该类唯一的活动对象，之后才能调用其他成员函数。
+
+**文档事实** 成员函数分为数据加载类（`hasLoaded()`、`load()`、`setRefPin()`）与数据访问类（`getModeContext()`、`isFXDLIgnorePin()`、`utility*`、`domains*`、`getTerminatedPinList()`、`getBufferPinMap()`、`getDomain()`）。
 
 ## 典型用法
 
-（待补）
+**文档事实** 先以 `SHARING_CONFIGURATION &sharingConfig = SHARING_CONFIGURATION::getInstance();` 取得对象，再调用 `sharingConfig.load("default.cfg");`；`load()` 的文件必须位于 `<device directory>/configuration/` 目录。
+
+**文档事实** 也可用 `setRefPin(pinName)` 从指定 pin 的物理连接加载 sharing configuration 信息；`hasLoaded()` 可判断是否已有配置被加载。
+
+**文档事实** utility 控制相关流程为：`utilitySearchFirst(name)` / `utilitySearchNext(name)` 定位 utility_control 块中的控制行，`utilityActionExecute(index)` 执行该行设置，`utilityGetApplicableSitesString(index)` 取得适用 site，`utilitySubstitutePins(index, pinsFrom, pinsTo)` 取得替换后的 pin 名。
+
+**文档事实** domains 相关访问包括 `domainsGetXSize()`/`domainsGetYSize()`/`domainsGetZSize()` 查询尺寸，`domainsGetApplicableSitesString(x, y)` 查询指定 (x, y) 的适用 site，`domainsGetSiteAtPos(x, y, z)` 与 `getDomain(site)` 分别做位置到 site、site 到 domain 的查询。
+
+**文档事实** 还可用 `getTerminatedPinList(vterm)` 取得由指定 termination pin 端接的 pin 列表，用 `getBufferPinMap()` 取得 buffer pin 映射。
 
 ## 和谁有关
 
-（待补）
+- Sharing configuration file：**文档事实** 本页首段说明该类就是用于访问该文件中的数据；其 `load()` 文件位于 device 目录的 configuration 子目录。
+- MTP_IDD_TASK：**文档事实** 该 API 文档把 SHARING_CONFIGURATION 列为完成 IDD 测试所需的 API 之一。
+- MTP_LEAKAGE_TASK：**文档事实** 该 API 文档把 SHARING_CONFIGURATION 列为完成 shared leakage 测试所需的 API 之一。
+- Driver Sharing APIs：**文档事实** 该页在"在一个 test method 内测试任意数量 pin"的类列表中列出 SHARING_CONFIGURATION。
+- fd_merge.pl / OnlineCompensation：**文档事实** Sharing configuration file 的 `fxdl_ignore_pins` 关键字说明这些 pin 会被这两个工具忽略；`isFXDLIgnorePin()` 用于查询该忽略列表。
+- `getInstance()`：**文档事实** 本页 Note 要求先调用它，其子主题给出取得唯一活动对象的示例。
 
 ## 版本
 
-（待补）
+**文档事实** Introduced in MTP 3.1.5（本页及各成员函数子主题的 `Functional changes` 均为该值）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.25_SHARING_CONFIGURATION.htm`
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.07.02_Sharing_configuration_file.htm`（文件格式与关键字）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.13_MTP_IDD_TASK.htm`（关系核对）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.14_MTP_LEAKAGE_TASK.htm`（关系核对）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.09.03_Driver_Sharing_APIs.htm`（关系核对）

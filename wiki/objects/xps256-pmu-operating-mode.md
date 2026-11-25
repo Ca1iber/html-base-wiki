@@ -286,20 +286,29 @@ resultIMeasXPS256 = spmuTask_measure.getValue("XPS256_PMU_1");
 
 ## 是什么
 
-（待补）
+**文档事实** 在 PMU operating mode 下，一个 XPS256 pin 被当作标准 PMU 使用，在单个 test suite 或一组 test suite 执行期间临时供电；pin 在 Digital Pins editor 中定义为 dc 类型（Type = dc、Mode = SIG）即处于该模式。
+**文档事实** 本页覆盖 Pin definition、Hardware view、SmartRDI overview、API overview、Relay switching、Supported measurement modes：完整设置功能由 SmartRDI 的 `dc()` API 提供（code-based 与 pattern-based 均支持）；test method API 侧由 `SPMU_TASK` 与 `SPMU_PIN_TASK` 覆盖；pattern-based 的 setup 与测量由 DC events 支持。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档三例完成同一测量序列——连接 / 设置 pin、测量、单独断开：Example 1 用 SmartRDI pattern-based（文档称其为代码最少、timing 最稳定的推荐方案），Example 2 用 SmartRDI code-based，Example 3 直接用 `SPMU_TASK`（基于低层 `DCCH` / `DCVH` 配合 `DCEX`）。
+**文档事实** `SPMU_PIN_TASK.mode()` 支持 VFVM、VFIM、VFIM_UNGANGED、CFVM、CFIM、IFVM、IFVM_UNGANGED、VM_HIZ；`relay()` 在 DC Scale 卡上支持 NO / NT（不支持 NTMBB / NTBBM / TERM）；`SPMU_TASK.execMode()` 的 `TM::FORCE_ON` / `TM::FORCE_OFF` 用于连接 / 断开，但不能与 mode 设为 `..._UNGANGED` 组合。
+**文档事实** PMU operating mode 下自动降档（automatic down-ranging）仅 pattern-based（DC events 或 SmartRDI）支持，code-based 编程不支持。**建议** 优先采用文档推荐的 pattern-based SmartRDI 方案。
 
 ## 和谁有关
 
-（待补）
+- SmartRDI `dc()`：覆盖 PMU operating mode 下 XPS256 通道的完整设置与测量（源文明确）。
+- SPMU_TASK / SPMU_PIN_TASK：API overview 指定的完整功能 API；本页引用 `SPMU_PIN_TASK.relay()`、`mode()`、`preCharge()`、`iMeasureRange()` 及 `SPMU_TASK.execMode()`。
+- DC events：为本页所述 pattern-based setup 与测量提供支持。
+- Digital Pins editor：把 pin 定义为 dc 类型即进入 PMU operating mode。
+- XPS256 operating modes / XPS256 programming - DPS operating mode / XPS256 in PMU operating mode：Related information 互链；`XPS256 in PMU operating mode` 明确把细节指向本页。
+- XPS256 Measure currents / Measure voltages / Force and clamp currents / Force and clamp voltages：这些页把 PMU operating mode 下的功能指向 SPMU_TASK 与 SPMU_PIN_TASK（入边）。
+- 低层命令 DCCH / DCVH / DCEX：Example 3 说明 SPMU_TASK 测量基于它们。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记为 "Introduced in SmarTest 7.10.1"。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.15_XPS256_programming_-_PMU_operating_mode.htm`。

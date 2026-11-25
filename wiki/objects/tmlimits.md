@@ -1123,20 +1123,42 @@ return;
 
 ## 是什么
 
-（待补）
+**文档事实** TMLimits 类用于使用 CSV 文件中的数据控制 testflow 的 limits 与 test numbering；将 testflow 参数外置到 CSV，便于在不访问 SmarTest 的情况下用 Open Office Calc 或普通文本编辑器修改。
+
+**文档事实** 该类没有构造函数，不能创建对象，必须使用系统预置对象 `tmLimits`，并在测试方法中声明 `using namespace V93kLimits;`；API 定义在 `/opt/hp93000/soc/prod_com/include/MAPI/TMLimits.h`。
+
+**文档事实** 单个测试的限制数据由 `TMLimits::LimitInfo` 结构承载，其多数成员对应 TMLimits CSV 文件的列（SuiteName、TestName、PinName、TestNumber、PassRegion、Lsl/Usl、OffSet、bins、TEST_API_LIMIT 等）。
+
+**文档事实** 同一 testflow 可切换不同 test mode/stage，例如 wafer 测试使用较松的 limits、quality control 使用较紧的 limits；模式由 `TMLimit_TestMode` testflow 变量或 `setTestMode()`/`load(<limitfile>,<mode>)` 决定，`getTestMode()` 可检查当前生效值。
 
 ## 典型用法
 
-（待补）
+**文档事实** 先声明 `using namespace V93kLimits;`，再直接使用 `tmLimits`；加载 CSV 可用 `load()`（按 `TMLimit_FileName`/`TMLimit_TestMode` testflow 变量）、`load(limitfile)`（模式 Default）或 `load(limitfile, mode)`。
+
+**文档事实** 读取限制优先用 `getLimitRef()`（更快、返回只读引用）；需要修改限制时用 `getLimit()` 取得可写引用，并在下一次调用前立即处理数据或复制到本地对象。
+
+**文档事实** 查找键由 `setLookupKey()` 指定（列名以冒号分隔），`setDefaultLookupKeys()` 可恢复默认组合；`tmLimits` 可直接作为 `TEST()` 或 `TESTSET().judgeAndLog_ParametricTest()` 的参数自动按查找键取限制。
+
+**文档事实** 使用 `getLimitObj()` 时会设置 multibin；若 testflow 使用 multibin，文档要求改用 `getLimit()`，或在使用 `judgeAndLog_xxx`/`TEST()` 时传入 `tmLimits` 本身。
+
+**文档事实** 在 SMC 框架中，`getLimit()`、`getLimitRef()`、`getLimitObj()` 是线程安全的；必须在 `SMC_ARM()` 之前把 TMLimits 表加载到内存，且 SMC 后台进程已 arm 或运行时不得修改或重新加载 TMLimits 表。
 
 ## 和谁有关
 
-（待补）
+- TMLimits CSV 文件 / test table：**文档事实** `load()` 从 `testtable/` 目录（或相对该目录的路径）加载符合 TMLimits 数据格式的 CSV，`LimitInfo` 多数元素对应其列。
+- Test Number Generator：**文档事实** 相关页面为 "Test Number Generator and TMLimits"，说明测试编号可从任意 testflow 导出为供 TMLimits 使用的 CSV。
+- TestTable：**文档事实** TestTable 文档提供 `isTmLimitsCsvFile()`，用于判断某 CSV 是否由 TMLimits 创建。
+- `TEST()` / `TESTSET().judgeAndLog_ParametricTest()`：**文档事实** 本页示例把 `tmLimits` 直接作为这些接口的参数，用于自动查找并应用 limits。
+- `LIMIT`：**文档事实** `getLimitObj()` 返回系统预置对象 `tmLimits` 内部的 `LIMIT` 引用。
+- SMC 框架：**文档事实** 本页 "TMLimits within the SMC framework" 规定线程安全与加载时序；`LimitInfo` 内部对象按线程各有一份（每个 SMC 后台线程一份）。
 
 ## 版本
 
-（待补）
+**文档事实** Introduced in SmarTest 6.5.0；6.5.1 移除 `dump()`、`load()` 可不带参数调用、新增 `setTestMode()`；6.5.3 新增 `getTestMode()`；7.1.4 新增 `getLimitRef()`、`setLookupKey()`、`setDefaultLookupKeys()`、`getLookupKey()`、`loadOnDemandAndReturnStatus()`；7.2.0 开始评估 `sbin` 与 `testnumber` 参数；7.3.4 为 `load()` 新增 `LIMIT_WARNING_LEVEL` 参数。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.250_TMLimits.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.245_TestTable.htm`（关系核对）
+- `02_System_reference/02.10_Data_Logging/02.10.01.08.01_Test_Number_Generator_and_TMLimits.htm`（关系核对）
+- `02_System_reference/02.10_Data_Logging/02.10.01.08.01.01.03_Saving_test_numbers_as_TMLimits_CSV_files.htm`（关系核对）
