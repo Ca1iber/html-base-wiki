@@ -196,20 +196,52 @@ The evaluation of the group expression results in an empty group.
 
 ## 是什么
 
-（待补）
+**文档事实** DFGE（DeFine Group Expressions）定义一个 expression-based pin group；pin group 可以像单个 pin 一样使用。`DFGE?` 查询返回指定组的 group type 与 group expression。
+
+**文档事实** `group_type` 取 `I`、`O`、`IO`、`DC`，分别表示 device input pins、output pins、bidirectional pins、DC type pins。
+
+**文档事实** `group_expression` 由 pin 或 pin group 名称与集合运算符组成：`+` 为并集、`*` 为交集、`-` 为差集；可用括号强制运算顺序。
+
+**文档事实** `DFGE?` 对 expression-based groups 返回 `DFGE group_type,"group_expression",(pin_group)`；对 digital fixed groups 则返回 `DFGP pin_type,(pinlist),(pin_group)`。
+
+**文档事实** `pin_group` 名称可在不同类型的组之间重复使用；`@` 可用于 `DFGE?` 列出此前用 DFGP 与 DFGE 定义的全部组；查询不存在的组返回空。
+
+**文档事实** 源文 Application 段把该命令归入 Pin Configuration（见 Configuration Setup Commands）。
 
 ## 典型用法
 
-（待补）
+**文档事实** 示例先用 `DFGP?` 读取固定组 SCAN 与 OUT，再定义二者的交集组：
+
+```
+> DFGE O,"SCAN * OUT",(SCAN_OUT)
+> DFGE? (SCAN_OUT)
+< DFGE O,"SCAN * OUT",(SCAN_OUT)
+> DFGP? (SCAN_OUT)
+< DFGP O,(SO1,SO2),(SCAN_OUT)
+```
+
+**文档事实** 源文说明 `SCAN_OUT` 含 SCAN 与 OUT 都有的 pins；查看成员 pin 必须用 `DFGP?`，`DFGE?` 只返回组定义。
+
+**文档事实** 同一结果也可用 `DFGE O,"OUT - O1",(SCAN_OUT)` 得到（差集写法）。
+
+**推断** 因而 DFGE 适合用已有的固定组或表达式组按集合关系组合出新组，而不必逐一列出 pin 名。
 
 ## 和谁有关
 
-（待补）
+- [[dfgp]]：**文档事实** `DFGE?` 对 digital fixed groups 以 `DFGP` 形式返回；示例用 `DFGP?` 显示 DFGE 组的成员。为什么：DFGE 定义组的成员展开与查询由 DFGP 承担。
+- [[udgp]]：**文档事实** UDGP 文档说它拆除此前由 DFGP 或 DFGE 定义的组。为什么：UDGP 是 DFGE 所建组的撤销命令。
+- SREC（如 `02_System_reference/02.06_Command_Reference/02.06.02.02.243_SREC__SREC__-__Set_RECeiver_mask.htm`）：**文档事实** 入边显示 SREC 的 pinlist 参数可包含由 DFGP 或 DFGE 创建的组。为什么：DFGE 组可作为其他命令 pinlist 的输入。
+- Defining pin groups（`02_System_reference/02.06_Command_Reference/02.06.03.01.06_Defining_pin_groups.htm`）：**文档事实** 该页说 expression based groups 用 DFGE 定义，并列出支持的类型；入边指向本页。为什么：它是 DFGE 的概念说明页。
+- Pin configuration setup commands（`02_System_reference/02.06_Command_Reference/02.06.03_Pin_configuration_setup_commands.htm`）：**文档事实** 本页 Application 指向该章。为什么：该章是 DFGE 所属的 pin 配置命令族。
+- List of commands（`02_System_reference/02.06_Command_Reference/02.06.02.02_List_of_commands.htm`）：**文档事实** 入边显示 DFGE 列在命令参考总表。为什么：这是索引关系，说明该命令在参考手册中的归属。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2。
+
+**推断** 这是文档集的哨兵写法，表示该命令在 6.3.2 之前已存在，不能理解为 6.3.2 引入。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.59_DFGE__DFGE__-__DeFine_Group_by_Expressions.htm`，主源，含概览、Syntax、Parameters、Application、Errors、Warnings、Example 与 Functional changes，已用 `show.py 02.06.02.02.59` 读取。
+- 关系与入边取自 `extract/objpack.py`（`edges.jsonl`）：Defining pin groups、SREC、UDGP、List of commands 等。

@@ -231,20 +231,61 @@ exists.
 
 ## 是什么
 
-（待补）
+**文档事实** JSCF 即 Jitter Set ConFiguration，用于定义和查询指定引脚的 jitter injection（抖动注入）配置；被配置的 jitter set 必须已用 JSDF 定义。
+
+**文档事实** 命令形式为 `JSCF {"jitter_set_name"}, {"property"}, {"property_value"}, {(pinlist)}`；查询 `JSCF? {"jitter_set_name"|ALL|PRM}, {"property"|ALL}, {(pinlist)}` 可用具体 jitter set 名、ALL（所有 jitter set）或 PRM（当前 primary jitter set）。
+
+**文档事实** 属性包括 MODE（OFF/CONT/RESTART）、MODULATION_SETS、WAVEFORM、PERIODFACTOR、PHASE、AMPLITUDE、PERIOD、DUTYCYCLE、NOISE、ALLOWED_NOISE。
+
+**文档事实** MODULATION_SETS 与除 MODE 外的其他属性互斥；WAVEFORM 既可直接给出偏移列表（最多 512 项，单位 ps，相对当前 timing set 的 edge delay，偏移最大 ±200 ps），也可选择预定义波形 SINUSOIDAL、RECTANGLE、TRIANGLE。
+
+**文档事实** 该命令配置的是具有 setup focus 的 site，一次只能有一个 site 处于 focus；文档将其 Application 标为 Jitter injection。
+
+**文档事实** 文档示例用 WAVEFORM 偏移列表定义了峰峰值 200 ps 的锯齿波，适用于 STDDIFF 或 STD 引脚。
+
+**推断** JSCF 是 jitter set 的「参数配置面」，与负责定义 jitter set 的 JSDF 成对使用；MODE 决定抖动循环跨 functional test 的运行方式。
 
 ## 典型用法
 
-（待补）
+**文档事实** 查询示例 `JSCF? "my_J_SET",ALL,(Pin1)` 返回该 jitter set 在该引脚上的 MODE、WAVEFORM、PERIODFACTOR 配置行。
+
+**文档事实** 示例中 MODE 设为 CONT，抖动从第一个 functional test 开始并持续运行直到被显式终止；WAVEFORM 给出 `"-100,-50,0,50,100,50,0,-50"` 的偏移列表；PERIODFACTOR 设为 25。
+
+**文档事实** PERIODFACTOR 只适用于用户自定义波形，n 表示 2 * clock_resolution 的倍数，默认 1、最大 1024。
+
+**文档事实** PHASE 只适用于预定义波形，为 RESTART 模式定义相位偏移，以度为单位，最大 360°。
+
+**文档事实** AMPLITUDE 为预定义波形幅度（峰峰值的一半），最大 200 ps、默认 100 ps；PERIOD 为预定义波形周期（ps），最大值 2 * clock_resolution * 1024 * 512；DUTYCYCLE 只适用于 TRIANGLE/RECTANGLE，默认 50%；NOISE 为每个波形加入随机噪声，最大幅度 400 ps、默认 0。
+
+**文档事实** 若列表中后一项小于前一项，两者最大差 max_diff = clock_resolution/2 - 410 ps。
+
+**文档事实** 若需完全控制 clock resolution，必须用 period_res 关键字手动指定不大于 2 * minimal_clock_resolution 的 period resolution，此时 clock resolution 等于 period resolution。
+
+**建议** 修改前先用 JSCF? 读回现有属性，避免在 MODULATION_SETS 与其它属性互斥时产生配置冲突。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** JSDF，本页参数说明要求 jitter_set_name 必须是 JSDF 定义过的 jitter set；Principles of jitter injection 页说明 jitter set 由 JSDF 与 JSCF 共同定义。
+- **文档事实** JSPR，Principles of jitter injection 页说明 jitter injection 通过 JSPR 定义或取消 primary jitter set 来激活与停止；不存在 primary jitter set 时 JTIN 指令被忽略。
+- **文档事实** JTIN，Principles of jitter injection 页说明它是 pattern 内局部启停 jitter injection 的 sequencer 指令，可局部覆盖全局循环配置，且只在其所在的 functional test 内有效。
+- **文档事实** PSFC，本页正文链接 PSFC，说明 JSCF 配置处于 setup focus 的 site。
+- **文档事实** Period resolution, clock resolution, and master clock period，本页 PERIODFACTOR/PERIOD 说明依赖 clock resolution；该页正文也反向引用 JSCF 作为需要计及 clock resolution 的例子（PS1600 上 clock resolution 需在 1.76–3.52 ns）。
+- **文档事实** Principles of jitter injection，本页正文指向它作为总览；该页说明 jitter injection 仅允许用于 drive pins，并描述 Smart Scale/STD/STDDIFF 下的实现差异与 JSWF? 查询。
+- **文档事实** Two ways of organizing jitter setup data，本页正文指向它说明 MODULATION_SETS 与其它属性的互斥关系，以及 jitter setup data 的两种组织方式。
+- **推断** MODULATION_SETS 与 modulation set 相关，但文档正文没有给出 modulation set 的独立对象页，因此这里只记录属性层面的联系，不外推其定义命令。
+- **文档事实** List of commands 与 Site dependent firmware commands（02.06.01.05、02.06.02.02.01 两处），这些索引页把 JSCF 列入命令清单；其中 Site dependent firmware commands 页把 JSCF 归入 site dependent firmware commands（引文取自 objpack 入边）。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载：
+
+- Introduced in SmarTest 7.0.1
+- SmarTest 7.1.1：WAVEFORM 参数的 SINUS 改为 SINUSOIDAL
+- SmarTest 7.3.0：新增 MODULATION_SETS 属性
+- SmarTest 7.3.1：用户自定义 jitter waveform 开始支持 FASTDIFF 引脚
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.147_JSCF__JSCF__-__Jitter_Set_ConFiguration.htm`，主源，含概述、Syntax、Parameters、Properties、Application、Errors、Example 与 Functional changes。
+- `02_System_reference/02.06_Command_Reference/02.06.16.01_Principles_of_jitter_injection.htm`，用于核对 JSDF、JSPR、JTIN 与 jitter set 的关系（已用 show.py 读取）。
+- Period resolution 页（02.06.06.01.04.01.02.03）、List of commands、Site dependent firmware commands 的语句取自 `extract/objpack.py` 入边索引。

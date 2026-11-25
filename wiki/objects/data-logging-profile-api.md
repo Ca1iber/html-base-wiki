@@ -2905,20 +2905,64 @@ See
 
 ## 是什么
 
-（待补）
+**文档事实** Data logging profile API 用于创建和处理 data logging profile 及其 rules 与 properties；它由 `ProfileMgr`、`Profile`、`Rule`、`Property` 四个 class 组成。
+
+**文档事实** 对象关系为：一个 `ProfileMgr` 实例含 0 个或多个 `Profile` 实例；一个 `Profile` 含 0 个或多个 `Rule`；一个 `Rule` 以字符串形式保存一条 logging definition，例如 `"*leakage*.*.*.datalog_detail=2"`。
+
+**文档事实** `ProfileMgr` 是 profile 管理器，也是所有 profile 的仓库，只有一个实例；用 `getInstance()` 取得，可用 `freeInstance()` 释放；它提供创建、激活、加载、保存、删除 profile 的方法。
+
+**文档事实** `Profile` 封装 profile 的创建、加载、保存与规则操作；通常用 `createProfile(WildcardProfileType)` 创建；文档要求始终使用 `WildcardProfileType`，另一类型 `ProdSettingProfileType` 仅供 SmarTest 内部兼容 production settings 使用。
+
+**文档事实** `Rule` 是抽象接口，保存 context 信息、property name 与 value；rule 字符串语法见 Data logging profile rule syntax。
+
+**文档事实** `Property` 供 test method 在当前执行上下文中查询 data logging property 的值：先取得 active profile，再查询该 profile 中该 property 的值。文档区分预定义 system properties 与 user defined properties。
 
 ## 典型用法
 
-（待补）
+**文档事实** 取得单例并创建 profile：
+
+```
+ProfileMgr* mgr = ProfileMgr::getInstance();
+Profile* profile = mgr->createProfile(WildcardProfileType);
+```
+
+**文档事实** 用 rule 字符串填充 profile；源文给出的三行可组成默认 profile `datalog_ON.prf`：
+
+```
+profile->createRule("*.*.*.log_events_enable=1");
+profile->createRule("*.*.*.datalog_level=3");
+profile->createRule("*.*.*.datalog_detail=2");
+```
+
+**文档事实** 也可先建空 rule 再逐项设置：`setTestSuite`、`setTestMethod`、`setTestName`、`setPropName`、`setPropValue`；`Rule` 也有对应的 get 方法。
+
+**文档事实** 用 `profile->save(<filename>)` 写入文件系统；文档建议文件名包含 device 名与 `profiles` 子目录，以便 SmarTest 能看到该 profile。
+
+**文档事实** 用 `profileMgr->activateProfile(profile)` 或 `activateProfile(<filename>)` 激活；激活后 profile 中的规则适用于下一次 test execution。
+
+**文档事实** 在 test method 中用静态 `Property::value("datalog_detail")`，或创建 `Property` 对象并利用其 int cast 运算符查询属性值。
+
+**文档事实** 用 `getRule(i)` 与 `getRuleCount()` 遍历规则，用 `setRule(i, rule)` 覆盖指定位置。
 
 ## 和谁有关
 
-（待补）
+- [[data-logging-profiles]]：**文档事实** 本页开头把 "data logging profile" 链接到该概念页，说明本 API 操作的对象；入边显示该页也反向链接本 API。为什么：概念页与 API 页成对。
+- ProfileMgr class（`02_System_reference/02.10_Data_Logging/02.10.01.02.08.01_ProfileMgr_class.htm`）：**文档事实** 本页 Subtopics 列出该类，语法节从该子主题抽取 `activateProfile`、`createProfile` 等成员函数。为什么：它是 API 的 profile 管理入口。
+- Profile class（`02_System_reference/02.10_Data_Logging/02.10.01.02.08.02_Profile_class.htm`）：**文档事实** 同上；语法节抽取 `createRule`、`save`、`value` 等成员。为什么：它是 profile 与 rule 操作的核心。
+- Rule class（`02_System_reference/02.10_Data_Logging/02.10.01.02.08.03_Rule_class.htm`）：**文档事实** 同上；语法节抽取 `parse`、`match` 与各 `set/get` 成员。为什么：它表示单条规则。
+- Property class（`02_System_reference/02.10_Data_Logging/02.10.01.02.08.04_Property_class.htm`）：**文档事实** 同上；语法节抽取 `Property::value` 与 cast 运算符。为什么：它是 test method 查询属性值的入口。
+- Data logging profile API examples（`02_System_reference/02.10_Data_Logging/02.10.01.02.08.05_Data_logging_profile_API_examples.htm`）：**文档事实** 本页与各子主题的 Example 段均指向该示例页。为什么：该页给出本 API 的完整用法样例。
+- Data logging profile rule syntax（`02_System_reference/02.10_Data_Logging/02.10.01.02.06.03_Data_logging_profile_rule_syntax.htm`）：**文档事实** 本页说 rule 字符串与预定义 system properties 的描述见该页。为什么：它是规则字符串格式的说明页。
+- Data logging profiles and sampling（`02_System_reference/02.10_Data_Logging/02.10.01.02.07_Data_logging_profiles_and_sampling.htm`）：**文档事实** 入边说 adaptive sampling 在程序控制下用 Data logging profile API 完成。为什么：这是该 API 的一个应用场景。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2；SmarTest 7.4.5: Removed stdf_generation flag。
+
+**推断** 后者表示某个 `stdf_generation` 标志在 SmarTest 7.4.5 被移除；文档没有说明移除后由什么替代。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.10_Data_Logging/02.10.01.02.08_Data_logging_profile_API.htm`，主源，含概览、ProfileMgr/Profile/Rule/Property 四节、Related information 与 Functional changes，已用 `show.py 02.10.01.02.08` 读取。
+- 子主题 `02.10.01.02.08.01`~`.04`（ProfileMgr/Profile/Rule/Property class）与 `.05`（Data logging profile API examples）；语法节经 `objpack.py` 从这些子主题汇总。
+- 关系与入边取自 `extract/objpack.py`（`edges.jsonl`）：Data logging Profiles、Data logging profiles and sampling、各 class 页等。

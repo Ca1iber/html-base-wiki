@@ -87,20 +87,51 @@ get utility block 272 =11101011100101100011100010011001
 
 ## 是什么
 
-（待补）
+**文档事实** GetUtilityLines 是一个 test method，读取最多 512 条 utility line 的状态，并在 report window 中显示。
+
+**文档事实** 它仅适用于 universal test method。
+
+**文档事实** utility line 状态也可在 93000 Hardware perspective 的 Utility Line view 中查看。
+
+**文档事实** 使用该 test method 时，本 test suite 指定的 primary sets 不被使用，而使用前一个已执行 test suite 的 primary sets。
+
+**文档事实** 唯一参数 blockId（INT）指定要查询的 utility pogo block：0 表示全部 utility line block，其他有效值表示指定 block。
+
+**文档事实** blockId 的合法范围：0–8；若使用三位格式，范围为 165…172；EXA Scale 系统第二个可选 Utility Card 只能使用三位格式，范围为 265…272。
+
+**推断** 该 test method 的文档定位是状态观测：读回 utility line 状态并打印；文档没有说明它产生 pass/fail 判定或写回状态。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档示例把 blockId 设为 0，输出两张 utility card 的所有 block 状态；第二个可选 Utility Card 的 pogo block 列为 265–272。
+
+**文档事实** 输出格式为 `get utility block <n> =<32 位二进制串>`，例如 `get utility block 1 =01111100101110100100010010011010`；示例列出 block 1–8 与 265–272。
+
+**文档事实** 每个 block 的状态为 32 位串。GET_UTILITY_LINES_STATUS 页说明 utility lines 按 pogo block 组织、每 block 32 条，test head 配置可提供 32/64/256/512 条，对应 1/2/8/16 个 utility block。
+
+**文档事实** 本页 Related information 指向 SetUtilityLines 与 GET_UTILITY_LINES_STATUS。
+
+**建议** 需要按 block 排查时，先用 blockId=0 获取全量输出，再针对 1–8 或 265–272 中的单个 block 复查。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** SetUtilityLines，本页 Related information 列出它；SetUtilityLines 设置最多 512 条 utility line，并同样说明 primary sets 使用前一个已执行 test suite 的。
+- **文档事实** GET_UTILITY_LINES_STATUS，本页 Related information 列出它；它是读取所有 utility input line 状态的 test method API，返回指定 block 的状态（"0" 表示 on，"1" 表示 off），并给出 utility block 与 utility line 数量的对应关系。
+- **文档事实** Utility Pins editor（02.08.04.18.03.01.04），objpack 入边引文说明可通过 test method library（GetUtilityLines 与 SetUtilityLines）、test method API 或自写 test method 访问 utility pins。
+- **文档事实** Miscellaneous test methods（02.07.05.04）与 List of predefined universal test methods（02.07.02.08），两个索引页都把 GetUtilityLines 列入，前者还给出 "Gets the status of the utility lines" 的一句话说明。
+- **文档事实** Utility Card（V93000 EXA Scale systems）与 Utility pogo block mapping，blockId 参数说明和示例都以它们为参照，第二张卡的 block 为 265–272。
+- **推断** GetUtilityLines（读）与 SetUtilityLines（写）构成 utility line 的读写对，GET_UTILITY_LINES_STATUS 提供同一状态信息的 API 入口；文档没有说明两者返回结果是否逐位一致。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载：
+
+- Introduced in SmarTest 6.5.2
+- SmarTest 7.2.1：utility line 最大数量增至 256
+- SmarTest 7.10.2：最多 512 条 utility line，并支持三位 utility pogo block 编号
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.05.04.05_GetUtilityLines.htm`，主源，含概述、Parameters、Example 与 Functional changes。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.05.04.07_SetUtilityLines.htm`、`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.108_GET_UTILITY_LINES_STATUS.htm`，用于核对读写配套关系与每 block 32 条的说明（已用 show.py 读取）。
+- Utility Pins editor、Miscellaneous test methods、List of predefined universal test methods 的引文取自 `extract/objpack.py` 入边索引。
