@@ -3807,20 +3807,42 @@ true );
 
 ## 是什么
 
-（待补）
+**文档事实** DPS_AUX_TASK 类控制 DC Scale 卡的 surge tracker 与 TMU（Time Measure Unit）。
+
+**文档事实** 源页列出的支持情况是：surge tracker 支持 DPS128/DPS64 与 XPS256；TMU 目前不被任何卡支持。
+
+**文档事实** DPS_AUX_TASK 可加入 TASK_LIST，并与其他 TASK 类型类协同工作；其 API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/DpsAuxTask.h`。
+
+**文档事实** 源页注明不要在 test method 中创建该类的静态对象，也不要创建该类的 test method 成员变量。
+
+**文档事实** 该类通过 pin() 取得 DPS_AUX_PIN_TASK，再链式调用 setMode()、selectISensorSetThresholds()、selectVSensorSetThresholds() 等方法；用 execute() 执行，用 checkSurgeTracker()、checkPowerFlags() 等把硬件状态读入 test method cache，再用 get...() 取结果。
 
 ## 典型用法
 
-（待补）
+**文档事实** 源页示例流程为：在 ON_FIRST_INVOCATION 块中创建 DPS_AUX_TASK，用 `pin("dps1").selectISensorSetThresholds(-1 mA, 1 mA).setMode(TM::SURGE_TRACKER)` 设阈值并开启 surge tracker，调用 execute()，再调用 `pin("dps1").checkSurgeTracker(TM::AGAINST_BOTH)`，最后用 getSurgeTrackerStatus("dps1") 取回状态。
+
+**文档事实** pin() 的 pinlist 可用逗号分隔多个引脚；checkPowerFlags() 可带 flags 掩码（默认 TM::ALL_FLAGS），其 get...() 系列函数从 test method cache 读取标志值，因此必须先调用 checkPowerFlags() 才能把硬件标志读入 cache。
+
+**文档事实** 对 XPS256，getSurgeTrackerStatus() 有第二种语法，可分别返回电压与电流 surge tracker 状态；该语法要求同时设置电压阈值与电流阈值才有效。
+
+**文档事实** XPS256 的 site 级阈值示例在 ON_FIRST_INVOCATION 中设公共阈值、在 FOR_EACH_SITE 中替换为各 site 阈值，并在另一个 FOR_EACH_SITE 中读取结果；示例用 RDI_INIT() 与 SmartRDI 配合，并说明 setMode() 只在 FOR_EACH_SITE 外调用以避免告警。
+
+**文档事实** 源页的 offline mode 说明：getAllStatus() 因 "Constant voltage" 标志在 offline 下恒置位而返回 TM::POWER_FLAG_STATUS_FAIL；getStatusWithoutConstVol() 及其他单个标志 get...() 在 offline 下返回 TM::POWER_FLAG_STATUS_PASS。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** DPS_AUX_PIN_TASK：本页 Related information 与 Subtopics 直接指向它；它是 DPS_AUX_TASK 的附属数据容器，pin() 返回该类型引用，setMode/select.../check... 等方法定义在它上面。
+- **文档事实** TASK_LIST：本页 Related information 与 Subtopics 指向它；DPS_AUX_TASK 可加入 TASK_LIST，加入后由 TASK_LIST 的 execute() 调用其 execute()。
+- **文档事实** DPS128/DPS64 与 XPS256：本页明确列出它们是 surge tracker 支持的 DC Scale 卡；示例分别用 dps1 与 XPS256 引脚演示。
+- **文档事实** ON_FIRST_INVOCATION 与 FOR_EACH_SITE：源页示例在 ON_FIRST_INVOCATION_BEGIN/END 内配置与执行；XPS256 site 级阈值示例用 FOR_EACH_SITE 循环设置和读取阈值。
+- **文档事实** RDI_INIT 与 SmartRDI：XPS256 示例以 RDI_INIT() 作为 SmartRDI 代码的前置，并按 SmartRDI 要求在 FOR_EACH_SITE 中读取结果。
+- **文档事实** XPS256 programming - Surge tracker / Force and clamp voltages / Force and clamp currents：这些卡编程页指向 DPS_AUX_TASK 与 DPS_AUX_PIN_TASK，说明 surge tracker 的完整功能由这两类 API 覆盖。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记 Introduced in SmarTest 7.2.1；SmarTest 7.3.1 新增 DC Scale PVI8 卡；SmarTest 7.4.0 新增 DC Scale AVI64 卡，并新增 getBatteryFull()、getPowerBudgetWarningAll()、getPowerBudgetWarning1()/...Warning2()/...Warning3() 以及返回 DPS_POWER_FLAG_STATUS 的成员函数；SmarTest 7.5.0 新增 DC Scale FVI16 卡。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43_DPS_AUX_TASK.htm`，主源，含类说明、支持卡、头文件、构造/示例、Related information 与 Functional changes。
+- 语法节还逐字取自其子主题 DPS_AUX_PIN_TASK、execute、pin、setup、getSurgeTrackerStatus，以及 DPS power flags / DPS status flags 的 get...() 函数与被引用页面。

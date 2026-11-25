@@ -304,20 +304,37 @@ Save
 
 ## 是什么
 
-（待补）
+**文档事实** Level setup tool 是 SmarTest 的 level 设置工具与章节，用于为器件设置 level；源页说明它提供背景信息、界面说明与任务相关信息。
+
+**文档事实** 源页把内容组织为 Basic concepts of levels、Equation based level setup、Elements of the Level Setup window、Opening and using the Level Setup Tool、Level setup related card specifications、Level setup related use cases 等子主题。
+
+**文档事实** Level setup 支持 context 概念：未定义 context 时自动采用 DEFAULT context，DEFAULT 适用于 std 引脚的传统 level setup；差分设置可另取 context 名（源页以 differential 为例，名称除 DEFAULT 外可任意），其中包含 FAST 模式差分引脚，并把 termination 设为 center_tap。
 
 ## 典型用法
 
-（待补）
+**文档事实** 创建 level equation set 的步骤为：在 Test Program Explorer 双击 <Levels> 打开 Level Setup 窗口，选择 Select > Edit Equations 打开 equation editor（NEdit），用 EQNSET 定义 equation set，为 DPS、输入/输出/I/O 引脚写 level 设置，再执行 Shell > Download 下载到测试机并检查 Report 窗口。
+
+**文档事实** 源页示例用 `EQNSET 1 "NonSpecs"`，为 DPS 引脚 Vcc 写 vout/ilimit/t_ms/offcurr，再用 `LEVELSET 1 "nominal"` 与 PINS 块设置输入、输出、I/O 引脚；每个 level set 必须覆盖 pin configuration 中定义的所有引脚。
+
+**文档事实** 保存方式是在 Test Program Explorer 中右键 <Levels...> 选择 Save As 输入文件名；源页明确不要用 NEdit 的 File > Save，必须先下载修改后的数据再从 Test Program Explorer 保存。
+
+**文档事实** 创建 specification set 可通过 Select > Edit Specifications 进入 Spec Tool（也可走 <93000> <Setup> <Spec Tool>），用 Change > Create Specification 选择 equation set、创建 level spec set 并 Download；可定义不带变量的 spec，也可定义指向 spec set 的变量（如 Vcc = 4.5V）。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Basic concepts of levels、Equation based level setup、Elements of the Level Setup window、Opening and using the Level Setup Tool、Level setup related card specifications、Level setup related use cases：这些是本页的子主题，分别承载概念、方程式 level setup、窗口元素、打开与使用、卡规格与用例。
+- **文档事实** Spec Tool：源页示例多次要求从 Level Setup 进入 Spec Tool（Select > Edit Specifications 或 <93000> <Setup> <Spec Tool>），并在其中创建 specification，说明两者是配套工具。
+- **文档事实** Test Program Explorer：源页要求在其中双击 <Levels> 打开工具，并通过右键 Save As 保存 level 文件。
+- **文档事实** Pin configuration tool 与 Timing Setup Tool：工具索引与入门流程把 Level setup tool 与这两者并列为同一套 setup 工具；源页还要求 level set 覆盖 pin configuration 中定义的所有引脚。
+- **文档事实** XPS256 programming - DPS operating mode：该页说明 XPS256 在 DPS 模式下的 force/clamp 设置由 level setup 控制，访问全部特性需使用 equations，并指向 Equation based level setup 与 DPSPINS。
+- **文档事实** Task 3: Setups for Digital Channels：该页把用 Level setup tool 设置电源电压、数字引脚驱动与接收条件列为数字通道 setup 的一步。
+- **文档事实** Setting up sequencer control of utility lines（DUT board 与 use case 两个版本）：两者都把用 Level setup tool 设置串行接口引脚 level 列为步骤。
 
 ## 版本
 
-（待补）
+**文档事实** 源页没有 Functional changes 段，版本信息「文档未覆盖」。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14_Level_setup_tool.htm`，主源，含章节导语、子主题列表与文档定位。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14.04.02_Specifying_the_context_for_levels.htm`、`...04.03_How_to_create_an_equation_set_using_the_Equation_editor.htm`、`...04.04_Creating_new_specification_sets.htm`，语法节逐字抽取来源。

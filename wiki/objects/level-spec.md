@@ -312,20 +312,60 @@ double vLow = LEVEL_SPEC(1, 2).getSpecValue("v_low");
 
 ## 是什么
 
-（待补）
+**文档事实** LEVEL_SPEC 是 test method API，用于访问已存在的 level equation set 与 spec set 的内容。
+
+**文档事实** 它提供六项功能：取 level equation set 号、取 level spec set 号、取某个 spec 的值、修改某个 spec 的值、针对特定 pin 修改 spec 值、复位 spec 值。
+
+**文档事实** 该 API 定义于头文件 `/opt/hp93000/soc/prod_com/include/MAPI/LevelSpec.h`。
+
+**文档事实** 构造 `LEVEL_SPEC(INT eqnset, INT specset)` 创建表示 equation set 中某个现有 level spec set 内容的对象；eqnset 为 equation set 号，specset 为 spec set 号。
+
+**文档事实** 成员函数：getEquation() 返回 equation set 号；getSpec() 返回 spec set 号；getSpecValue(const STRING& spec) 查询 spec 值；change(spec, value) 修改 spec 值，change(spec, value, pin) 修改特定 pin 或 pin list 的值，value 必须落在 spec set 规定的范围内；restore() 把所有 spec 值复位为当前 test suite 的 test method 程序启动时生效的值。
+
+**文档事实** 每条语句只能指定一个成员函数；`Primary.getLevelSpec().func()` 作用于当前 primary level spec，其中 getLevelSpec() 是 PRIMARY_STATUS 的成员函数。
+
+**文档事实** CAUTION：不要把 LEVEL_SPEC 或 TIMING_SPEC API 与出于调试以外原因修改值的 firmware 命令混用；这两个 API 会缓存值以支持 restore()，固件层没有该缓存；改 spec 值不会修改 level 或 timing 文件，永久修改必须在对应 setup 文件中进行。
+
+**文档事实** 调试用途的 Note：可在 application model 运行时暂停，用 firmware 命令 SVLR 从 hpt 直接改 spec 值，然后恢复运行。
+
+**文档事实** 另一条 Note：针对 pin 的值只保留一个 flush cycle，且不能用 getSpecValue(spec) 取回 pin 特定值。
+
+**推断** 因此它适合 test method 运行期临时修改 level spec；需要持久生效的修改应落到 setup 文件。
 
 ## 典型用法
 
-（待补）
+**文档事实** Example 1：`LEVEL_SPEC spec1(1, 2); Primary.level(spec1);` 把 level equation set 1、spec set 2 设为 primary level specification。
+
+**文档事实** Example 2：`Primary.getLevelSpec().change("v_low", -2.1 V);`，或先取引用 `LEVEL_SPEC& ls_obj = Primary.getLevelSpec();` 再 `ls_obj.change("v_low", -2.1 V);`，把 v_low 改为 -2.1 V。
+
+**文档事实** Example 3：`Primary.getLevelSpec().change("vdde", 4.4, "VCC"); FLUSH(TM::APRM);` 只改 VCC pin 的 vdde；省略 pin 的 `change("vdde", 4.5)` 改所有 pin（含 VCC），随后 FLUSH。
+
+**文档事实** Example 4：在 ON_FIRST_INVOCATION_BEGIN() 中创建 `LEVEL_SPEC newSpec(2,2)`，在 FOR_EACH_SITE_BEGIN/END 内按 CURRENT_SITE_NUMBER() 为每个 site 赋不同值，再用 FLUSH() 写入 tester。
+
+**文档事实** Example 5：`double vLow = Primary.getLevelSpec().getSpecValue("v_low");`；已知 equation set 与 spec set 号时可用 `LEVEL_SPEC(1, 2).getSpecValue("v_low")`。
+
+**建议** 运行期改动前先记录原值，或依赖 restore() 复位到当前 test suite 的 test method 程序启动时的值。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** PRIMARY_STATUS - (Primary)，getLevelSpec() 是其成员函数并返回 LEVEL_SPEC 对象；Primary.level(LEVEL_SPEC) 用于设定 primary level spec，Example 1 直接使用。
+- **文档事实** TIMING_SPEC，CAUTION 与 Related information 把二者并列为姊妹 API，均缓存值以支持 restore()。
+- **文档事实** Changing spec value in primary level spec set，该页说明 `<memberFunction>` 是 LEVEL_SPEC API 的成员函数，只能指定一个，且不能在该语句中指定 PRIMARY_STATUS 的其他成员函数。
+- **文档事实** Changing and obtaining digital settings，该页说明 level(LEVEL_SPEC(...)) 版本用于访问 LEVEL_SPEC 成员函数，getLevelSpec() 返回带 primary level spec/equation sets 的 LEVEL_SPEC 对象。
+- **文档事实** SVLR firmware command，本页 Note 说明调试时可在暂停 application model 后用 SVLR 从 hpt 修改 spec 值。
+- **文档事实** LEV_TRANSFER_TASK 与 LEV_TRANSFER_PIN_TASK，这两个页面在入边中引用 LEVEL_SPEC。
+- **文档事实** APIs in alphabetical order，该页把 LEVEL_SPEC 列入 API 清单。
+- **文档事实** DC Test Programming，该页在说明 DPS_TASK 时提到 primary level spec/equation sets，与本页的 level spec 概念相关。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced before SmarTest 6.3.2。
+
+**文档事实** SmarTest 7.1.1：新增针对特定 pin / pin list 的 change 函数。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.124_LEVEL_SPEC.htm`，主源，含首段、Class definition、Member functions、Examples、Related information 与 Functional changes。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.167_PRIMARY_STATUS_-__Primary.htm`，getLevelSpec() 与 Primary.level(LEVEL_SPEC) 的旁证。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.03.03.02.02_Changing_spec_value_in_primary_level_spec_set.htm` 与 `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm`，入边旁证。
+- `extract/edges.jsonl` 入边，用于 LEV_TRANSFER_TASK、SVLR、DC Test Programming 等旁证。

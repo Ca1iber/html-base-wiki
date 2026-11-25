@@ -204,20 +204,44 @@ dps_set_id
 
 ## 是什么
 
-（待补）
+**文档事实** SPRM（Set PRiMary sets）用于为 test suite 或在 user procedure 中定义的 test 定义和更改 primary sets。
+
+**文档事实** primary sets 包括：timing equation set 与 spec set（equation based testing）；multi-port specification（multiport setup）；waveform set（非 equation based testing）；timing set，或 multiport setup 下的 timing set list；level equation set、level spec set 与 level set（equation based testing）；level set（非 equation based testing）；DPS set。
+
+**文档事实** SPRM 不激活硬件中的 primary sets，激活由 APRM 负责。
+
+**文档事实** 若测试需要用不同参数重复 functional test，可用 SPRM 为每次 test run 定义 primary sets；除非另行指定，functional test 使用实际 primary sets 中定义的参数。
+
+**文档事实** FTST?、RCLS?、SQST/SQST?、PSST/PSST? 也依赖 SPRM，但不需要事先执行 APRM。
+
+**文档事实** 在 equation based timing/level setup 中须给出 spec set ID、level set ID、DPS set ID，而不是 waveform set number、level set number、DPS set number；公式为 `specset_id = 100 * equation_set_no + specset_no`、level set ID `= 100000 * equation_set_no + 1000 * specset_no + level_set_no`、DPS set ID `= 100000 * equation_set_no + 1000 * specset_no + 1`。
+
+**文档事实** 若指定的部分 set 不存在，SPRM 可能报错，但它始终会存储传给它的值。
 
 ## 典型用法
 
-（待补）
+**文档事实** 语法有三种形式：非 equation based（waveform_set_no、timing_set_no、level_set_no/level_set_id、dps_set_no/dps_set_id）；equation based（timing_specset_id、timing_set_no、level set、DPS set）；multiport（`"multi-port_spec"`、timing set 或 timing set list、level set、DPS set，可带 port）。`SPRM?` 返回当前 primary sets。
+
+**文档事实** 示例对含三个 port 的 multiport 规格 spec_ClockP_P1_P2，先用 `SPRM "spec_ClockP_P1_P2","2,1,2",,` 定义各 port 的 primary timing sets，再用 `SPRM?` 查询，返回 `SPRM "spec_ClockP_P1_P2","2,1,2",101002,101003`。
+
+**文档事实** 示例还演示对单个 port 的设置与查询：`SPRM "spec_ClockP_P1_P2",2,,,(port_1.CP_1)`，以及 `SPRM? (port_1.CP_1)` 返回带 `(port_1.CP_1)` 的结果。
+
+**文档事实** Application 段说明其作用是定义 test 的 primary sets，覆盖 AC tests 和 DC measurements（后者见 DC Measurement Commands）。
+
+**建议** 每次需要变更测试条件时用 SPRM 重设 primary sets；注意它不激活硬件，需要硬件生效时应另行执行 APRM。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** APRM - (Activate PRiMary sets)，源文明确 SPRM 不在硬件中激活 primary sets，激活由 APRM 完成。
+- **文档事实** FTST? - (Functional TeST)、RCLS? - (ReCeive Level Sensitivity)、SQST, SQST? - (SeQuencer STate)、PSST, PSST? - (Power Supply STatus)，源文列为其依赖 SPRM、但无需事先执行 APRM 的命令。
+- **文档事实** DSCP, DSCP? - (Define System Control Parameter)，Errors 说明 set number 超过 DSCP 配置的最大值会报错。
+- **文档事实** WSUS, WSUS? - (Waveform Sets USed)、TSUS, TSUS? - (Timing Sets USed)、LSUS, LSUS? - (Level Sets USed)、DSUS, DSUS? - (Dps Sets USed)，源文参数表分别用这些命令确定 waveform、timing、level、DPS set 的最大编号。
+- **文档事实** Timing Specification File，源文称 wavetable 由 equation_set_no 与 specset_no 在该文件中所引用的 wavetable 决定。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 仅记载 Introduced before SmarTest 6.3.2，其后无其他条目。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.05.02.22_SPRM__SPRM__-__Set_PRiMary_sets.htm`，主源，含 intro、Equation Based Testing、SPRM、SPRM?、Parameters、Application、Errors、Example 与 Functional changes。

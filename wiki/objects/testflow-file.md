@@ -588,20 +588,37 @@ end
 
 ## 是什么
 
-（待补）
+**文档事实** testflow file 是 testflow tool 用来保存数据的文本文件，位于 `<device_dir>/testflow` 目录。
+
+**文档事实** 文件内容按 section 组织，每个 section 以关键字开头、以 `end` 结束。BNF 列出的 section 有：information、declarations、flags、tests、testfunctions、datasets、test_suites、initialize、download、abort、pause、reset、exit、test_flow、binning、context、hardware_bin_descriptions。
+
+**文档事实** 语法用 BNF 描述，覆盖 language_revision、各 section 的条目，以及 test_flow 段的语句（run、run_and_branch、print、print_dl、if、while、for、repeat、复合语句、stop_bin 等）和表达式。
+
+**文档事实** 文件是纯文本，因此可以直接用文本编辑器修改参数。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档建议只用 SmarTest Work Center 的 Testflow Tool 修改设置，而不是直接改文本文件。
+
+**文档事实** 若发现无效参数，testflow 的加载会被中止，并在 ui_report 窗口显示类似 `".../TestFlow", line ##, near ";": error: [;] Flag ... must be between ... and ...` 和 `ERROR: cannot parse shm setting from testflow '.../TestFlow'` 的错误信息。
+
+**文档事实** 文档给出的示例文件包含 information、flags、testmethodparameters、testmethodlimits、testmethods、test_suites、test_flow、binning、context、hardware_bin_descriptions 等段；其 test_flow 段用 `run_and_branch` 依次串联 Continuity、gross_func、Leakage 三个 test suite，在失败分支和末尾用 `stop_bin` 指定 bin。
+
+**推断** 因为加载遇到无效参数会整体中止，直接手改文件的风险是一处 flag 越界就可能让整个 testflow 无法载入。
+
+**建议** 需要改参数时走 Testflow Tool；确需手改时，先确认改动的 flag 取值落在允许区间内，并避免破坏 section 的 `end` 配对。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Testflow Tool，源文称 testflow tool 把数据存入该文件，并建议只通过 Testflow Tool 修改设置。
+- **文档事实** Testflow components、Elements of the Testflow Tool、Flags，这三页是源文 Related information 列出的相关主题，分别说明 testflow 的组成、元素与 flags。
+- **文档事实** Test Methodologies，源文 Related information 列为相关主题。
+- **文档事实** context 段引用的 `context_*` 文件项（如 context_config_file、context_levels_file、context_timing_file、context_vector_file、context_channel_attrib_file），它们指向该 testflow 所用的 setup context 文件。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced before SmarTest 6.3.2。SmarTest 7.1.0 移除 testflow optimization 功能。SmarTest 7.2.0 移除 report_to_file、report_to_printer、datalog_to_file、datalog_to_printer、datalog_to_report_win 五个 flag。SmarTest 7.2.2 移除 ooc_rule、OOC_watch、OOC_sample_size 相关语法。SmarTest 7.3.2 新增 setup context：context_analog_control_file、context_attrib_file、context_channel_attrib_file、context_config_file、context_levels_file、context_mixsgl_file、context_protocols、context_routing_file、context_testtable_file、context_timing_file、context_vector_file、context_waveform_file。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.05_Testflow_file.htm`，主源，含 intro、Syntax、Range check of parameters、Testflow syntax、Example、Related information 与 Functional changes。

@@ -1115,20 +1115,44 @@ CLK(); CTRL(1,1); DES(); DBUS_IDLE();
 
 ## 是什么
 
-（待补）
+**文档事实** Waveform mapping 是把 APG 程序产生的逻辑 0/1 pattern 转换为送往测试机引脚的物理波形的过程。
+
+**文档事实** MTL 中有两种映射方式，二者都把编译器产生的逻辑 pattern 转换为 timing file 中的索引：direct waveform mapping 使用标准 SmarTest Timing file；indirect waveform mapping 使用 MTP Waveform mapping file。
+
+**文档事实** direct 方式的设置是在 APG pattern file 的 `:waveformMap:` 关键字参数中给出 timing file 与所需 wavetable；indirect 方式则给出 waveform mapping file。
+
+**文档事实** 必须始终使用某种 waveform mapping；源页建议除非有特定理由，否则使用 direct waveform mapping。特定理由包括：使用 Device access file 中的 `:devCyc:` 关键字（源页建议不再这样做）；测试在高数据率下需要第三 level 的器件，或更一般地需要把多个逻辑波形映射到一个物理波形（direct 方式无法做到）。
 
 ## 典型用法
 
-（待补）
+**文档事实** wavetable 用 `WAVETBL "<wavetable_name>"` 与 `PINS <dutPinName>` 定义；每条波形写作 `<phyWfIndex><edgeActions><deviceCycleName>`，物理索引为 0–255，device cycle name 显示在 Pattern View。standard 模式每个 edge 带名称（如 `d1:0 d2:1`），fast 模式只写电平序列（如 `01`）。
+
+**文档事实** 一个 PINS 后可跟最多 256 个 DUT 引脚名，以空格分隔；若使用 maintenance operations，VEC refresh 模式下不可中断序列的波形必须使用 80–FF（十六进制）索引。
+
+**文档事实** Automatic waveform generation：编译器向已有 wavetable 增补波形时只添加执行 pattern 所需的最少波形，并自动生成反映逻辑动作的 device cycle name；不可中断波形的名字带 `_ni` 后缀。
+
+**文档事实** 源页的 Waveform mapping file 示例按引脚组分节（如 CK、CKn、Address_Bus、DQi_Bus、DQ_Bus），普通波形从 0 起编号、不可中断波形从 0x80 起并带 `_ni` 后缀；若使用 Transparent x-modes，PINS 后的括号内不允许写名字，正确写法如 `PINS clock ()`。
+
+**文档事实** 源页注明：indirect waveform mapping 可用未修改的 SmarTest timing file 代替 waveform mapping file，做法是复制该 timing file，并在 APG pattern file 中以 direct waveform mapping 的语法（同时给文件名与 wavetable 名参数）引用它。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** APG pattern file：`:waveformMap:` 关键字在此文件中指定 waveform mapping 的来源（timing file 或 waveform mapping file），是两种映射方式的入口。
+- **文档事实** Timing file：direct waveform mapping 直接使用标准 SmarTest timing file 作为转换来源；本页 Related information 同时指向该页。
+- **文档事实** Waveform mapping file：indirect waveform mapping 使用 MTP waveform mapping file；本页 Related information 同时指向该页。
+- **文档事实** Wavetable syntax（WAVETBL / PINS）：本页语法节从 Wavetable syntax 子主题逐字抽取，定义 wavetable 的关键字与写法。
+- **文档事实** APG program file 与编译器：源页说明 waveform mapping 转换的是 APG 程序产生、由编译器生成的逻辑 pattern；Automatic waveform generation 由编译器增补波形与生成名字。
+- **文档事实** Device access file：源页把使用 `:devCyc:` 关键字列为选择 indirect waveform mapping 的理由之一。
+- **文档事实** Maintenance operations：源页规定 VEC refresh 模式下不可中断序列的波形索引必须落在 80–FF。
+- **文档事实** Transparent x-modes：源页规定使用该模式时 PINS 括号内不得写名字。
+- **文档事实** Setting up direct waveform mapping、Setting up indirect waveform mapping、Automatic waveform generation：这三个子主题分别给出两种映射的设置步骤与自动波形生成说明。
+- **文档事实** Pattern View：device cycle name 是显示在 Pattern View 中的名字。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记 Introduced before SmarTest 6.3.2。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.04.03_Waveform_mapping.htm`，主源，含定义、direct/indirect 对比、选择建议、Related information 与 Functional changes。
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.04.03.01_Setting_up_direct_waveform_mapping.htm`、`...03.02_Setting_up_indirect_waveform_mapping.htm`、`...03.03_Automatic_waveform_generation.htm`、`...03.01.01_Wavetable_syntax.htm`，以及 APG pattern file、APG program file、Device access file、Waveform mapping file 等子主题，语法节逐字抽取来源。

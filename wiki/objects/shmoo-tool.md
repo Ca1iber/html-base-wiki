@@ -30,20 +30,42 @@ verified: doc-only
 
 ## 是什么
 
-（待补）
+**文档事实** Shmoo Tool 用于创建 shmoo tests 并查看 shmoo plots。
+
+**文档事实** 可用它执行：对 functional test 做 shmoo；对已有 test suite 或多个 test suite 做 shmoo；针对 MTP 的 fail bit count shmoo；以及自定义 shmoo tests。
+
+**文档事实** 对 test suite 做 shmoo 时，可以在 shmoo plot 上查看 value 结果。
+
+**文档事实** 它支持 multisite shmoo tests，并支持覆盖（overlay）shmoo plots。
+
+**文档事实** 文档把使用流程拆成 set up、execute、view 三步，并另设打开工具、工具界面、命令附录等子主题。
 
 ## 典型用法
 
-（待补）
+**文档事实** 在 Shmoo Tool 中设置、执行并查看 shmoo test；对 test suite 做 shmoo 时可查看其 value 结果。
+
+**文档事实** 可用 Shmoo Tool 做 multisite shmoo，并覆盖查看不同 site 的 shmoo 图。
+
+**文档事实** 与 Testflow Tool 交互可：显示某个 shmoo test suite 的 shmoo plot；在 Shmoo Tool 与 test suite 之间转移 shmoo setup。
+
+**文档事实** 要把 shmoo 数据记入 report window，或把 shmoo plot 保存为 PNG/ASCII 文件，必须先把 shmoo tests 从 Shmoo Tool 转移到 testflow。
+
+**文档事实** 要在 Integrated Result Tool 中显示 shmoo plot，同样必须先把 shmoo tests 从 Shmoo Tool 转移到 testflow。
+
+**建议** 需要进报告或长期保存时，先在 Shmoo Tool 中调好 shmoo setup，再转移到 testflow，之后才能写入 report window 或导出 PNG/ASCII。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Testflow Tool，源文列出的交互包括显示 shmoo test suite 的 shmoo plot、在 Shmoo Tool 与 test suite 之间转移 shmoo setup。
+- **文档事实** Integrated Result Tool，源文称可与之交互以在其中显示 shmoo plots，前提是先把 shmoo tests 转移到 testflow。
+- **文档事实** Report window，源文称可把 shmoo 数据记入 report window，前提同上。
+- **文档事实** Test suites，源文称可对已有 test suite 或多个 test suite 做 shmoo，并可在 Shmoo Tool 与 test suite 间转移 shmoo setup。
+- **文档事实** MTP_MEMORY_TEST，源文把 fail bit count shmoo for MTP 列为用途之一。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 SmarTest 7.2.2 引入对多个 test suite 做 shmoo；SmarTest 7.2.2 将 shmoo plots 与 results 保存为 ASCII 文件。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.25_Shmoo_Tool.htm`，主源，含 Subtopics、功能与用途说明、与 Testflow Tool 及 Integrated Result Tool 的交互说明与 Functional changes。

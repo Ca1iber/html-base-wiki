@@ -164,20 +164,45 @@ site, and the data for each site are put into adjacent columns.
 
 ## 是什么
 
-（待补）
+**文档事实** Integrated Result Tool 用于对已保存的 data log 文件以及 system data log stream 进行统计与图形评估。
+
+**文档事实** 使用该工具可以载入（load）并打开 data log；日志会被自动汇总（automatically summarized），并可创建多种 result graph，以便发现关注的数据。
+
+**文档事实** 文档把该工具的内容分为 Principles of operation、Using the Integrated Result Tool、Integrated Result Tool reference 三部分；reference 下包含 Data Log Explorer view、Data navigation views、Detail data views、Analysis views、Preference settings 与 CSV Export command line tool。
+
+**推断** 它是一组结果查看/分析视图加辅助导出工具的集合，而非单一视图。
 
 ## 典型用法
 
-（待补）
+**文档事实** 使用流程是：把 data log 载入工具，在 tabular view 中打开，检查其底层数据，或把日志显示为多种 graph。
+
+**文档事实** Using the Integrated Result Tool 子主题把操作分为 Opening the Integrated Result Tool、Managing data logs、Working with result data tables、Analyzing test results 四步。
+
+**文档事实** result data stream 不会自动保存到磁盘，文档另见 Saving the system data log stream。
+
+**文档事实** 命令行导出由子主题 CSV Export command line tool 的 CsvExport 提供：-I 指定输入（支持 EDL 与 STDF，且不必先载入 Data Log Explorer），-T 选择 testsummary、devicesummary、binsummary 或 wafersummary，-F 选 h（横向，分组置于相邻列）或 v（纵向，分组置于相邻行，默认），-G 按 wafer/site/pin/binsite 分组且可用冒号组合层级，-C 自定义列，-h 只显示帮助且不执行导出。
+
+**文档事实** 示例 `CsvExport -I ~/datalogs/myLog.std -O ~/Analysis/CSV/testSum.csv -T testsummary -F h -G site` 把按 site 分组的 test summary 导出为横向相邻列。
+
+**建议** 批量生成 CSV 汇总时使用 CsvExport 命令行；交互式查看与画图使用工具的 GUI 视图。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** CSV Export command line tool（`02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.06_CSV_Export_command_line_tool.htm`），它是 IRT reference 的子主题，本页「语法 / 参数」节即逐字取自该页，说明该命令行导出属于本工具。
+- **文档事实** Data Log Explorer view、Data navigation views、Detail data views、Analysis views、Preference settings，这些页面都是 IRT reference 的子主题，文档把它们归在同一工具下。
+- **文档事实** Test table editor，其文档说 Show in Result Tool 会打开 Integrated Result Tool，并要求已载入带测试结果的 data log，说明它是进入 IRT 的一个入口。
+- **文档事实** SHMOO.drawPlot，其文档说运行对应 test suite/testflow 后，用 Integrated Result Tool 的 shmoo view 查看绘图，说明 shmoo 结果由 IRT 呈现。
+- **文档事实** V93000 Components and Compatibility，其迁移表记载 Data Analysis Tool 与 Histogram Tool 被 Integrated Result Tool 取代（SmarTest 7.2.0），说明 IRT 是二者的后继工具。
+- **文档事实** Interaction with the Integrated Result Tool，该页以 IRT 为主题讨论交互，入边引用了本页。
+- **文档事实** Tools in alphabetical order、Tools grouped by function、93000 menu and its tools，这些页面把 IRT 列为 SmarTest 工具之一。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载 Introduced in SmarTest 7.2.0。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13_Integrated_Result_Tool.htm`，主源，含首段、Subtopics 与 Functional changes。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.02_Using_the_Integrated_Result_Tool.htm`，使用流程来源。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03_Integrated_Result_Tool_reference.htm` 及其子主题 `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.06_CSV_Export_command_line_tool.htm`，reference 结构与 CsvExport 语法来源。
+- `extract/edges.jsonl` 入边，用于 Test table editor、SHMOO.drawPlot、V93000 Components and Compatibility 等旁证。

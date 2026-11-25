@@ -124,20 +124,35 @@ dos.uploadResult(dest, DIGITAL_OFFSET_SEARCH::ALL_EDGES);
 
 ## 是什么
 
-（待补）
+**文档事实** TimingSetSelector 类表示单个 timing set 或全部 fixed timing set。
+
+**文档事实** 它与 DIGITAL_OFFSET_SEARCH_TASK 和 DIGITAL_OFFSET_SEARCH_PINS 一起使用；类定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/DigitalOffsetSearchTypes.h`。
+
+**文档事实** 构造需要两个参数：第一个选择 waveform set（fixed timing）、timing specification（equation based timing）或 multi-port specification；第二个从该 waveform set/specification 中选择一个或全部 timing set。对 multi-port specification，selector 指向的 port 由 DIGITAL_OFFSET_SEARCH_TASK 对象的 pin list 决定。
+
+**文档事实** 默认构造 `TimingSetSelector()` 等价于 `TimingSetSelector(DIGITAL_OFFSET_SEARCH::PRM, DIGITAL_OFFSET_SEARCH::PRM)`，指向 primary timing set。
+
+**文档事实** 参数语义：INT 型 waveformORspecId 在 fixed timing 下是 waveform set 号，在 equation based timing 下是 `100*equation_set_no + specset_no` 的 timing specification ID；DIGITAL_OFFSET_SEARCH::PRM 选 primary specification 或当前 primary timing set；DIGITAL_OFFSET_SEARCH::ALL 在 waveform 参数上选 fixed timing set 中全部 waveform set（仅支持 waveform set，不支持 specification ID），在 timingset 参数上选 timing set group 中全部 timing set。
 
 ## 典型用法
 
-（待补）
+**文档事实** 源页示例先创建 `DIGITAL_OFFSET_SEARCH_TASK dos` 与 `TimingSetSelector dest("multi_port", DIGITAL_OFFSET_SEARCH::ALL)`，设置 dos 的 pin/resourceType/searchType/start/numSteps/stepWidth/restoreFlag 后执行 `dos.execute()`，再调用 `dos.uploadResult(dest, DIGITAL_OFFSET_SEARCH::ALL_EDGES)`，把结果上传到 selector 选定的 timing set。
+
+**文档事实** 该类也被 DIGITAL_OFFSET_SEARCH 的其他上传/读取接口用作 timing set 选择参数，例如 uploadOffset/uploadResult、getOffset、DigitalOffsetResultCopy/Reset。
+
+**文档事实** 源页说明该类没有返回值（构造函数）。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** DIGITAL_OFFSET_SEARCH_TASK：本页明确说明 TimingSetSelector 与它一起使用；示例与 uploadOffset/uploadResult、enableAutoOffsetUpload、enableAutoResultsUpload 都用它选择 timing set，且对 multi-port 而言 selector 的 port 由该 task 的 pin list 决定。
+- **文档事实** DIGITAL_OFFSET_SEARCH_PINS：本页明确说明 TimingSetSelector 与它一起使用；uploadOffset/uploadResult、getOffset、DigitalOffsetResultCopy、DigitalOffsetResultReset 等接口以 TimingSetSelector 参数指定 timing set。
+- **文档事实** LevelSetSelector：本页 Related information 指向它，作为 level 侧对应的 selector 类。
+- **文档事实** DIGITAL_OFFSET_SEARCH_TASK.uploadResult() 的 dest 参数：该页说明它接收用 TimingSetSelector 定义的 dest 对象，用于选择结果要上传到的 timing set。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记 Introduced in SmarTest 7.2.1。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.02.17_TimingSetSelector.htm`，主源，含类说明、构造与参数语义、示例、Related information 与 Functional changes。
