@@ -14,6 +14,7 @@
 """
 
 import json
+import re
 from pathlib import Path
 
 BASE = Path(__file__).resolve().parent.parent
@@ -25,6 +26,7 @@ ERR_MIN = 60          # 比分这短的段不算材料（与 md 版一致）
 
 _docs = None
 _sections = None
+_topic2rel = None
 
 
 def load_docs():
@@ -49,15 +51,63 @@ def load_sections():
     return _sections
 
 
+def topic_to_rel(topic):
+    """`26580.htm` → 分类路径 rel。Subtopics 里写的是 topic id。"""
+    global _topic2rel
+    if _topic2rel is None:
+        _topic2rel = {}
+        for rel, d in load_docs().items():
+            t = (d.get('frontmatter') or {}).get('source_topic')
+            if t:
+                _topic2rel[t] = rel
+    return _topic2rel.get(topic)
+
+
 def sections_of(rel):
     return load_sections().get(rel, [])
 
 
-def collect_syntax(rel):
-    """返回 ([(段名, 正文)], [rel])。只取 group == 'syntax' 且未截断的段。"""
-    parts = [(s['h2'], s['body']) for s in sections_of(rel)
-             if s.get('group') in SYNTAX_GROUPS and not s.get('truncated')]
-    return parts, [rel]
+def _child_rels(rel):
+    """从 `Subtopics` 段里取子文档的 rel（body 里现在是 `[文字](rel)`）。"""
+    out = []
+    for s in sections_of(rel):
+        if (s.get('h2') or '').strip().lower() == 'subtopics':
+            for m in re.finditer(r'\]\(([^)]+)\)', s.get('body') or ''):
+                r = m.group(1).strip().split('#')[0]
+                r = topic_to_rel(r) or r
+                if r and r not in out:
+                    out.append(r)
+    return out
+
+
+def collect_syntax(rel, follow_subtopics=True, max_depth=2):
+    """返回 ([(段名, 正文)], [用到的 rel])。
+
+    跟随 `Subtopics`（最多两层）：定义文档自己没语法段时，
+    子主题 / 孙主题里常常有。段名会标「取自子主题 …」。
+    """
+    parts, srcs = [], []
+    seen = set()
+
+    def add(r, suffix=''):
+        if r in seen:
+            return
+        seen.add(r)
+        for s in sections_of(r):
+            if s.get('group') in SYNTAX_GROUPS and not s.get('truncated'):
+                parts.append((s['h2'] + suffix, s['body']))
+                srcs.append(r)
+
+    def walk(r, depth, suffix):
+        add(r, suffix)
+        if depth <= 0:
+            return
+        for ch in _child_rels(r):
+            title = ((load_docs().get(ch, {}).get('frontmatter') or {}).get('title') or ch)
+            walk(ch, depth - 1, f'（取自子主题 {title}）')
+
+    walk(rel, max_depth if follow_subtopics else 0, '')
+    return parts, srcs
 
 
 def collect_errors(rel):

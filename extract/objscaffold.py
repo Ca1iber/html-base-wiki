@@ -70,7 +70,11 @@ def syntax_block(rel):
         return '\n'.join(w)
 
     tot = sum(len(b) for _, b in parts)
-    w += [f'> 本节 **{tot:,} 字符逐字取自** `<{rel}>`。**不是转述。**',
+    subs = sorted({s for s in srcs if s != rel})
+    src_txt = f'`<{rel}>`'
+    if subs:
+        src_txt += ' 及其子主题 ' + '、'.join(f'`<{s}>`' for s in subs)
+    w += [f'> 本节 **{tot:,} 字符逐字取自** {src_txt}。**不是转述。**',
           '> 脚本能产出的不许调 LLM；参数表照抄，不改写。',
           '> 段内的内部链接已改写为 `文本`（raw: `路径`），**不再是链接**。', '']
     for name, body in parts:
@@ -188,6 +192,10 @@ def main():
     if (sys.stdout.encoding or '').lower().replace('-', '') != 'utf8':
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
     force = '--force' in sys.argv
+    only_type = None
+    if '--type' in sys.argv:
+        k = sys.argv.index('--type')
+        only_type = sys.argv[k + 1]
 
     rows = [r for r in csv.DictReader(PLAN.open(encoding='utf-8'))
             if r.get('slug') and not r['slug'].startswith('#')]
@@ -235,6 +243,11 @@ def main():
 
     for r in rows:
         if r['status'] != 'todo':
+            continue
+        if only_type and r['type'] != only_type:
+            continue
+        if not rels_of(r):
+            print(f'⏭  无 rel，跳过：{r["slug"]}')
             continue
         p = WIKI / DIRS[r['type']] / f"{r['slug']}.md"
         if p.exists() and not force:

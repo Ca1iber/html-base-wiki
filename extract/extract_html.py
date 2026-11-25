@@ -38,7 +38,7 @@ CONTEXT_MIN = 20
 CONTEXT_MERGE_MAX = 3
 CONTEXT_MAX = 300
 FIRST_PARA_MAX = 300
-SECTION_MAX = 6000
+SECTION_MAX = 50000     # md 版是 6,000；html 的语法段里是整张表，实测有 36k
 LABEL_MAX = 72          # md 臂的文件名规则：标签截到 72 字符
 
 SECTION_GROUPS = {
@@ -458,6 +458,11 @@ def flatten_events(article):
                 continue
             if c.tag == 'pre':
                 events.append(('b', '```\n' + text_of(c) + '\n```'))
+                continue
+            if c.tag == 'a':
+                href = (c.get('href') or '').strip()
+                t = norm(text_of(c))
+                events.append(('t', f'[{t}]({href})' if href else t))
                 continue
             if c.tag in BLOCK_TAGS:
                 events.append(('t', '\n'))
