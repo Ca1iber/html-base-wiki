@@ -614,20 +614,72 @@ dps_setNum
 
 ## 是什么
 
-（待补）
+**文档事实** PRIMARY_STATUS API 访问一个数据容器，该容器保存数字 primary 的当前定义：timing 相关 primary、level 相关 primary 以及 start label。这些定义可通过其成员函数修改。
+
+**文档事实** 该 API 还可调用子数据容器：`TIMING_SPEC` 与 `LEVEL_SPEC` 的类对象，用于修改 primary timing/level 的 equation/spec set 定义及 spec 值；多 port 测试时另有 `SPECIFICATION` 的类对象可用。
+
+**文档事实** 通过本 API 指定的定义变更，会在执行以下任一 API 时真正反映到硬件：`EXECUTE_TEST`、`START_TEST`、`DIGITAL_CAPTURE_TEST`、`NB_DIGITAL_CAPTURE_START`、`FUNCTIONAL_TEST`、`FLUSH` 后执行 `SPEC_SEARCH.execute()`、`FLUSH` 后执行 `SEQUENCER_STATUS.run()`、`FLUSH` 后执行 `PMU_IFVM.execute()`/`PMU_VFIM.execute()`/`TASK_LIST.execute()`/`DPS_VFIM.execute()`。
+
+**文档事实** 执行 `FLUSH` 时，这些变更也可以反映到 MCD；文档把这一点描述为把变更反映到 Test Program Explorer、Spec Tool 等用户界面的选项。
+
+**文档事实** 读取定义时返回的是当前已激活的定义。即使 sequencer 指令 `CTIM`（或 `CLEV`）在 start label 的 vector 生成期间把 timing set（或 level set）从 primary 切换到另一个，该指令也不改变 primary timing set（或 primary level set）的定义。
+
+**文档事实** 该类没有构造函数。使用 PRIMARY_STATUS API 时必须始终使用系统预置的类对象 `Primary`，不能自行创建该 API 的对象。头文件为 `/opt/hp93000/soc/prod_com/include/MAPI/PrimaryStat.h`。
+
+**文档事实** 成员函数覆盖 timing、waveform、level、dps、label 的设置与读取，多 port 下的 port-based timing 与 `SPECIFICATION`，以及 `FOR_EACH_SITE` 内使用的 `assignLabelToCurrentSite`、`assignPinToCurrentSite`。
 
 ## 典型用法
 
-（待补）
+**文档事实** 修改 primary timing set：
+
+```cpp
+Primary.timing(3);
+
+FUNCTIONAL_TEST();
+```
+
+**文档事实** `timing` 成员函数把 timing set 3 指定为要定义的 primary timing set，`FUNCTIONAL_TEST` 把它反映到硬件后执行功能测试。
+
+**文档事实** 读取 primary DPS set：
+
+```cpp
+INT dps_setNum;
+...
+dps_setNum = Primary.getDps();
+```
+
+**文档事实** `getDps` 把当前定义为 primary 的 DPS set 号返回给变量 `dps_setNum`。
+
+**文档事实** 读取 primary timing/waveform/level/label 分别用 `Primary.getTiming()`、`Primary.getWaveform()`、`Primary.getLevel()`、`Primary.getLabel()`；读取 primary timing/level 的 equation/spec set 与 spec 值用 `Primary.getTimingSpec()`、`Primary.getLevelSpec()`。
+
+**文档事实** 对 `timing`、`waveform`、`level`、`dps` 传入 0 时，当前定义保持不变；equation-based setup 也要用这些参数指定 primary set 号。
+
+**文档事实** 若在 PRIMARY_STATUS 指定变更后需要由 DC 测试 API（`PMU_VFIM`、`PMU_IFVM`、`DPS_VFIM`）生成 vector，必须先执行 `FLUSH` 以反映变更；`FUNCTIONAL_TEST` 不处理 analog set 与 routing set，涉及 analog 模块的功能测试也要先 `FLUSH`。
+
+**文档事实** 多 port 测试可用 `timing(INT tset, const STRING& port)` 为指定 port 定义 primary timing set，或用 `timing(const SPECIFICATION& specif)` 指定 specification；用 `isTimingPortBased()`、`isLabelPortBased()` 判断当前 timing setup/vector setup 是否 port-based。
+
+**文档事实** `assignLabelToCurrentSite` 为当前 site 指定 site 专用 start label，只能在 `FOR_EACH_SITE` 块内使用，并且要求相应 testsuite 的 parallel enable 标志已置位；`assignPinToCurrentSite` 控制多个 site 共用同一 channel 时哪个 label 在该 channel 上执行，块内带 pin 调用、块外以空参数调用可撤销先前的关联。
+
+**文档事实** `getModeContextName(STRING&)` 返回当前 active mode context 的名称，文档称该成员函数总是返回 `true`。
+
+**建议** 不要用 firmware command 与 test method API 混查或混改硬件状态：文档说明 test method API 使用内部 cache，firmware command 的硬件状态变更不会记录到该 cache，随后的 API 查询可能返回错误结果。
 
 ## 和谁有关
 
-（待补）
+- **TIMING_SPEC / LEVEL_SPEC / SPECIFICATION** — **文档事实**：本页把它们列为 PRIMARY_STATUS 可调用的子数据容器；`getTimingSpec()`、`getLevelSpec()`、`getSpecification()` 返回对应类对象，用于修改 primary 的 spec set 与 spec 值。
+- **FUNCTIONAL_TEST / START_TEST / EXECUTE_TEST / DIGITAL_CAPTURE_TEST / NB_DIGITAL_CAPTURE_START** — **文档事实**：执行这些 API 时，PRIMARY_STATUS 指定的数字 primary（timing/level 相关 primary 与 start label）会自动定义为新设置并激活到硬件，因此无需再执行 `FLUSH`。
+- **FLUSH** — **文档事实**：本页说明 `FLUSH` 可把变更反映到 MCD（供 UI 显示），也是 DC 测试 API 生成 vector 前反映 primary 变更的手段；表格按 API 列出 primary 是在 Define 还是 Activate 阶段生效。
+- **PMU_VFIM / PMU_IFVM / DPS_VFIM / TASK_LIST / SPMU_TASK / DPS_TASK / SEQUENCER_STATUS / SPEC_SEARCH** — **文档事实**：这些出现在本页的生效时机表中；DC API（`PMU_VFIM`、`PMU_IFVM`、`DPS_VFIM`）需先 `FLUSH` 才能反映 primary 变更。
+- **CTIM / CLEV（sequencer 指令）** — **文档事实**：本页明确它们只切换当前 timing/level set，不改变 primary 的定义。
+- **FOR_EACH_SITE** — **文档事实**：`assignLabelToCurrentSite`、`getAssignedLabelForCurrentSite`、`assignPinToCurrentSite`、`getAssignedPinForCurrentSite` 只能在 `FOR_EACH_SITE` 块内使用。
+- **How to execute separate patterns per site** — **文档事实**：`assignLabelToCurrentSite` 与 `assignPinToCurrentSite` 的说明都链接到该页，并指出需要 testsuite 的 parallel enable 标志。
+- **mode context** — **文档事实**：`getModeContextName` 返回当前 active mode context 的名称，正文链接到 mode context 的说明页。
+- **testflow** — **文档事实**：本页脚注说明 testflow 会在每个 testsuite 的 test method 程序启动前自动完成 primary 的定义与激活。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载：Introduced before SmarTest 6.3.2；SmarTest 7.5.3 新增成员函数 `getModeContextName()`。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.167_PRIMARY_STATUS_-__Primary.htm`：主源，含 API 概述、生效时机、Class definition、成员函数说明、Syntax for common tasks、Examples、Important points、Functional changes。

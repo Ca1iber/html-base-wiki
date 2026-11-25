@@ -49,20 +49,48 @@ FLSH {MUX}, {"init_flags"}
 
 ## 是什么
 
-（待补）
+**文档事实** FLSH 是 utility line 命令。页首说明 utility line 的下列命令不会立即设置硬件，而是先缓冲在 MCD（Message Concentrator and Distributor）中，并列出 UPST、UPTI、UTST、UTTI 四条命令。
+
+**文档事实** 其他命令页把 FLSH 作为这些设置的生效步骤：UPST 页要求发出 UPST 后必须发出 FLSH，才能把设置下载到硬件；UTST 页要求 FLSH 激活 UTST 的状态设置；DFUP 页要求 utility purpose 的标准设置经 UPST 后接 FLSH 激活。
+
+**文档事实** 本页语法为 `FLSH {MUX}, {"init_flags"}`。
+
+**文档事实** MUX 是可选参数，设计为系统软件生成的 testflow 的执行码，用于断开特定 site；文档明确说明它不用于用户编程，不要用它编写用户 procedure 或从 hpt 执行 FLSH。
+
+**文档事实** 参数表只描述了 MUX，语法中的 `init_flags` 没有对应说明。
+
+**推断** FLSH 的职责是把先前缓冲的 utility line 设置提交到硬件；这一职责由 UPST、UTST、DFUP 三页的表述共同支持，但 FLSH 本页没有逐字写出该定义。
 
 ## 典型用法
 
-（待补）
+**文档事实** UPST 与 UTST 页的 Application 示例都采用同一结构：先 `UPST ...` 或 `UTST ...` 设置状态，再 `FLSH`，需要等待完成时再 `WSDN`。
+
+**文档事实** UPST/UTST 页共同记载：用 UTST 或 UPST 设置的所有 utility lines 在 FLSH 执行时并行切换；若 FLSH 之后立即用 WSDN，暂停时间等于所切换 utility lines（UTTI）或 purposes（UPTI）中定义的最长 settling time。
+
+**文档事实** WSDN 页说明 WSDN 等待 FLSH 触发的 readiness analog set 与 routing settings 下载完成；若 FLSH 的设置序列没有运行，WSDN 无效果并立即返回。
+
+**文档事实** 标准断开序列页给出的序列为 `DLSO (@) CHRS OFF FLSH MUX WSDN SQST OFF CNCT OFF,(@) BCMD "",ACTION,"Update", PSST OFF RLYC IDLE,OFF,(@)`，FLSH 后紧跟 WSDN；用户自定义断开序列页给出同类序列。
+
+**文档事实** FTCG 页提示：若通过 FTCG 设置了 keep alive ports，再执行 FLUSH(TM::APRM)（文档注明即命令 FLSH），更新 clock 时会发出消息，说明至少一个端口无法保持不变，Flush 会强制 clock off。
+
+**建议** 用户程序写 `FLSH` 时不带 MUX，把 MUX 留给系统生成的断开 site 流程。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** UPST、UPTI、UTST、UTTI，FLSH 页把四条 utility line 命令列为会被缓冲的命令；UPST 页要求 FLSH 下载设置，UTST 页要求 FLSH 激活状态，UPTI/UTTI 定义的 settling time 决定 FLSH 后 WSDN 的等待。
+- **文档事实** WSDN，该页专门等待 FLSH 触发的下载完成，并给出 `FLSH` / `WSDN` 示例。
+- **文档事实** DFUP，该页说明 utility purpose 的标准设置须经 UPST 后接 FLSH 激活。
+- **文档事实** FTCG，该页说明 keep alive ports 与 FLSH/FLUSH 更新 clock 时的提示消息；并把 `FLUSH(TM::APRM)` 注明为命令 FLSH。
+- **文档事实** Standard disconnect sequence 与 User-defined disconnect sequence，两页的断开序列都含 `FLSH MUX` 后接 `WSDN`。
+- **文档事实** Defining a utility line，该页说明 FLSH 执行时 UTST/UPST 设置的所有 utility lines 并行切换，以及 WSDN 的等待时间规则。
+- **文档事实** MCD，FLSH 页说明被缓冲的 utility line 命令存放在 MCD。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2；SmarTest 7.1.3 支持 MBAV8+；SmarTest 7.1.4 起，master clock 关闭时不能访问模拟模块硬件，会发出错误并把消息显示在 report window。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.124_FLSH_-__FLuSH_buffered_commands.htm`，主源，含概述、Syntax、Parameters 与 Functional changes。
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.305_UPST__UPST__-__Utility_Purpose_STate.htm`、`02.06.02.02.313_UTST__UTST__-__UTility_line_STate.htm`、`02.06.02.02.341_WSDN_-__Wait_Setup_DoNe.htm`、`02.06.02.02.69_DFUP__DFUP__-__DeFine_Utility_Purpose.htm`，用于核对 FLSH 的激活与等待关系（已用 show.py 读取）。
+- 断开序列、FTCG、Defining a utility line 的引文取自 objpack 入边索引。

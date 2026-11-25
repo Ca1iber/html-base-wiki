@@ -251,20 +251,57 @@ quotation marks into the command string.
 
 ## 是什么
 
-（待补）
+**文档事实** FW_TASK 是 test method API，允许从 test method 在 firmware 层直接访问系统硬件。
+
+**文档事实** 若 test method 程序中需要使用多条 firmware commands，该 API 提供按需执行一条或多条 firmware commands 的环境。
+
+**文档事实** 文档规定 BEGIN_EXTENSION 与 END_EXTENSION 始终与 FW_TASK 一起使用；除 firmware command 外，也可在二者之间执行自己创建的函数。
+
+**文档事实** 该 API 定义在头文件 `/opt/hp93000/soc/prod_com/include/MAPI/Extension.h`。
+
+**文档事实** 有三个重载：执行设置命令；执行查询命令并把应答写入 `STRING& answer`；取二进制数据并写入 `FW_ResultData& resultdata`。
+
+**文档事实** 返回类型 FWTASK_STATUS 的枚举包括 FW_PASSED（命令成功执行）、FW_WARNING（MCD 产生警告并输出到 report window）、FW_BREAK（固件执行期间发生 break 时返回；按 SmarTest 主菜单 Break 后，break 信号送到 MCD，数字 sequencer 进入 BRK 状态，系统硬件停止而数字通道继续输出 break vectors，随后控制返回 test method 并继续执行）。
+
+**文档事实** 若 firmware 执行因上述以外原因失败则发生 error，test method 执行中止；report window 输出两类错误消息：由 ENABLE_ERROR_MESSAGE 激活的 test method 错误消息，以及 MCD 产生的消息。
+
+**文档事实** 查询用的 answer 最大 1 MB，超过限制会触发 system error。
 
 ## 典型用法
 
-（待补）
+**文档事实** 设置命令示例为 `FW_TASK("UTOT 1, 65535, 12345\n");`；文档说明它在 firmware 层把输出线 URW15、14、UW13 置 7，URW06 置 00、值 53190（12345 的反相值）。命令串即使只有一条，也须以 `\n` 或 `;` 结尾。
+
+**文档事实** 查询命令示例为 `STRING answer; if (FW_TASK("DFPS?(@)\n", answer) == FW_PASSED) { ... }`；DFPS? 成功执行且返回 FW_PASSED 后，if 块中的语句执行。
+
+**文档事实** 取二进制数据示例依次执行 `DPSE 1,(dps1),#150,1,2`、`PSST ON`、`PSEE 1,,,(dps1)`、`PSER? 1,pval`，最后一条用 `FW_ResultData data` 接收；结果含 Answer、BinaryDataLength 与 BinaryData。
+
+**文档事实** trace/MCDLog 示例用 `FW_TASK("DIAG 2")` 开启 trace、`FW_TASK("DIAG -2")` 关闭，并用 NOOP 命令经 FW_TASK 向 MCDLog 写注释；字符串内的引号须用反斜杠转义。
+
+**文档事实** 多条 firmware 命令可用换行 `\n` 或分号 `;` 分隔后合并在一个 command string 中。
+
+**文档事实** FFCI 页说明 FFCI? 命令也可用 FW_TASK 执行，取二进制数据必须使用 `FWTASK_STATUS FW_TASK(const STRING& command, FW_ResultData & resultdata);`。
+
+**文档事实** 多 site 编程页说明：在多 site 测试的 first-invocation block 中，应把 FW_TASK 包在带 site 参数的 BEGIN_EXTENSION 与 END_EXTENSION 之间。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** BEGIN_EXTENSION 与 END_EXTENSION，文档规定二者始终与 FW_TASK 一起使用；extension block 内可放一个或多个 FW_TASK 及自建函数，不应放其他 test method API；BEGIN_EXTENSION 页还要求进入 block 前执行 FLUSH 下载缓存设置。
+- **文档事实** Command Reference，FW_TASK 执行的是 firmware commands，文档把命令细节指向该手册。
+- **文档事实** FW_ResultData，SmarTest 7.1.0 新增的类，作为二进制数据重载的输出对象，提供 Answer、BinaryDataLength、BinaryData。
+- **文档事实** MCD，FW_WARNING 由 MCD 产生并输出到 report window；出错时 MCD 的消息也会输出；FLUSH 的缓存设置下载目标是系统硬件或 MCD。
+- **文档事实** ENABLE_ERROR_MESSAGE，决定 test method 错误消息是否输出到 report window。
+- **文档事实** DIAG 与 NOOP，Example 4 用 FW_TASK 执行它们来开关 trace 与写 MCDLog 注释。
+- **文档事实** GET_TESTSUITE_NAME，Example 4 用它取得 test suite 名称后再写 MCDLog 注释。
+- **文档事实** FFCI，FFCI 页说明其命令也可经 FW_TASK 执行，并指定用 FW_ResultData 重载取二进制数据。
+- **文档事实** Executing firmware commands from within a program，该页把“从 test method 执行 firmware command”落到 FW_TASK。
+- **文档事实** Important Points on Multisite Programming（System reference 与 Multi-Site Testing 两个版本），两页都要求把 FW_TASK 包在带 site 参数的 BEGIN_EXTENSION/END_EXTENSION 中。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2；SmarTest 7.1.0 新增类 FW_ResultData。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.77_FW_TASK.htm`，主源，含 Application note、Syntax、Parameters、Return value、Examples、Related information 与 Functional changes。
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.10_BEGIN_EXTENSION.htm`，用于核对 extension block 与 FLUSH 的关系（已用 show.py 读取）。
+- FFCI、多 site、Executing firmware commands 的引文取自 objpack 入边索引。

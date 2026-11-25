@@ -310,20 +310,86 @@ The change to the spec's value results in violations of range, limit, etc.
 
 ## 是什么
 
-（待补）
+**文档事实**：SVLR 把 base（spec）variable 设为给定值，并重新计算 timing 或 levels。给定值必须落在相应 spec set 规定的 minimum 与 maximum 范围内；新值在下一个 functional test 开始时生效。
+
+**文档事实**：SVLR 不改变 spec variable 的 setup value；做出新的修改时，之前的修改会被重置为 setup values。
+
+**文档事实**：SVLR? 查询返回一个或多个 base 或 derived（spec 或 equation）variable 的当前 runtime value，或返回变量与 equation sets 之间的关联。
+
+**文档事实**：spec_type 取 LEV（levels）或 TIM（timing）。equation_set_no 为 1–99，可用 PRM 表示 primary equation set（multi-port 下为 SPRM 定义的 primary specification），查询中可用 ALL。specset_no 为 1–99，查询中可用 ALL；未给 specset_no 时只返回 spec 名而不返回值。
+
+**文档事实**：multi-port specification 在第三个参数给出 specification 名，此时第二个参数必须留空。spec_name 可用 `<spec_name>@<port_name>` 限定到某端口；这样修改后该端口的变量 scope 会变为 local（即使 setup 中为 global），直到 setup 再次下载。
+
+**文档事实**：pinlist 参数可临时修改单个 pin 的 runtime definition，但 SVLR? 不能取回 pin-specific values。在另一个 spec variable 上做新修改时只保留最后一次修改，之前的 spec variable 会重置为 spec file 中的 setup value。要永久修改某个 spec variable，应把全部 pin（即 @）作为 pinlist；若要永久修改单个 pin 的值，则需为每个 pin 使用 specset 并在该 specset 中修改。
+
+**文档事实**：CAUTION 指出，不应把 LEVEL_SPEC 或 TIMING_SPEC API 与非调试目的的 firmware 命令混用：这两个 test method API 会缓存值以支持 `.restore()`，而 firmware 层没有这种缓存。两种方式改 spec 值都不会改变 level 或 timing 文件；永久修改必须改对应的 setup 文件。
+
+**文档事实**：SVLR 不会把 Test Program Explorer 置为 out of date，但会设置受影响 spec set 的 status bit 10；status bits 可用 SPST? 查询。
+
+**文档事实**：该命令配置拥有 setup focus 的 sites（见 PSFC），同一时间只能有一个 site 在 focus。
+
+**文档事实**：Application 段把 SVLR/SVLR? 的应用场景记为 testflow 中的 assign value node，并注明 multi-site 环境下每个 site 可设置自己的值。
 
 ## 典型用法
 
-（待补）
+**文档事实**：Example 1 在同时存在 single-port 与 multi-port specifications 的 setup 中查询 spec variable f 的值：
+
+```
+> SVLR? TIM,ALL,ALL,"f"
+< SVLR TIM,,"spec_p_1_p_2","f@p_1",35
+< SVLR TIM,,"spec_p_1_p_2","f@p_2",33
+< SVLR TIM,1,1,"f",37
+```
+
+**文档事实**：Example 2 查询 spec variable f 出现在哪些 equation sets；不返回数值：
+
+```
+> SVLR? TIM,ALL,,"f"
+< SVLR TIM,1,,"f",
+< SVLR TIM,2,,"f",
+```
+
+**文档事实**：Example 3 假设 primary timing 是含 p_1、p_2 两个端口的 multi-port specification，且两端口共享变量 f，f 对 p_1 的 scope 为 global。查询 p_1 的值、全局修改、再查询：
+
+```
+> SVLR? TIM,PRM,,"f@p_1"
+< SVLR TIM,,"spec_p_1_p_2","f@p_1",33
+> SVLR TIM,PRM,,"f",43
+> SVLR? TIM,PRM,,"f@p_1"
+< SVLR TIM,,"spec_p_1_p_2","f@p_1",43
+```
+
+**文档事实**：随后先做 local 修改，再尝试 global 修改：
+
+```
+> SVLR TIM,PRM,,"f@p_1",53
+> SVLR TIM,PRM,,"f",43
+> SVLR? TIM,PRM,,"f@p_1"
+< SVLR TIM,,"spec_p_1_p_2","f@p_1",53
+```
+
+**文档事实**：第二次 global 命令无效，因为执行 local 命令后 f 只有 local scope。
+
+**文档事实**：修改单点值的基本形式为 `SVLR {spec_type}, {equation_set_no}, {specset_no}, {"spec_name"}, {value} [,(pinlist)]`；文档给出的出错条件是 spec 不存在，或修改后的值违反 range、limit 等。
 
 ## 和谁有关
 
-（待补）
+**文档事实**：以下关系均有本页正文或回链证据支撑。
+
+- [[psfc]]：本页说明 SVLR 配置拥有 setup focus 的 sites，并直接链接 PSFC/PSFC?（Parallel Setup FoCus）。
+- [[spst]]：本页说明 SVLR 会设置受影响 spec set 的 status bit 10，并可用 SPST? 查询。
+- [[assign-value-node]]：本页 Application 段把 assign value node 列为 SVLR 的应用场景，并说明每个 site 可设自己的值。
+- [[spec-set]]：SVLR/SVLR? 的 specset_no 指向 spec set；查询中 ALL 选择所有已定义的 specsets。
+- [[level-spec]]、[[timing-spec]]：本页 CAUTION 直接提到 LEVEL_SPEC 与 TIMING_SPEC test method API，并比较其缓存行为与 firmware 层 SVLR 的差异。
+- `List of level setup commands`（`02_System_reference/02.06_Command_Reference/02.06.05.02_List_of_level_setup_commands.htm`）：回链证据把 SVLR/SVLR? 列入 level setup 命令。
+- `Global and local scope of base variables`（`02_System_reference/02.06_Command_Reference/02.06.06.01.05.03.01_Global_and_local_scope_of_base_variables.htm`）：本页参数说明 multi-port 下 spec variable 的 local/global scope 时直接链接该页。
 
 ## 版本
 
-（待补）
+**文档事实**：本页 Functional changes 仅记载 Introduced before SmarTest 6.3.2——这是哨兵值，表示文档集覆盖范围之前已有，不能理解为 6.3.2 的新增或变更。
+
+**文档事实**：本页 Functional changes 未记载任何后续版本变更，后续变更文档未覆盖。
 
 ## 出处
 
-（待补）
+- 主源（「语法 / 参数」与「报错条件」的逐字来源）：`02_System_reference/02.06_Command_Reference/02.06.05.02.24_SVLR__SVLR__-__Spec_VaLues_at_Runtime.htm`（正文、单端口/多端口/两种 setup 的语法、Parameters、Application、Errors、Examples、Functional changes）。

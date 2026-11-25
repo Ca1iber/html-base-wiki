@@ -684,20 +684,61 @@ VAR myvar3: files/group2.tfl
 
 ## 是什么
 
-（待补）
+**文档事实** Testflow Tool 是 SmarTest Work Center 中用于开发和调试 testflow 的 GUI 工具。
+
+**文档事实** testflow 是由各个测试互连而成的集合，每个测试检验一个特定参数；这些测试可以按顺序、按先前/其他测试结果、在某个条件成立期间等多种方式互连，共同组成对器件的完整测试。
+
+**文档事实** Testflow Tool 有两个编辑器用于开发和调试 testflow：Flow Data Editor 以表格/电子表格形式显示 testflow 元素，便于纵览各组件、也便于调试；Flow Sequence Editor 显示测试的流程图，提供 testflow 结构信息。两者以两种不同方式表示同一份 testflow 文件中的信息。
+
+**文档事实** 两个编辑器处理的是同一个 testflow 文件，该文件位于 `<device directory>/testflow` 目录。Testflow Properties view 显示所选 test suite 的属性。
+
+**文档事实** testflow 可以存成单个文件，也可以把各部分存成独立子文件，再由 testflow master file 把组成完整 testflow 的各部分汇总起来；后一种结构便于多个用户并行处理同一 testflow。
+
+**文档事实** 使用 Testflow Tool 时还可获得导航辅助（书签、Flow Data Editor 的过滤行、Flow Sequence Editor 的搜索、Next/Previous Annotation 按钮）、运行与调试、testflow 合并等能力；SmarTest 另提供离线的 Hardware Response Emulator 来辅助调试 testflow 或 test suite。
 
 ## 典型用法
 
-（待补）
+**文档事实** 打开方式：先打开 93000 Setup perspective，在 Test Program Explorer 视图中双击 testflow 项。若配置为 Open recent editor，会打开最近关闭的编辑器（Flow Data Editor 或 Flow Sequence Editor）与 Properties view；若配置为 Open integrated testflow tool，会打开 Flow Data Editor、Flow Sequence Editor 与 Properties view。也可右键 testflow 项，选择 Open With > Flow Sequence Editor 或 Open With > Flow Data Editor 只打开其中一个编辑器。
+
+**文档事实** 编辑 testflow 的步骤包括：打开工具、创建 testflow、选择 setup 文件、插入 test suite 与 bin、在 Flow Data Editor 中编辑 test suite、在 Tests 页或 Properties view 添加 limit、处理节点、变量、打印 testflow 的图形表示、从 CSV 导入或导出到 CSV、识别 burst 中的 fail label。
+
+**文档事实** 可以直接运行整个 testflow，或运行其中一个/多个 test suite；也可以让 testflow 或单个 test suite 在循环中运行直到满足指定条件。文档说明这适用于调试 testflow，或把新 test suite 集成进 testflow 时。
+
+**文档事实** 调试时 SmarTest 会自动显示 Debug view；开始调试前用 Debug Mode flag 选择 Report window 中的调试信息级别；可以逐个 test suite 单步执行（SmarTest 7.1.0 引入单步执行模式）；多 site 调试时可借助 Site Control Window 识别通过/失败的 site，并查看各 site 的结果。
+
+**文档事实** 合并 testflow 时，目标 testflow 需先加载，然后在 Test Program Explorer 中右键 testflow 项并选择 Open testflow to merge 选源 testflow；在源 testflow 的 Flow Sequence Editor 中复制一个或多个元素并粘贴到目标 testflow，节点设置会一并复制。若复制元素用到目标中不存在的变量，SmarTest 会打开 Add New Variables 窗口；若合并后 test suite 的 primary 设置无效，需要手工修正。
+
+**文档事实** Hardware Response Emulator（HWRE）用于离线调试 testflow 或 test suite：Import 模式导入 hardware response 文件中的数据，并在执行期间返回给 testflow 或 test method API；Store 模式从在线执行的测量数据或离线执行的用户提供数据生成 hardware response 文件。
+
+**文档事实** Report Window 中按 site 打印的消息可通过 `.testflow.ReportUiOutput.user_def` 配置，支持 `<passed>`、`<failed>` 行以及 `%site`、`%bin`、`%testSuiteName` 等占位符，`#` 开头的行是注释；示例包括同时打印通过/失败 site、只打印失败 site、以及 test suite 执行后打印失败 site。
+
+**文档事实** Testflow Tool 可在 Preferences window（Window > Preferences）中配置；相关偏好页包括 Testflow Tool、Flow Sequence Editor、Testflow Tool - Table Annotations、Test Suites preference page。
+
+**建议** 即使 testflow 文件是文本文件、可以直接用文本编辑器修改，文档也建议只通过 Testflow Tool 修改设置，以避开参数范围检查等加载错误。
 
 ## 和谁有关
 
-（待补）
+- **Flow Data Editor** — **文档事实**：Testflow Tool 的两个编辑器之一，以表格形式显示 testflow 元素，提供组件纵览并辅助调试。
+- **Flow Sequence Editor** — **文档事实**：另一个编辑器，以流程图形表示 testflow 结构，并带有插入 Testflow components 的 Palette。
+- **Testflow Properties view** — **文档事实**：显示所选 test suite 的属性；Testflow Tool 的 integrated 打开模式会同时打开该视图。
+- **Testflow file** — **文档事实**：两个编辑器处理同一份位于 `<device_dir>/testflow` 的文件；该页给出 testflow 文件的 BNF 语法与示例，并建议通过 Testflow Tool 修改设置。
+- **Testflow master file** — **文档事实**：testflow 可拆成多个子文件，由 master file 汇总；该页说明 master file 的格式与可拆分的部分（test suite groups、Information、Flags、Bins、Setup、Variables）。
+- **Testflow components / Test suites / Bins / Flags / Variables** — **文档事实**：这些是 testflow 的组成元素，工具用于编辑和运行它们；报告消息、调试模式等由相应 flag 控制。
+- **Debug view / Site Control Window** — **文档事实**：调试 testflow 时 Debug view 自动显示，Site Control Window 用于多 site 调试时识别通过/失败 site 并查看各 site 结果。
+- **Hardware Response Emulator** — **文档事实**：工具提供的离线调试手段，返回预先准备的数据并可控制各 test suite 的 pass/fail。
+- **Report window 与 `.testflow.ReportUiOutput.user_def`** — **文档事实**：该文件配置 testflow 执行后打印到 Report Window 的通过/失败 site 消息。
+- **Preferences window / Testflow Tool preference page** — **文档事实**：Testflow Tool 的配置入口，包括选择最近编辑器、integrated 打开模式、编辑器选择同步等选项。
+- **Test Program Explorer 与 93000 Setup perspective** — **文档事实**：打开 Testflow Tool 的前置环境；在该视图中双击 testflow 项打开工具，右键可执行 Open testflow to merge。
+- **Integrated Result Tool** — **文档事实**：其原理页说明可从 data navigation view 在 Testflow Tool 中打开测试或 bin 的定义，也可在 Testflow Tool 中右键测试、从快捷菜单在 Integrated Result Tool 中打开其结果（objpack 入边引文）。
 
 ## 版本
 
-（待补）
+**文档事实** 主文档 Functional changes 只记一条：Introduced before SmarTest 6.3.2。其子主题另记有：SmarTest 6.5.2 将 Flow Sequence Editor 集成进 SmarTest Eclipse Work Center、Properties view 取代 Testsuite view（Elements of the Testflow Tool）；SmarTest 7.1.0 引入单步执行调试模式（Debugging a testflow）；SmarTest 7.2.1 在打开 testflow 编辑器时检查 test method 库版本（Opening the Testflow Tool）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Testflow_Tool.htm`：主源，含 Subtopics、工具定义与 Functional changes。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03_Elements_of_the_Testflow_Tool.htm`：两个编辑器、Properties view、同一 testflow 文件与 Functional changes。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.03_Hierarchy_within_a_testflow.htm`、`02.08.04.32.01.05_Configuring_the_messages_printed_in_the_Report_Window.htm`、`02.08.04.32.03.05_Testflow_file.htm`、`02.08.04.32.03.06_Testflow_master_file.htm`：语法节所用的四个子主题，提供层次选择、报告消息、testflow 文件语法与 master file 格式。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02_Using_the_Testflow_Tool.htm` 及其子主题（Editing、Navigating、Running、Debugging、Merging、Hardware Response Emulator、Configuring）：开发、导航、运行、调试、合并与配置的做法与版本信息。
+- `02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.01.01_Opening_the_Testflow_Tool.htm`：打开工具的前置条件与三种打开模式。

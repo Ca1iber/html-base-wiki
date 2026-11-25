@@ -71,10 +71,10 @@ jscf,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.14
 jsdf,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.148_JSDF__JSDF__-__Jitter_Set_DeFinition.htm,skeleton,
 jspr,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.149_JSPR__JSPR__-__Jitter_Set_PRimary_set.htm,skeleton,
 pste,object,L1,run,02_System_reference/02.06_Command_Reference/02.06.02.02.199_PSTE__PSTE__-__Parallel_SiTe_Enable.htm,skeleton,
-primary-status,object,L3,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.167_PRIMARY_STATUS_-__Primary.htm,skeleton,
+primary-status,object,L3,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.167_PRIMARY_STATUS_-__Primary.htm,done,
 sequencer-status,object,L3,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.204_SEQUENCER_STATUS_-__Sequencer.htm,skeleton,
 tmlimits,object,L3,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.250_TMLimits.htm,done,
-report-window,object,gui,results,01_Getting_started/01.01_SmarTest_Work_Center/01.01.13_Report_window.htm,skeleton,
+report-window,object,gui,results,01_Getting_started/01.01_SmarTest_Work_Center/01.01.13_Report_window.htm,done,
 timing-diagram-tool,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.33_Timing_Diagram_Tool.htm,done,并入 using-the-timing-diagram-tool
 error-map-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.08_Error_Map_Tool.htm,skeleton,
 shmoo-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.25_Shmoo_Tool.htm,done,并入 setting-up-a-shmoo-test-with-the-shmoo-tool
@@ -82,7 +82,7 @@ setup-management-tool,object,gui,project,01_Getting_started/01.01_SmarTest_Work_
 integrated-result-tool,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13_Integrated_Result_Tool.htm,done,
 digital-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.02_Digital_Pins_editor.htm,done,
 stpm,object,gui,project,02_System_reference/02.09_Test_Program_Management/02.09.02_SmarTest_Program_Manager.htm,skeleton,
-model-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.01_The_model_file.htm,skeleton,
+model-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.01_The_model_file.htm,done,
 testflow-file,object,file,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.05_Testflow_file.htm,done,
 stpm-control-file,object,file,project,02_System_reference/02.09_Test_Program_Management/02.09.02.03_STPM_control_file.htm,done,
 spec-set,object,L2,level,02_System_reference/02.06_Command_Reference/02.06.05.01.04.02.09_Spec_sets.htm,skeleton,
@@ -142,14 +142,14 @@ mapping-testmethod,mapping,n/a,testmethod,01_Getting_started/01.06_Test_methods/
 mapping-timing,mapping,n/a,timing,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.04.02_Setting_up_the_wavetables.htm,todo,回填（页面先建；sources 共 68 条，此处只记第一条）
 pin-configuration-file,object,file,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.04_Pin_configuration_file.htm;02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.05_Pin_configuration_master_file.htm;02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.09.01_Pin_configuration_file.htm,done,
 level-file,object,file,level,02_System_reference/02.06_Command_Reference/02.06.05.01.04.02_Structure_of_an_equation_based_level_setup.htm;02_System_reference/02.06_Command_Reference/02.06.05.01.05_Data_Organization_of_Fixed_Levels.htm,skeleton,
-test-program-explorer,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02_Test_Program_Explorer.htm,skeleton,
+test-program-explorer,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02_Test_Program_Explorer.htm,done,
 pattern-explorer,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.01_Pattern_Explorer.htm,done,
 vector-setup-file,object,file,pattern,02_System_reference/02.06_Command_Reference/02.06.07.01_Concepts_of_vector_setup.htm;02_System_reference/02.06_Command_Reference/02.06.07.01.05_The_pattern_master_file.htm,skeleton,
 device-directory,object,file,project,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.01.01_Device_directory_structure.htm,skeleton,
-flags-page,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01.06_Flags_page.htm,skeleton,
+flags-page,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01.06_Flags_page.htm,done,
 pattern-master-file,object,file,pattern,02_System_reference/02.06_Command_Reference/02.06.07.01.05_The_pattern_master_file.htm,skeleton,
-spec-tool,object,gui,level,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.30_Spec_Tool.htm,skeleton,
-testflow-tool,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Testflow_Tool.htm,skeleton,
+spec-tool,object,gui,level,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.30_Spec_Tool.htm,done,
+testflow-tool,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Testflow_Tool.htm,done,
 timing-file,object,file,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.03.01_Data_organization_of_equation_based_timing.htm;02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.04_Example_of_the_equation_based_timing_setup_file.htm,skeleton,
 level-master-file,object,file,level,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.14.02.05_Level_setup_master_file.htm;01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.02.04.04_Creating_a_level_master_file.htm,skeleton,
 site-control-window,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.27_Site_Control_Window.htm,done,
@@ -160,18 +160,18 @@ level-setup-tool,object,gui,level,02_System_reference/02.08_Setup_and_Result_Too
 pattern-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.02_Pattern_Editor.htm,done,
 test-suite,object,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.01_Test_suites.htm,skeleton,
 bin,object,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.06_Bins.htm,skeleton,
-connect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,skeleton,
-timing-setup-tool,object,gui,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34_Timing_Setup_Tool.htm,skeleton,
+connect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,done,
+timing-setup-tool,object,gui,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34_Timing_Setup_Tool.htm,done,
 dps-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.03_DPS_Pins_editor.htm,done,
-flow-data-editor,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01_Flow_Data_Editor.htm,skeleton,
+flow-data-editor,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01_Flow_Data_Editor.htm,done,
 level-spec,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.124_LEVEL_SPEC.htm,done,
-svlr,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.24_SVLR__SVLR__-__Spec_VaLues_at_Runtime.htm,skeleton,
-test-suites-page,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01.01_Test_Suites_page.htm,skeleton,
+svlr,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.24_SVLR__SVLR__-__Spec_VaLues_at_Runtime.htm,done,
+test-suites-page,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.01.01_Test_Suites_page.htm,done,
 testflow-analyzer-tool,object,L3,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.05.07_The_Testflow_Analyzer_Tool__TAT.htm,done,
 timing-equation-set,object,file,timing,02_System_reference/02.06_Command_Reference/02.06.06.01.02.01_Timing_equation_set_reference.htm,done,
 timing-master-file,object,file,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.05_Timing_setup_master_file.htm,skeleton,
 utility-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.04_Utility_Pins_editor.htm,done,
-disconnect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,skeleton,
+disconnect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.41_DISCONNECT.htm;02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,done,
 spec-value,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.03_SpecValue.htm,skeleton,
 spec-variable,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.04_SpecVariable.htm,skeleton,
 timing-spec,object,L2,timing,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm,skeleton,
@@ -221,22 +221,22 @@ dc-scale-limits-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result
 edl-file,object,file,results,03_Use_cases_and_application_papers/03.14_Application_Papers/03.14.10.04_The_V93000_Data_Logging_Architecture.htm,skeleton,定义句在此篇：「the terms DataCollection file and EDL file have become synonymous」
 flag,concept,n/a,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.07_Flags.htm,todo,flag 对象本身；清单侧已建 `alphabetical-list-of-flags`，勿重复
 flex-relay,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.68_FLEX_RELAY.htm,done,stages/pin.md 已定 L2；spmu-pin-task-mode 把它写成替代品
-flsh,object,L1,run,02_System_reference/02.06_Command_Reference/02.06.02.02.124_FLSH_-__FLuSH_buffered_commands.htm,skeleton,⚠️ 与已建 `flush`（L2）**只差一个字母、是另一件东西**；flush.md 与 stages/run.md 已明写要各建一页
+flsh,object,L1,run,02_System_reference/02.06_Command_Reference/02.06.02.02.124_FLSH_-__FLuSH_buffered_commands.htm,done,⚠️ 与已建 `flush`（L2）**只差一个字母、是另一件东西**；flush.md 与 stages/run.md 已明写要各建一页
 pin-string,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,skeleton,⚠️ 是 test method 的 PinString **参数类型**，不是 02.06 的 PADS 命令（词面匹配会指错）
 smartcalc,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.10_SmartCalc_framework.htm,done,分界已定：本页讲「怎么调」（API 侧），`smartcalc-framework` 讲「为什么、是什么」
 spec-search,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.233_SPEC_SEARCH.htm,skeleton,六个 FLUSH-then-X 之一；level-spec.md 已划清与本页不同物
 test-method-class,object,gui,testmethod,01_Getting_started/01.06_Test_methods/01.06.02.02_2._Create_a_Test_Method_Class.htm,skeleton,「New > Test Method Class」向导产出的类模板；概念页 `how-to-create-a-universal-test-method-class` 是「怎么建」
-utility-line-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.04_Utility_Line_view.htm,skeleton,utility line 的**运行期**视图；与概念页 `utility-lines` 不同层
+utility-line-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.04_Utility_Line_view.htm,done,utility line 的**运行期**视图；与概念页 `utility-lines` 不同层
 wavetable,object,n/a,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.03.03.07_wavetable.htm,skeleton,⚠️ wavetable-file.md 自己把取材边界写好了：本页是概念侧，「wavetable 本身是什么、有哪些列」
 device-technology-directory,object,file,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.01.01_Device_Technology_Directory.htm,skeleton,≠ `device-directory`（那是结构本身）；本页是 /dev_tech 下的 cmos/ecl 模板
 dps-aux-task,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43_DPS_AUX_TASK.htm,done,**父类**，管 surge tracker 与 TMU；子类 `dps-aux-pin-task` 已建
 dtcp,object,L1,project,02_System_reference/02.06_Command_Reference/02.06.02.02.93_DTCP__DTCP__-__Define_Technology_Control_Parameters.htm,skeleton,管 testpoints / extended_dram_factor，需 *RST 激活；补充已建 `dscp`
 error-map,object,file,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.08.01_Error_Map.htm,skeleton,⚠️ error-map-tool.md 已明写「上游，不是同义词」——工具页与格式页两页
-fw-task,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.77_FW_TASK.htm,skeleton,⚠️ 勿挂 02.08.04.32.02.06.01.05_FW_TASK_type.md（Hardware Response Emulator 的对话框，是另一件东西）
+fw-task,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.77_FW_TASK.htm,done,⚠️ 勿挂 02.08.04.32.02.06.01.05_FW_TASK_type.md（Hardware Response Emulator 的对话框，是另一件东西）
 multiport-burst-editor,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16.03_Multiport_Burst_Editor.htm,done,原文首句自称 multiport editor（与标题不一致，逐字引用保留）。可追加 99.0136 为第二 source
 pattern-object,object,L2,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.142.01_PATTERN.htm,skeleton,⚠️ slug 是 wiki 自造（§5 避撞脊椎 pattern 段），**不许改回 pattern**；sources 只挂 .142.01
 port-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.03_Port_Editor.htm,skeleton,建页前先读 pin-configuration-tool.md:577（Port Editor ↔ Pin Group Editor 关系已写在那里）
-setup-perspective,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02_Setup_perspective.htm,skeleton,勿把父篇 01.01.07_Perspectives（in_src=13）内容吸进来
+setup-perspective,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02_Setup_perspective.htm,done,勿把父篇 01.01.07_Perspectives（in_src=13）内容吸进来
 spst,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.23_SPST__-__SPecset_STatus.htm,skeleton,⚠️ 取 dedup canonical（in_src=7）；另有 3 份 in_src=0 的重复投放，取错会得出「入度 0」的反向结论
 stdf,object,file,results,02_System_reference/02.10_Data_Logging/02.10.03.02.01_Starting_the_formatter.htm,skeleton,⚠️ 定义句在此篇；挂名的 02.10.03.01_Overview 只有 377 B 纯子主题清单、无定义。原文特意写明它不是 SmarTest Data Formatter 的缩写
 testflow-variable,object,file,testflow,02_System_reference/02.09_Test_Program_Management/02.09.03.04.08_Testflow_variable_mapping_table.htm,skeleton,分 Userflag / String / Double 三型；RDI_CONFIGURE_FILE 与 TMLimit_* 的宿主
@@ -252,7 +252,7 @@ data-retrieval-library,object,L2,results,02_System_reference/02.10_Data_Logging/
 dfge,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.59_DFGE__DFGE__-__DeFine_Group_by_Expressions.htm,skeleton,定义表达式型 pin 组；⚠️ 勿据已建 `dfgp` 推内容（dfgp.md 实测 0 命中 DFGE）
 dfpt,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.66_DFPT__DFPT__-__DeFine_PorT.htm,skeleton,定义 port；⚠️ raw 正文小标题误拼作 DFTP，逐字引用须保留并加注
 edf,concept,file,results,02_System_reference/02.10_Data_Logging/02.10.01.06_Event_Data_Logging_Format__EDF.htm,todo,⚠️ **本篇正文 0 句**（602 B 纯子主题清单）。语料全库无 EDF 定义句——页内必须写「语料未写」，不许替它造定义
-event-formatter,object,gui,results,02_System_reference/02.10_Data_Logging/02.10.02_Event_Formatter.htm,skeleton,把 EDF 落成人读报告；与 `smartest-data-formatter` 分列（mapping-results 已分）
+event-formatter,object,gui,results,02_System_reference/02.10_Data_Logging/02.10.02_Event_Formatter.htm,done,把 EDF 落成人读报告；与 `smartest-data-formatter` 分列（mapping-results 已分）
 file-string,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,skeleton,test method 参数类型 FileString（SmarTest 7.2.1 起）
 hardware-response-emulator,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.06_Hardware_Response_Emulator.htm,skeleton,HWRE，Run dialog 的 Response Emulator 区；≠ `offline-result-emulation`（ORE）
 jsud,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.16.02.05_JSUD_-__Jitter_Set_UnDefine.htm,skeleton,抖动注入家族 02.06.16；同族 jscf/jsdf/jspr 已建
@@ -262,7 +262,7 @@ option-list,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference
 pattern-tool,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16_Pattern_Tools.htm,done,pattern 工具的父页；pattern-editor / pattern-explorer 是它的子主题
 pin-utility,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.147_PIN_UTILITY.htm,skeleton,把 pin list（含 pin group 名）展开成具体 pin 名
 project-explorer-view,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02_Project_Explorer_view.htm,skeleton,层次化显示 device 目录；import / remove / activate device 的入口
-run-dialog,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.03_Running_a_testflow.htm,skeleton,Run dialog（Run > Open Run Dialog）；Loop 区细节可追加 02.08.04.32.02.03.01
+run-dialog,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.03_Running_a_testflow.htm,done,Run dialog（Run > Open Run Dialog）；Loop 区细节可追加 02.08.04.32.02.03.01
 software-bin-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.05_Software_bin_summary_tab.htm,skeleton,与 hardware-bin-summary-tab 成对（后者同批未建，不在本次范围）
 testflow-master-file,object,file,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.06_Testflow_master_file.htm,skeleton,≠ `testflow-file`（.03.05 是另一篇）；拆文件时的主文件
 uptd,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.26_UPTD__UPTD__-__UP_To_Date.htm,skeleton,查数据与硬件是否一致；stage 归属 level（与已建 `aprm` 同侧）
@@ -306,7 +306,7 @@ debug-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.08
 device-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.03_Device_summary_tab.htm,skeleton,§12 自发现：被 3 处链；无阶段页链它；stage 取链它的对象页多数（results 3/3），**最近的一段，不是归属**
 end-extension,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.59_END_EXTENSION.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
 ground-sense-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.09_Ground_sense_editor.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
-match-loops,object,L1,testmethod,02_System_reference/02.06_Command_Reference/02.06.07.01.08.04.03_Match_loops.htm,skeleton,§12 自发现：被 3 处链；无阶段页链它；stage 取链它的对象页多数（testmethod 2/3），**最近的一段，不是归属**
+match-loops,object,L1,testmethod,02_System_reference/02.06_Command_Reference/02.06.07.01.08.04.03_Match_loops.htm,done,§12 自发现：被 3 处链；无阶段页链它；stage 取链它的对象页多数（testmethod 2/3），**最近的一段，不是归属**
 result-configuration,object,L2,results,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.191_RESULT_CONFIGURATION.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
 upas,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.304_UPAS__UPAS__-__Utility_Purpose_ASsignment_for_multi-site.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 vec-events,object,L2,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.267_VEC_EVENTS.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[pattern]]`（最近的一段，**不是归属**）

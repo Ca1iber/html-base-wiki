@@ -184,20 +184,52 @@ POGOCABLING
 
 ## 是什么
 
-（待补）
+**文档事实** model file 包含 tester 的硬件配置：它指定安装了哪些 test head 卡、这些卡的特性，以及卡到 DUT board 接口 pogo pin 的映射；同时指定测试系统的 reference clock 信号。SmarTest 需要这些信息来为被测测试设置测试系统资源的配置与特性。
+
+**文档事实** 在线模式下 SmarTest 启动时读取 model file，并在 report window 的 MAXIMUM POSSIBLE CONFIGURATION 表中报告检测到的硬件；离线模式下则显示 model file 定义的 requested configuration，并列出所引用或被链接的 model file。
+
+**文档事实** 无论在线还是离线启动，使用的都是同一个 model file：位于默认位置的文件、从默认位置链接到的文件，或由环境变量 `V93000_MODEL` 指定的文件。
+
+**文档事实** model file 的默认位置是 `/etc/opt/hp93000/soc/model`；该路径也可为指向 `/etc/opt/hp93000/soc_common/model` 的链接。文件名依语法为 `model` 或 `tester.model`（见 Model file sections）；如需其他文件名，设置 `V93000_MODEL` 并给出实际文件名（如 `model.offline`）。
+
+**文档事实** 对有 license 要求的测试系统资源与特性，SmarTest 先依据 model file 生成 license 请求，再读取 `*.lic` license 文件向 license server 签出所需 license。
 
 ## 典型用法
 
-（待补）
+**文档事实** 每次在线启动生成的模板 `/var/opt/hp93000/soc_<version>/model_template` 展示 maximum possible configuration；基于该模板的 model file 或 device license file 会请求并占用所有可能被用到的 license。
+
+**文档事实** 位于 `/opt/hp93000/soc_<version>/pws/data/model.def` 的示例 model file 演示正确的 model file 语法。
+
+**文档事实** 除 model file 外，可用一个或多个 device license file 实现 licensing-per-device；该机制是 model file 概念的附加与增强，device license file 沿用 model file 语法且只包含 license 相关条目。
+
+**文档事实** 若存在 device license file，其参数会被评估，model file 中任何 licensing 参数都被忽略；文档建议用 Testflow Analyzer Tool (TAT) 开发 device license file。
+
+**文档事实** 语法节示例显示：GLOBAL 段设置 testhead、dut_interface、hpib_interface、utility_lines、mux_boards 等；CARD_CONFIGURATION 段以 `slot = …, HW=…, pogoblocks=…` 描述卡；legacy 的 `model` 格式另有 IOCHANNEL、DPS、POGOCABLING 等段。
+
+**建议** 修改前先读 Editing the model file、Switching model files、Converting legacy model files 等子主题，再按目标语法编辑。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Model file sections — 决定文件名是 `model` 还是 `tester.model`，并给出各 section 的语法细节；本页在文件名说明处指向它。
+- **文档事实** Editing the model file、Concepts of logical boards、Converting legacy model files — 本页子主题，分别覆盖编辑、逻辑板概念与旧文件转换。
+- **文档事实** Report window — model file 被引用的情况会在 report window 列出（Functional changes 记 SmarTest 6.5.4 这一变化），且在线/离线配置表都在 report window 显示。
+- **文档事实** Configuration information in the report window — 引用本页，并用 MAXIMUM POSSIBLE CONFIGURATION 与 REQUESTED CONFIGURATION 两表说明 model file / device license file 的配置呈现。
+- **文档事实** Device license file — 沿用 model file 语法，是其子集与增强；存在时覆盖 model file 的 licensing 参数。
+- **文档事实** System .lic license files、License Management — model file 生成 license 请求后由 `*.lic` 文件完成签出，License Management 页把 model file 列为其中一环。
+- **文档事实** Testflow Analyzer Tool (TAT) — 文档推荐用它开发 device license file。
+- **文档事实** V93000_MODEL、SmarTest environment variables — 前者指定非默认的 model file，后者是 model file 指定方式的说明页。
+- **文档事实** Technology file for a device — 说明 "memory 在所有 model file 中可用的 DC Scale 卡上预留"。
+- **文档事实** DPS128/DPS64 pogo cabling and model file configuration、PSSL pogo cable assembly — 说明 model file 的 DPS、POGOCABLING 等段需要特定条目。
+- **文档事实** Direct DMM high-accuracy voltage measurements — 说明把 DMM 集成进 model file 需在 GLOBAL 指定 hpib_interface 并添加 DMM 段。
+- **文档事实** Internal Utility Power Supply (SE-UDPS) — 说明 SE-UDPS 需在 model file 的 DPS 段与 POGOCABLING 段定义。
+- **文档事实** Configuration for digital cards、Configuration for DPSs — 引用本页，说明 model file 或 device license file 启用所需资源与特性。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记载：Introduced before SmarTest 6.3.2；SmarTest 6.5.4：Report window 列出所引用的 model file；SmarTest 7.5.3：model file 使用说明更新。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.01_The_model_file.htm`，主源，含文件位置、license 请求、Detailed model file information 与 Functional changes。
+- 语法节子主题 `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.01_Model_file_reference__tester.model.htm`。
+- 语法节子主题 `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02_Model_file_reference__model_legacy.htm`。
