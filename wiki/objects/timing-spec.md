@@ -314,20 +314,62 @@ number currently defined as the primary.
 
 ## 是什么
 
-（待补）
+**文档事实**：TIMING_SPEC 是 test method API，访问「某个 timing equation set 中某个 spec set」的数据容器；构造 `TIMING_SPEC(eqnset, specset)` 即绑定一个已存在的 equation set 号与 spec set 号（`02.07.04.01.249`）。
+
+**文档事实**：它用于读取 equation/spec 号与单个 spec 值（`getEquation()`、`getSpec()`、`getSpecValue()`）、修改 spec 值（`change()`）、以及把所有 spec 值恢复为「当前 test suite 的 test method 程序启动时」的值（`restore()`）。SmarTest 中 timing 值默认单位是纳秒。
+
+**文档事实**：改动不会立即到硬件。文档列出的生效时机是：`EXECUTE_TEST`、`START_TEST`、`DIGITAL_CAPTURE_TEST`、`NB_DIGITAL_CAPTURE_START`、`FUNCTIONAL_TEST`，以及 `FLUSH` 后执行 `SPEC_SEARCH.execute()`、`SEQUENCER_STATUS.run()`、`PMU_IFVM.execute()`、`PMU_VFIM.execute()`、`TASK_LIST.execute()`、`DPS_VFIM.execute()` 之一；执行 `FLUSH` 还能把改动反映到 MCD（Test Program Explorer、Spec Tool）。
+
+**文档事实**：改 spec 值不会改写 level/timing 文件；要永久修改必须改对应的 setup 文件。**文档事实**（原文 CAUTION）：LEVEL_SPEC/TIMING_SPEC 为支持 `.restore()` 在 API 层缓存值，firmware 层没有这份缓存，因此除调试目的外不要把这些 API 与修改值的 firmware 命令混用。
+
+**文档事实**（Important points）：每条语句只能写一个成员函数；要修改主 timing specification 或其中的 spec 值，必须显式定义 TIMING_SPEC 类对象再引用它。
 
 ## 典型用法
 
-（待补）
+**文档事实**：把 equation set 1、spec set 2 设为主 timing：
+
+```cpp
+TIMING_SPEC spec1(1, 2);
+Primary.timing(spec1);
+```
+
+**文档事实**：修改主 timing 的 spec 值有两种等价写法——经 `Primary.getTimingSpec()` 取对象，或直接引用已定义对象：
+
+```cpp
+Primary.getTimingSpec().change("Tp", 10);   // 10 ns
+TIMING_SPEC& ts_obj = Primary.getTimingSpec();
+ts_obj.change("Tp", 10);
+```
+
+`change()` 的第二个参数可带单位（如 `10 ns`）；文档示例说明带 `ns` 时按 10^-9 秒计。读取用 `getSpecValue("Tp")`，取编号用 `getEquation()` / `getSpec()`。
+
+**文档事实**：multiport timing 用 `"spec@port"` 形式取值；multiport specification 由 `SPECIFICATION` API 选择：
+
+```cpp
+DOUBLE specValue = Primary.timing(SPECIFICATION("spec"))
+                         .getSpecification().getSpecValue("specValue@port");
+```
+
+**文档事实**：若在 PRIMARY_STATUS 中切换主 spec set / equation set 之前未 `FLUSH`，先前对 TIMING_SPEC 对象所做、尚未 FLUSH 的 spec 值改动会被清除；文档示例中 `"T"`、`"T2"` 的改动因此被忽略。要保留改动，需在切换前执行 `FLUSH(TM::APRM)`。
+
+**文档事实**：`change()` + `FLUSH` 改了值后，Test Program Explorer 不会显示 timing 已变；调试时若要重载当前 timing setup 文件，需先在 Spec Tool 窗口改一个 spec 值，让 Test Program Explorer 标记 timing 已改。
+
+**建议**：调试期临时改值用 `TIMING_SPEC`；需要长期生效的改动写入 timing setup 文件，不要依赖运行期改值（与文档 CAUTION 一致）。
 
 ## 和谁有关
 
-（待补）
+- [[primary-status]] — **文档事实**：`Primary.timing(TIMING_SPEC)` 用于设定主 timing；`Primary.getTimingSpec()` 返回当前主 specification 的 TIMING_SPEC 对象（`02.07.04.01.249` 首段与示例，`02.07.04.01.167`）。
+- [[level-spec]] — **文档事实**：对等的 level spec 容器；CAUTION 同时点名两者，并说明两者的 API 层缓存与 `restore()` 机制相同（`02.07.04.01.249`）。
+- [[flush]] — **文档事实**：`FLUSH` 决定改动何时生效、是否反映到 MCD；未 FLUSH 时切换主 set 会丢弃改动（`02.07.04.01.249` 首段、Important points）。
+- [[svlr]] — **文档事实**：仅调试用途——可暂停 application model，用 firmware 命令 `SVLR` 直接改 spec 值，再恢复运行（`02.07.04.01.249` Note，链到 `02.06.02.02.252`）。
+- `SPECIFICATION`（`02.07.04.01.232`）— **文档事实**：multiport timing 的 `"spec@port"` 取值由它选择 specification（Example 4）。
+- [[spec-search]] — **文档事实**：`FLUSH` 后 `SPEC_SEARCH.execute()` 是文档列出的改动生效时机之一（`02.07.04.01.249` 首段）。
+- [[spec-tool]]、[[timing-setup-tool]]、[[timing-file]] — **文档事实**：MCD 侧可见性涉及 Test Program Explorer 与 Spec Tool；永久改动须落在 timing（setup）文件本身（`02.07.04.01.249` 首段与 CAUTION）。
 
 ## 版本
 
-（待补）
+**文档事实** 文档未覆盖（源文档无 `Functional changes` 节）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm`（主文档；本页语义、内链关系与 Related information 均出自该篇）。

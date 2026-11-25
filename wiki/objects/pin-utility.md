@@ -431,20 +431,69 @@ return;
 
 ## 是什么
 
-（待补）
+**文档事实**：PIN_UTILITY 是 test method API，用于把 pin list（逗号分隔、可含 pin group 名）展开为具体的 pin 名列表，以便按 pin 取测量结果；头文件 `/opt/hp93000/soc/prod_com/include/MAPI/PinUtility.h`（`02.07.04.01.147`）。
+
+**文档事实**：该类没有 public constructor；必须使用系统预置的类对象 `PinUtility`，不能自行创建对象。
+
+**文档事实**：成员函数分工如下：
+- `expandDigitalPinNamesFromPinList()`：把指定 pin type 的 pin 名展开成 vector，pin group 解析为 pin 名；仅用于向下兼容，新应用应改用 `getDigitalPinNamesFromPinList()`。
+- `getDigitalPinNamesFromPinList()`：同类展开，但可对未定义 pin、pin type 不匹配报错，并可指定 `PIN_UTILITY::ALPHABETICAL` 或 `PIN_UTILITY::DEFINITION_ORDER` 排序。
+- `getDpsPinNamesFromPinList()`：只展开 DPS pin。
+- `getPinType()`：查询 pin 背后的硬件能力（MCB、MCE、PS400、PS1600）；文档说明在 analog setup 中可据此能力设置滤波器或频率。
+- `getSharedDigitalPins()` / `getSharedDpsPins()`：返回在多个 site 间共享的 digital / DPS pin。
+- `createPinListFromPinNames()`：把一个 pin 名 vector 合成为逗号分隔的 pin list 字符串（如 `"pin1,pin2,pin3"`）。
+
+**文档事实**：各展开函数返回 `STRING_VECTOR`（std::vector），因此可用 STL 方法遍历、合并。
 
 ## 典型用法
 
-（待补）
+**文档事实**：最小用法——展开 pin list 并逐 pin 输出：
+
+```cpp
+STRING pinList = "pin1,pin2,pin3";
+STRING_VECTOR pinNameList =
+    PinUtility.getDigitalPinNamesFromPinList(pinList, TM::IO_PIN, TRUE, TRUE);
+for (uint index = 0; index < pinNameList.size(); index++)
+    cout << pinNameList[index] << endl;
+```
+
+**文档事实**：两个返回的 vector 可直接相加合并（文档示例 `sum = sv1 + sv2;`，示例中另有 `sv1*=sv2;`，原文如此）。
+
+**文档事实**：Example 4 的完整用法是先展开 pin group，再按 pin 取值并记录：
+
+```cpp
+pinNameList = PinUtility.getDigitalPinNamesFromPinList("leak_pins1", TM::IO_PIN, TRUE,TRUE);
+for (int index = 0; index < SizeOfNameList; index++)
+{
+    TEST(pinNameList[index], "Leakage_Low", tmLimits,
+         measLeakLow.getValue(pinNameList[index]), TRUE);
+}
+```
+
+该例的注释把 `leak_pins1` / `leak_pins2` 称为 group，测量对象是 `PPMU_MEASURE`，配套 `PPMU_SETTING`、`PPMU_RELAY` 与 `TASK_LIST`。
+
+**文档事实**：`getPinType("dps1")` 等返回形如 `"DCS-DPS128HC"`、`"DCS-DPS128HV"`、`"DCS-VI32"`、`"PS1600"` 的字符串（文档示例，原文如此）。
+
+**文档事实**：`throwErrorOnMissingPinNames` 与 `throwErrorOnMismatchedPinTypes` 默认 `FALSE`——未定义或不匹配的 pin 不进入 vector、不报错；设为 `TRUE` 则报错。`getDpsPinNamesFromPinList()` 的缺失 pin 标志同理，默认 `FALSE`。
+
+**建议**：新代码统一用 `getDigitalPinNamesFromPinList()` 并显式给出两个错误标志，避免默认值掩盖 pin 名笔误（文档只说明默认语义，这一取舍是工程建议）。
 
 ## 和谁有关
 
-（待补）
+- [[pin-configuration-tool]] — **文档事实**：被测的 pin 与 pin group 在 Pin Configuration tool 中定义；测量结果与 pin 名关联，因此取结果前必须知道组内所有 pin 名（源首段）。
+- `STRING_VECTOR`（`02.07.04.02.15`）— **文档事实**：所有展开函数的返回类型；源内链接指向该 API（入边语境）。
+- [[test]] — **文档事实**：Example 4 对展开后的每个 pin 调用 `TEST(...)` 记录结果。
+- `PPMU_MEASURE` — **文档事实**：Example 4 用 `measLeakLow.getValue(pinName)` / `measLeakHigh.getValue(pinName)` 按 pin 取测量值；pin 名由 PIN_UTILITY 从组名展开（同篇示例）。
+- `PPMU_SETTING`、`PPMU_RELAY`、`TASK_LIST` — **文档事实**：Example 4 中与按 pin 取结果配套使用的对象（源示例）。
+- `JitterSeparation`（`02.07.05.01.04`）、`JitterSeparationHS`（`02.07.05.01.05`）、`ScanTest`（`02.07.05.05`）— **文档事实**：这些文档引用 PIN_UTILITY（入边语境）。
+- `getPinType()` 与硬件类型 — **文档事实**：返回的字符串对应 MCB、MCE、PS400、PS1600 等硬件能力，供 analog setup 设滤波器/频率（成员函数说明与 Example 3）。
 
 ## 版本
 
-（待补）
+**文档事实**（源 `Functional changes`）：
+- SmarTest 7.2.1：新增 `getPinType` 参数（7.2.1.1 及更高版本支持）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.147_PIN_UTILITY.htm`（主文档；语义、示例与 Functional changes 均出自该篇）。
+- 关系核对：`02_System_reference/02.07_Test_Method_Reference/02.07.04.02.15_STRING_VECTOR.htm`、`02.07.05.01.04_JitterSeparation.htm`、`02.07.05.01.05_JitterSeparationHS.htm`、`02.07.05.05_ScanTest__scan_tml.htm`（入边语境）。

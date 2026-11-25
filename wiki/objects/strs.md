@@ -185,20 +185,62 @@ equation-based.
 
 ## 是什么
 
-（待补）
+**文档事实** STRS?（Spec TRansition Search）在一个循环中重复执行 functional test；每次执行时，在指定区间内系统地修改某个 timing 或 level spec 变量的值，作用于查询中指定、且在其 timing/level setup 中依赖该变量的所有 pin。
+
+**文档事实** 搜索目标是找出使测试结果从 PASS 变为 FAIL、或从 FAIL 变为 PASS 的那个变量值。
+
+**文档事实** 若在搜索区间内找到这种跃迁，STRS? 返回最后一个结果仍与起始值相同的值，以及第一个结果已改变的值；若结果始终不变，则只返回一个值，即 stop 值。
+
+**文档事实** `start`/`stop` 的默认值是 primary spec set 中为该 spec 变量定义的最小/最大值；文档说明给出这些最大/最小值可以加快搜索。
+
+**文档事实** 在 Pin Scale 系统上，STRS? 可以临时改变 primary port（见 `port` 参数说明），并在搜索完成后恢复 primary port。
+
+**文档事实** `mode` 有 L（linear search）、LB（linear/binary search）、B（binary search）；`spec_type` 为 `LEV`（levels）或 `TIM`（timing）；`resolution` 指定搜索使用的最小步长。
+
+**文档事实** 若所用的 primary sets 不是 equation-based，将产生错误（见报错节）。
 
 ## 典型用法
 
-（待补）
+**文档事实** 示例 `STRS? 0.5,2.0,LB,,LEV,"aclk_vo_swing",0.1,0.1` 返回 `STRS GE,2,,`。
+
+**文档事实** 按语法 `[start],[stop],{mode},[(pinlist)],{spec_type},{"spec_name"},[stepwidth],{resolution}`，示例依次为 start=0.5、stop=2.0、mode=LB、pinlist 为空、spec_type=LEV、spec_name=`aclk_vo_swing`、stepwidth=0.1、resolution=0.1。
+
+**文档事实** pinlist 为空或省略时默认 `@`（所有 pin）；pinlist 也可包含 `[[dfgp]]` 定义的组。
+
+**文档事实** `mode` 为 B 时 `stepwidth` 可选；`resolution` 特别适用于浮点范围的二分搜索，因为 start 与 stop 之间有无穷多个值。
+
+**文档事实** `start` 可大于 `stop`，此时搜索沿负方向进行；`stop` 也可小于 `start`。
+
+**文档事实** 多端口 setup 中可在 `spec_name` 后加 `@port`，使变量值只对属于该 port 的 pin 修改；即使该变量在此 port 的 timing 规格中是 global scope 也如此。若不给 port，则只修改其 port 将该变量设为 global scope 的 pin；setup pins 对此没有影响。
+
+**文档事实** 在 Pin Scale 系统上，若 `spec_name` 用于 port period 的定义，指定 port 会使该 port 临时作为 primary port；在 port 名后加 `@UNCHANGED` 可抑制这一切换。
+
+**文档事实** 返回格式为 `STRS {res_spec}, [pass_meas_value], [fail_meas_value], [(pinlist)]`；示例响应中的 `GE` 属 res_spec（greater than or equal to），`2` 对应 pass_meas_value，后两个字段省略。
+
+**建议** 为缩短搜索，先在 primary spec set 中为该 spec 变量给出最大/最小值；需要定位浮点边界时用 B 模式并设置 `resolution`。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `[[dfgp]]` — STRS 的 pinlist 可包含由 DFGP 创建的组（参数说明）；DFGP 页也把 STRS 列入可引用组名的命令。
+- **文档事实** `[[execution-context]]` — 可选的第一个参数 `exec_context` 是 execution context，文档指向 “Using execution contexts”。
+- **文档事实** SHSP, SHSP?（SHmoo SPecs）与 SHVL, SHVL?（SHmoo spec VaLues）— 本页 Related information 列出二者；本 wiki 无对应对象页。
+- **文档事实** `Modifying the period for a search or shmoo in a multi-port setup (Pin Scale)` — 本页在描述 port 与临时 primary port 时两次指向该页，`@port[@UNCHANGED]` 的用法见该页。
+- **文档事实** `Global and local scope of base variables` — 本页在解释 port 与 spec 变量作用域时指向该页。
+- **文档事实** DPSR（Define Parallel SeaRch）与 EXSR（EXecute SeaRch）— 它们的页面在 Related information 中把 STRS? 列为相关项（objpack 入边）；DPSR 把搜索条件写入 search set，EXSR 并行执行这些条件。
+- **推断** STRS? 在单条查询内循环执行测试并修改 spec 变量；DPSR/EXSR 则先定义 search set 再并行执行搜索。文档只给出互列关系，没有说明二者互斥或调用顺序。
+- **文档事实** equation based level setup / primary sets — 报错节要求 primary sets 为 equation-based，否则报错；本页未展开如何定义 equation based primary sets。
+- **文档事实** List of commands — 入边显示 STRS? 列在命令参考总表。
+- **文档事实** Application 段把 STRS? 的用途定为 Spec search testflow。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：
+
+- Introduced before SmarTest 6.3.2
+- SmarTest 7.1.0：Setting the primary port
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.251_STRS__-__Spec_TRansition_Search.htm`，主源，含概览、临时 primary port 说明、Syntax、Parameters、Application、Errors、Example、Related information 与 Functional changes，已用 `show.py 02.06.02.02.251` 读取。
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.86_DPSR__DPSR__-__Define_Parallel_SeaRch.htm` 与 `02_System_reference/02.06_Command_Reference/02.06.02.02.121_EXSR_-__EXecute_SeaRch.htm`，用于确认与 STRS? 的 Related information 关系及搜索语义，已用 `show.py --head` 读取。
+- 入边与交叉引用取自 `extract/objpack.py` / `edges.jsonl`。

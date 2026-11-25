@@ -155,20 +155,59 @@ channels assigned by the
 
 ## 是什么
 
-（待补）
+**文档事实**：PACT 是 firmware 命令，用于 mask 或 activate 指定 site；由 Site Control 窗口使用，也在 testflow 被要求串行执行、或分支后各 site 走不同执行路径时使用。`PACT?` 查询当前 site 状态（`02.06.02.02.171`）。
+
+**文档事实**：`control` 取 `ACTIVE`（site 接收全部测试数据并产生测试结果）或 `MASKED`（仍接收全部测试数据，但该 site 的接收器被禁用，没有结果信息）。`site` 是单个整数 site 号；`ALL` 表示 pin configuration 中配置且可用于测试（即不使用 MCDIgnore 文件中 inactivated channel）的所有 site；`{"site_string"}` 用逐 site 的 `"0"`/`"1"` 字符表示 mask/activate，每个已配置 site 必须给一个字符。
+
+**文档事实**：每执行一次 PACT 都会重置所有 site 的结果，即使命令只指定了一个 site。若 site 不可用，PACT 会发出 warning。
+
+**文档事实**（原文 Note）：该命令实现 multisite 测试的 tpi 接口；应使用 tpi 调用而不是此 firmware 命令。**建议**：自动化流程走 tpi，只有在直接操作 firmware/调试时才用 PACT（文档倾向，非机台行为断言）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：激活 site 1、mask site 2 和 3：
+
+```text
+> PACT ACTIVE, 1
+> PACT MASKED, 2
+> PACT MASKED, 3
+```
+
+**文档事实**：查询与紧凑返回：
+
+```text
+> PACT?
+< PACT ACTIVE,1
+< PACT MASKED,2
+< PACT MASKED,3
+> PACT? STR
+< PACT "100"
+```
+
+文档说明该例通过 `STR` 让查询返回单个 site 字符串；示例中 site 1 为 ACTIVE、site 2/3 为 MASKED，对应 `"100"`。
+
+**文档事实**：也可用 `PACT {"site_string"}` 一次性设置多个 site（语法节）。
+
+**建议**：需要保存/恢复 site 状态时，用 `PACT? STR` 取紧凑串、再用 `PACT "…"` 回写；文档给出了字符串格式，但没有给出这一组合的现成示例。
+
+**文档事实**：每次 PACT 都会重置所有 site 的结果，即使只指定一个 site（源首段 Note）。**推断**：因此若在同一 testflow 中先取得结果、后执行 PACT，先前结果会被重置——这是「resets the results of all sites」的直接含义，文档未另给示例。
 
 ## 和谁有关
 
-（待补）
+- [[pals]] — **文档事实**：若 site 上并非所有 pin 都经 `PALS` 分配了 channel，PACT 会报错（本页 Errors）。
+- [[site-control-window]] — **文档事实**：文档 `Application` 节写明 PACT 应用于 Site Control 窗口（源 `Application`）。
+- `EXSR`（`02.06.02.02.121`）— **文档事实**：EXSR 的 active sites 是「上次执行 PACT 命令所激活的 site」；默认只有第一个 site 处于 active（入边语境）。
+- testflow 串行执行 / 分支 — **文档事实**：testflow 被要求串行运行，或分支后某些 site 走不同执行路径时，会使用 PACT（源首段）。
+- [[pqfc]]、[[psfc]]、[[pste]]、[[stme]] — **文档事实**：与 PACT、PALS 同列为 multisite setup 命令（`02.06.03` 入边语境）。
+- `MCDIgnore`（Service Guide Part 1）— **文档事实**：`ALL` 的语义排除 MCDIgnore 文件中 inactivated channel 对应的 site（参数表）。
+- TPI — **文档事实**：文档声明 PACT 为 multisite 实现 `tpi` 接口，并建议改用 `tpi` 调用（源首段 Note）。
 
 ## 版本
 
-（待补）
+**文档事实**（源 `Functional changes`）：Introduced before SmarTest 6.3.2。
+**文档事实**：按本 wiki 规格，`Introduced before …` 是哨兵值，表示在文档集覆盖范围之前已存在，不应理解为 6.3.2 的变更。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.171_PACT__PACT__-__Parallel_ACTivities_control.htm`（主文档；语法、Application、Warnings、Errors、示例与 Functional changes 均出自该篇）。
+- 关系核对：`02_System_reference/02.06_Command_Reference/02.06.02.02.121_EXSR_-__EXecute_SeaRch.htm`、`02.06.03_Pin_configuration_setup_commands.htm`、`02.06.03.01.01_Introduction.htm`（入边语境）。

@@ -60,7 +60,7 @@ testflow,stage,,,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Te
 testmethod,stage,,,01_Getting_started/01.06_Test_methods/01.06.01_Test_Method_Introduction.htm,done,回填（页面先建；sources 共 38 条，此处只记第一条）
 testname-requires-matching-limits,constraint,L1,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.05.03.01_Continuity.htm,todo,回填（页面先建；sources 共 7 条，此处只记第一条）
 timing,stage,,,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.01.01_Device_directory_structure.htm,done,回填（页面先建；sources 共 72 条，此处只记第一条）
-ctxt,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.35_CTXT__CTXT__-__ConTeXT.htm,skeleton,
+ctxt,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.35_CTXT__CTXT__-__ConTeXT.htm,done,
 dfpn,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.63_DFPN__DFPN__-__DeFine_Pin_Name.htm,done,
 sqst,object,L1,pattern,02_System_reference/02.06_Command_Reference/02.06.02.02.241_SQST__SQST__-__SeQuencer_STate.htm,done,
 pals,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.173_PALS__PALS__-__Pin_ALlocation_for_multiple_Sites.htm,done,
@@ -173,8 +173,8 @@ timing-master-file,object,file,timing,02_System_reference/02.08_Setup_and_Result
 utility-pins-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.01.04_Utility_Pins_editor.htm,done,
 disconnect,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.41_DISCONNECT.htm;02_System_reference/02.07_Test_Method_Reference/02.07.04.01.18_CONNECT.htm,done,
 spec-value,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.03_SpecValue.htm,skeleton,
-spec-variable,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.04_SpecVariable.htm,skeleton,
-timing-spec,object,L2,timing,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm,skeleton,
+spec-variable,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.02.13.04_SpecVariable.htm,done,
+timing-spec,object,L2,timing,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.249_TIMING_SPEC.htm,done,
 wavetable-file,object,file,timing,02_System_reference/02.07_Test_Method_Reference/02.07.11.01.05.03_Wavetable_file.htm,skeleton,
 dfps,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.65_DFPS__DFPS__-__DeFine_Power_Supply.htm,done,
 on-first-invocation-begin,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.138_ON_FIRST_INVOCATION_BEGIN.htm,done,
@@ -182,8 +182,8 @@ on-first-invocation-end,object,L2,testmethod,02_System_reference/02.07_Test_Meth
 testflow-properties-view,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.04_Testflow_Properties_view.htm,done,
 aprm,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.01_APRM_-__Activate_PRiMary_sets.htm,done,
 device-license-file,object,file,project,02_System_reference/02.04_Model_File_and_Licensing/02.04.05.06_The_device_license_file.htm,done,
-eqfs,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.09_EQFS_-__EQuation_FileS_command_transfer.htm,skeleton,
-eqsp,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.10_EQSP__EQSP__-__EQuation_SPecification_transfer.htm,skeleton,
+eqfs,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.09_EQFS_-__EQuation_FileS_command_transfer.htm,done,
+eqsp,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.05.02.10_EQSP__EQSP__-__EQuation_SPecification_transfer.htm,done,
 testset,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.244_TESTSET.htm,done,
 event-value-double,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.63.18_EVENT_VALUE_DOUBLE.htm,done,
 spmu-pin-task,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.234.01_SPMU_PIN_TASK.htm,done,
@@ -224,11 +224,11 @@ flex-relay,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.0
 flsh,object,L1,run,02_System_reference/02.06_Command_Reference/02.06.02.02.124_FLSH_-__FLuSH_buffered_commands.htm,done,⚠️ 与已建 `flush`（L2）**只差一个字母、是另一件东西**；flush.md 与 stages/run.md 已明写要各建一页
 pin-string,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,done,⚠️ 是 test method 的 PinString **参数类型**，不是 02.06 的 PADS 命令（词面匹配会指错）
 smartcalc,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.10_SmartCalc_framework.htm,done,分界已定：本页讲「怎么调」（API 侧），`smartcalc-framework` 讲「为什么、是什么」
-spec-search,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.233_SPEC_SEARCH.htm,skeleton,六个 FLUSH-then-X 之一；level-spec.md 已划清与本页不同物
+spec-search,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.233_SPEC_SEARCH.htm,done,六个 FLUSH-then-X 之一；level-spec.md 已划清与本页不同物
 test-method-class,object,gui,testmethod,01_Getting_started/01.06_Test_methods/01.06.02.02_2._Create_a_Test_Method_Class.htm,skeleton,「New > Test Method Class」向导产出的类模板；概念页 `how-to-create-a-universal-test-method-class` 是「怎么建」
 utility-line-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.04_Utility_Line_view.htm,done,utility line 的**运行期**视图；与概念页 `utility-lines` 不同层
 wavetable,object,n/a,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.04.03.03.07_wavetable.htm,skeleton,⚠️ wavetable-file.md 自己把取材边界写好了：本页是概念侧，「wavetable 本身是什么、有哪些列」
-device-technology-directory,object,file,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.01.01_Device_Technology_Directory.htm,skeleton,≠ `device-directory`（那是结构本身）；本页是 /dev_tech 下的 cmos/ecl 模板
+device-technology-directory,object,file,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.02.01.01_Device_Technology_Directory.htm,done,≠ `device-directory`（那是结构本身）；本页是 /dev_tech 下的 cmos/ecl 模板
 dps-aux-task,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43_DPS_AUX_TASK.htm,done,**父类**，管 surge tracker 与 TMU；子类 `dps-aux-pin-task` 已建
 dtcp,object,L1,project,02_System_reference/02.06_Command_Reference/02.06.02.02.93_DTCP__DTCP__-__Define_Technology_Control_Parameters.htm,skeleton,管 testpoints / extended_dram_factor，需 *RST 激活；补充已建 `dscp`
 error-map,object,file,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.08.01_Error_Map.htm,skeleton,⚠️ error-map-tool.md 已明写「上游，不是同义词」——工具页与格式页两页
@@ -246,7 +246,7 @@ utility-purpose-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result
 waveform-set,concept,n/a,timing,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.34.03_Waveform_and_timing_sets.htm,todo,⚠️ 词面会误配到 02.06 的 JSWF 命令——本页是内存里的逻辑容器，不是命令
 alias-set-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.04_Alias_Set_Editor.htm,done,pin alias 编辑器；可追加 99.0011 为第二 source
 assign-value-node,object,gui,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.01.02.03_Assign_Value_node.htm,skeleton,svlr 在 testflow 侧挂的就是这个节点
-change-device-wizard,object,gui,project,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.03_Change_Device_wizard.htm,skeleton,⚠️ 勿与 HVM 远程命令 ChangeDevice（02.09.01.10.03.02.02.12）合并——词面同、位置不同
+change-device-wizard,object,gui,project,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.03_Change_Device_wizard.htm,done,⚠️ 勿与 HVM 远程命令 ChangeDevice（02.09.01.10.03.02.02.12）合并——词面同、位置不同
 context-pins,concept,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,todo,test method 参数类型 ContextPins；勿与已建 `execution-context` 互链
 data-retrieval-library,object,L2,results,02_System_reference/02.10_Data_Logging/02.10.01.04_Data_Retrieval_Library.htm,done,DRL，读 data log stream 的 C 库；认领须锁死 02.10.01.04
 dfge,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.59_DFGE__DFGE__-__DeFine_Group_by_Expressions.htm,skeleton,定义表达式型 pin 组；⚠️ 勿据已建 `dfgp` 推内容（dfgp.md 实测 0 命中 DFGE）
@@ -254,18 +254,18 @@ dfpt,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.66_DF
 edf,concept,file,results,02_System_reference/02.10_Data_Logging/02.10.01.06_Event_Data_Logging_Format__EDF.htm,todo,⚠️ **本篇正文 0 句**（602 B 纯子主题清单）。语料全库无 EDF 定义句——页内必须写「语料未写」，不许替它造定义
 event-formatter,object,gui,results,02_System_reference/02.10_Data_Logging/02.10.02_Event_Formatter.htm,done,把 EDF 落成人读报告；与 `smartest-data-formatter` 分列（mapping-results 已分）
 file-string,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,done,test method 参数类型 FileString（SmarTest 7.2.1 起）
-hardware-response-emulator,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.06_Hardware_Response_Emulator.htm,skeleton,HWRE，Run dialog 的 Response Emulator 区；≠ `offline-result-emulation`（ORE）
+hardware-response-emulator,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.06_Hardware_Response_Emulator.htm,done,HWRE，Run dialog 的 Response Emulator 区；≠ `offline-result-emulation`（ORE）
 jsud,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.16.02.05_JSUD_-__Jitter_Set_UnDefine.htm,skeleton,抖动注入家族 02.06.16；同族 jscf/jsdf/jspr 已建
 jswf,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.16.02.06_JSWF__-__Jitter_Set_WaveForm.htm,skeleton,抖动注入家族 02.06.16
 new-device-wizard,object,gui,project,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.15_New_Device_wizard.htm,skeleton,建 device 的唯一 GUI 入口；与 `change-device-wizard` 成对
 option-list,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm,done,test method 参数类型 OptionList（SmarTest 7.2.0 起）
 pattern-tool,object,gui,pattern,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.16_Pattern_Tools.htm,done,pattern 工具的父页；pattern-editor / pattern-explorer 是它的子主题
-pin-utility,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.147_PIN_UTILITY.htm,skeleton,把 pin list（含 pin group 名）展开成具体 pin 名
+pin-utility,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.147_PIN_UTILITY.htm,done,把 pin list（含 pin group 名）展开成具体 pin 名
 project-explorer-view,object,gui,project,01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.02_Project_Explorer_view.htm,done,层次化显示 device 目录；import / remove / activate device 的入口
 run-dialog,object,gui,run,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.03_Running_a_testflow.htm,done,Run dialog（Run > Open Run Dialog）；Loop 区细节可追加 02.08.04.32.02.03.01
 software-bin-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.05_Software_bin_summary_tab.htm,done,与 hardware-bin-summary-tab 成对（后者同批未建，不在本次范围）
 testflow-master-file,object,file,testflow,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.03.06_Testflow_master_file.htm,skeleton,≠ `testflow-file`（.03.05 是另一篇）；拆文件时的主文件
-uptd,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.26_UPTD__UPTD__-__UP_To_Date.htm,skeleton,查数据与硬件是否一致；stage 归属 level（与已建 `aprm` 同侧）
+uptd,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.26_UPTD__UPTD__-__UP_To_Date.htm,done,查数据与硬件是否一致；stage 归属 level（与已建 `aprm` 同侧）
 pqfc,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.03.02.19_PQFC__PQFC__-__Parallel_Query_FoCus.htm,done,§12.1「按需求补」；⚠️ 取 dedup canonical（in_src=11），hubs.csv 的 15 是灌水
 sprm,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.05.02.22_SPRM__SPRM__-__Set_PRiMary_sets.htm,done,§12.1「按需求补」；已建 `aprm` 的 related 第一项就是它——建它是闭环。⚠️ dedup canonical in_src=11
 smartest-data-formatter,object,gui,results,02_System_reference/02.10_Data_Logging/02.10.03_SmarTest_Data_Formatter.htm,skeleton,§12 自发现：被 9 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
@@ -275,7 +275,7 @@ hardware-bin-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_
 hardware-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.05.03_Hardware_view.htm,done,§12 自发现：被 7 处链；stage 取自链它的 `[[run]]`（最近的一段，**不是归属**）
 drlv,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.89_DRLV__DRLV__-__DRive_LeVel.htm,done,§12 自发现：被 6 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 rclv,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.204_RCLV__RCLV__-__ReCeive_LeVel.htm,done,§12 自发现：被 6 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
-udgp,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.296_UDGP_-__UnDefine_GrouP.htm,skeleton,§12 自发现：被 6 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
+udgp,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.296_UDGP_-__UnDefine_GrouP.htm,done,§12 自发现：被 6 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 wsus,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.342_WSUS__WSUS__-__Waveform_Sets_USed.htm,done,§12 自发现：被 6 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 dfpr,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.64_DFPR__DFPR__-__DeFine_Pin_Role.htm,skeleton,§12 自发现：被 5 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 dsus,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.91_DSUS__DSUS__-__Dps_Sets_USed.htm,skeleton,§12 自发现：被 5 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
@@ -290,7 +290,7 @@ term,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.257
 timing-set-selector,object,L2,timing,02_System_reference/02.07_Test_Method_Reference/02.07.04.02.17_TimingSetSelector.htm,done,§12 自发现：被 5 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 tsus,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.283_TSUS__TSUS__-__Timing_Sets_USed.htm,done,§12 自发现：被 5 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 add-limit,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.02_addLimit.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
-clkr,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.24_CLKR__CLKR__-__CLocK_Resolution.htm,skeleton,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
+clkr,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.24_CLKR__CLKR__-__CLocK_Resolution.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 dfup,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.69_DFUP__DFUP__-__DeFine_Utility_Purpose.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 dfut,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.70_DFUT__DFUT__-__DeFine_UTility_line.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 pclk,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.175_PCLK__PCLK__-__Pin_CLocK.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
@@ -300,11 +300,11 @@ testset-testname,object,L2,results,02_System_reference/02.07_Test_Method_Referen
 wafer-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.02_Wafer_summary_tab.htm,done,§12 自发现：被 4 处链；无阶段页链它；stage 取链它的对象页多数（results 4/4），**最近的一段，不是归属**
 wave,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.333_WAVE__WAVE__-__WAVEform.htm,done,§12 自发现：被 4 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 begin-extension,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.10_BEGIN_EXTENSION.htm,done,§12 自发现：被 3 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
-clmp,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.26_CLMP__CLMP__-__CLaMP_level.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
+clmp,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.26_CLMP__CLMP__-__CLaMP_level.htm,done,§12 自发现：被 3 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 data-logging-profile-api,object,n/a,results,02_System_reference/02.10_Data_Logging/02.10.01.02.08_Data_logging_profile_API.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
 debug-view,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.08.06_Debug_View.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[run]]`（最近的一段，**不是归属**）
 device-summary-tab,object,gui,results,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02.03_Device_summary_tab.htm,done,§12 自发现：被 3 处链；无阶段页链它；stage 取链它的对象页多数（results 3/3），**最近的一段，不是归属**
-end-extension,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.59_END_EXTENSION.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
+end-extension,object,L2,testmethod,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.59_END_EXTENSION.htm,done,§12 自发现：被 3 处链；stage 取自链它的 `[[testmethod]]`（最近的一段，**不是归属**）
 ground-sense-editor,object,gui,pin,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.18.03.09_Ground_sense_editor.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 match-loops,object,L1,testmethod,02_System_reference/02.06_Command_Reference/02.06.07.01.08.04.03_Match_loops.htm,done,§12 自发现：被 3 处链；无阶段页链它；stage 取链它的对象页多数（testmethod 2/3），**最近的一段，不是归属**
 result-configuration,object,L2,results,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.191_RESULT_CONFIGURATION.htm,skeleton,§12 自发现：被 3 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
@@ -318,10 +318,10 @@ dcdt,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.41
 debug-perspective,object,gui,run,01_Getting_started/01.01_SmarTest_Work_Center/01.01.07.04_Debug_perspective.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[run]]`（最近的一段，**不是归属**）
 dprl,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.82_DPRL__DPRL__-__Default_PRimary_Level_sets.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 etds,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.117_ETDS__ETDS__-__Edge_Timing_Definition_String.htm,done,§12 自发现：被 2 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
-etim,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.118_ETIM__ETIM__-__Edge_TIMing.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
+etim,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.118_ETIM__ETIM__-__Edge_TIMing.htm,done,§12 自发现：被 2 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 level-set-selector,object,L2,level,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.123_LevelSetSelector.htm,done,§12 自发现：被 2 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 lot-summary-generator,object,L1,results,02_System_reference/02.10_Data_Logging/02.10.01.07_LotSummaryGenerator.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[results]]`（最近的一段，**不是归属**）
-pact,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.171_PACT__PACT__-__Parallel_ACTivities_control.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
+pact,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.171_PACT__PACT__-__Parallel_ACTivities_control.htm,done,§12 自发现：被 2 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 pdiv,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.176_PDIV__-__Period_DIVider.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 play-pattern,object,L2,pattern,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.149_playPattern.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[pattern]]`（最近的一段，**不是归属**）
 pssr,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.197_PSSR__PSSR__-_Power_Supply_Slew_Rate.htm,skeleton,§12 自发现：被 2 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
@@ -342,7 +342,7 @@ cct-change-level-spec,object,L2,level,02_System_reference/02.07_Test_Method_Refe
 chin,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.22_CHIN__-__CHannel_INformation.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 dfpc,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.62_DFPC__DFPC__-__DeFine_Pin_Comment.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 dprt,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.83_DPRT__DPRT__-__Default_PRimary_Timing_sets.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
-edsp,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.102_EDSP__EDSP__-__EDge_SPecification.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
+edsp,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.102_EDSP__EDSP__-__EDge_SPecification.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 gctx,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.129_GCTX__-__Get_ConTeXt.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 hw-pin-state,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.117.01_HW_PIN_STATE.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 hw-state,object,L2,pin,02_System_reference/02.07_Test_Method_Reference/02.07.04.01.117_HW_STATE.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
@@ -354,9 +354,9 @@ pssl,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.196_P
 rset,object,L1,level,02_System_reference/02.06_Command_Reference/02.06.02.02.210_RSET_-__ReSET.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[level]]`（最近的一段，**不是归属**）
 shared-continuity-test,object,n/a,pin,02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.21_SHARED_CONTINUITY_TEST.htm,done,§12 自发现：被 1 处链；无阶段页链它；stage 取链它的对象页多数（pin 1/1），**最近的一段，不是归属**
 smartshell,object,n/a,project,02_System_reference/02.15_SmartShell/02.15_SmartShell.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[project]]`（最近的一段，**不是归属**）
-strs,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.251_STRS__-__Spec_TRansition_Search.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
+strs,object,L1,timing,02_System_reference/02.06_Command_Reference/02.06.02.02.251_STRS__-__Spec_TRansition_Search.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[timing]]`（最近的一段，**不是归属**）
 udpr,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.297_UDPR_-__UnDefine_Pin_Role.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
-udps,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.298_UDPS_-__Undefine_DPS_pin.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
+udps,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.298_UDPS_-__Undefine_DPS_pin.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 udpt,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.299_UDPT_-__UnDefine_PorT.htm,skeleton,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 udup,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.301_UDUP_-__UnDefine_Utility_Purpose.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）
 udut,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.302_UDUT_-__UnDefine_UTility_line.htm,done,§12 自发现：被 1 处链；stage 取自链它的 `[[pin]]`（最近的一段，**不是归属**）

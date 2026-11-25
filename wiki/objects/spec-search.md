@@ -442,20 +442,63 @@ pass/fail transition value or displays an error message.
 
 ## 是什么
 
-（待补）
+**文档事实**：SPEC_SEARCH 是 test method API，执行 spec search 测试，并访问保存搜索条件的数据容器；定义于头文件 `/opt/hp93000/soc/prod_com/include/MAPI/SpecSearch.h`（`02.07.04.01.233`）。
+
+**文档事实**：构造时给定目标 spec 名与类型（`TM::TIM` = timing spec，`TM::LEV` = level spec）。执行前会激活 Testsuite 对话框中指定的 digital primaries；若 digital primaries 是用 PRIMARY_STATUS 改过的，必须把 `FLUSH` 放在 SPEC_SEARCH 之前。搜索在发现 pass/fail 或 fail/pass 跃变时停止。
+
+**文档事实**：搜索方法 `TM::Linear` 按 resolution 为区间从 start 线性搜到 stop；`TM::Binary` 在 start..stop 间二分，最小间隔由 resolution 设定；`TM::LinBin` 先按 resolution 线性搜索，再在「最后一个 pass 值」与「第一个 fail 值」之间用测试系统硬件的最大分辨率做二分。
+
+**文档事实**：未指定 start/stop 时，使用 spec window 中的 minimum/maximum。`resolution` 对三种方法都必需，单位须与 spec 一致，并会舍入 start、stop、stepWidth、numberOfSteps 的值（例：resolution 0.01、start 1.555 会被当成 1.56）。`limits()` 可用 test 名或 LIMIT 对象设定 start/stop，并覆盖 `start()`/`stop()`；`resultPins()` 覆盖 `specPins()` 的 pass/fail 判定 pin 集。`unit()` 只用于 data logging 中显示单位。
+
+**文档事实**：`getResultSpec()` 返回 `TM::SPEC_RESULT`：`TransitionPassFail`、`TransitionFailPass`、`AllPass`、`AllFail`。只有前两种跃变存在时，`getPassVal()`/`getFailVal()` 才返回有效值；`AllPass`/`AllFail` 时二者无效。
 
 ## 典型用法
 
-（待补）
+**文档事实**：文档示例——对 `CPandMR` 做 50~70 Hz 的线性搜索，20 步，resolution 0.01：
+
+```cpp
+SPEC_SEARCH search_1("freq",TM::TIM);
+search_1.specPins("CPandMR").method(TM::Linear).
+unit("Hz").start(50).stop(70).numberOfSteps(20).
+resolution(0.01);
+
+search_1.execute();
+DOUBLE Pval, Fval;
+switch(search_1.getResultSpec()){
+case TM::TransitionPassFail :
+case TM::TransitionFailPass :
+    Pval = search_1.getPassVal();
+    Fval = search_1.getFailVal();
+    break;
+case TM::AllPass :
+case TM::AllFail :
+    cout << "No transition found within the search interval" << endl;
+    break;
+}
+```
+
+**文档事实**：setter 返回 `SPEC_SEARCH&`，因此可链式调用；`execute()` 无参数；结果通过 `getXxx()` 读取。
+
+**文档事实**：`stepWidth()` 与 `numberOfSteps()` 互相覆盖——后调用的那个生效；两者在 `Binary` 模式下都是可选的。
+
+**建议**：先判断 `getResultSpec()` 再取 pass/fail 值，`AllPass`/`AllFail` 时不要使用 `getPassVal()`/`getFailVal()`（文档明说此时不返回有效值）。
 
 ## 和谁有关
 
-（待补）
+- [[test]] — **文档事实**：TEST API 接受 SPEC_SEARCH 类对象来指定要判定的 spec search 测量（`02.07.04.01.241` 入边语境）。
+- `TESTSET::judgeAndLog_SpecSearch`（`02.07.04.01.244.16`）— **文档事实**：该 API 用 SPEC_SEARCH 类对象指定要判定的 spec search 测量（入边语境）。
+- [[flush]] — **文档事实**：要激活经 PRIMARY_STATUS 修改的 digital primaries，需把 FLUSH 放在 SPEC_SEARCH 之前（源首段）。
+- [[primary-status]] — **文档事实**：digital primaries 的修改来源；与 FLUSH 的先后关系见上（源首段）。
+- [[limit]] — **文档事实**：`limits(LIMIT limit)` 接受 LIMIT API 的类对象来设定 start/stop（成员函数说明）。
+- `WAIT_TEST_DONE`（`02.07.04.01.271`）与 `SMC_WAIT_TEST_DONE()`（`02.07.04.01.231.52`）— **文档事实**：二者可与 SPEC_SEARCH 联用，超时从 SPEC_SEARCH 执行结束时开始计（入边语境）。
+- `SEARCH_FUNC_TASK` — **文档事实**：Performance Cookbook 的 multisite 技巧建议用 `SEARCH_FUNC_TASK` 替代 `SPEC_SEARCH(specName, specType).execute()`（`03.01.03.01.01` 入边语境）。
+- [[hardware-response-emulator]] — **文档事实**：HWRE 支持的 API 列表包含 SpecSearch 的 `getResultSpec`、`getPassVal`、`getFailVal`（`02.08.04.32.02.06.04`）。
 
 ## 版本
 
-（待补）
+**文档事实** 文档未覆盖（源文档无 `Functional changes` 节）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.233_SPEC_SEARCH.htm`（主文档；语义与示例均出自该篇）。
+- 关系核对：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.241_TEST.htm`、`02.07.04.01.244.16_TESTSET__.judgeAndLog_SpecSearch.htm`、`02.07.04.01.271_WAIT_TEST_DONE.htm`、`02.07.04.01.231.52_SMC_WAIT_TEST_DONE.htm`（入边语境）；`02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32.02.06.04_Supported_test_suites_and_test_method_APIs.htm`。
