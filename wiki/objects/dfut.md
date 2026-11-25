@@ -149,20 +149,37 @@ The utility line name is already assigned to an analog or digital pin.
 
 ## 是什么
 
-（待补）
+**文档事实**：DFUT 为一条 utility line 定义符号名（`util_name`）和操作模式（`type`）。`DFUT?` 按 `util_name` 查询已定义的 utility line，`@` 可列出全部。
+
+**文档事实**：`type` 的常规取值：`W` = Write-Only、`R` = Read-Only、`RW` = Read-Write。可选 `Utility Card` 的 utility line 还可配置为 safety line 或 global shutdown line，用于硬件控制 XPS256 pin 的 shutdown：`TRIGGER_IF_HIGH` / `TRIGGER_IF_LOW` 是 safety line，`TRIGGER_SITE_IF_HIGH` / `TRIGGER_SITE_IF_LOW` 是 global shutdown line。
+
+**文档事实**：`ch_No` 支持五位数与 legacy 三位格式：五位格式前三位是 utility pogo block，三位格式首位 1–8 表示 UTIL-1…UTIL-8；后两位是通道号 01–32。utility pogo block 上有 -1 偏移，通道号为 URW00…URW31。`DFUT?` 返回始终是五位数格式，`PALS?` 同样。
+
+**文档事实**：`util_name` 最多 16 个字母数字字符，不能含空格及 `# ; ( ' ' ) ? @ ,`。报错条件：通道号超范围、通道号已被使用、utility line 名字超范围、名字已分配给 analog 或 digital pin。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`DFUT 16504,w,(filter)`——把第一个 utility pogo block 的第 4 号 utility line 命名为 `filter`，操作模式为 Write-Only（`w`）。
+
+**文档事实**：查询单条线用 `DFUT? (filter)`；查询全部已定义 utility line 用 `DFUT? (@)`。
+
+**文档事实**：需要把 utility line 用作 XPS256 的硬件安全关机时，`type` 选 `TRIGGER_IF_HIGH` / `TRIGGER_IF_LOW`（safety line）或 `TRIGGER_SITE_IF_HIGH` / `TRIGGER_SITE_IF_LOW`（global shutdown line）；具体行为见 `XPS256 safety line and DUT board disconnect`。
+
+**建议**：命名前先 `DFUT? (@)` 或 `PALS?` 全量回读查重。文档规定同一通道不能被重复使用、名字不能与 analog/digital pin 冲突，先用 `@` 回读是最直接的查重方式。
 
 ## 和谁有关
 
-（待补）
+- `UTST` / `UTST?`：**文档事实**——UTST 文档说被查询的 utility line 必须由 DFUT 定义。**推断**：因此 DFUT 的命名是 UTST 按名称操作该线的前置；文档只写了"必须先定义"，没有展开顺序示例。
+- `PALS` / `PALS?`：**文档事实**——PALS? 文档就 utility line 的通道号写 "see DFUT, DFUT? - (DeFine UTility line) for the channel number"；DFUT 的 `ch_No` 说明也明确 `PALS?` 与 `DFUT?` 一样返回五位数格式。
+- `DFUP`：**文档事实**——DFUP 的 Errors 段规定，若通道已在 DFUT 中定义为 READ ONLY，DFUP 报错；DFUP 定义 utility purpose（通道组加标准状态），DFUT 定义单条线的符号名与方向。**推断**：两者是"线"与"线的组"的分工，先 DFUT 后 DFUP 是自然顺序，但文档没有强制先后。
+- `Utility Card`：**文档事实**——`type` 参数说明把 `TRIGGER_*` 关键字限定为可选 Utility Card 的 utility line，并链接到 Utility Card 主题。
+- `XPS256 safety line and DUT board disconnect`：**文档事实**——`type` 参数说明在给出 `TRIGGER_IF_HIGH` / `TRIGGER_IF_LOW` / `TRIGGER_SITE_IF_HIGH` / `TRIGGER_SITE_IF_LOW` 后直接让读者参考本篇，用于 XPS256 pin 的硬件控制 shutdown。
+- `Utility line assignments`、`DUT interface layout`：**文档事实**——DFUT 的 `ch_No` 参数与 Related information 直接指向这两篇，用于确定 utility pogo block 与通道编号。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced before SmarTest 6.3.2（哨兵值，表示在文档集覆盖起点之前已有，不是 6.3.2 的变更）；SmarTest 7.10.1 在 V93000 EXA Scale 系统上引入三位 utility pogo block 编号；SmarTest 7.10.2 为 `type` 参数新增关键字，用 utility line 配置 XPS256 pin 的 shutdown（"New keywords for the type parameter to configure shutdown of XPS256 pins using utility lines"）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.06_Command_Reference/02.06.02.02.70_DFUT__DFUT__-__DeFine_UTility_line.htm`——语法、参数、示例、Errors、Related information 与 Functional changes 均取自本篇。

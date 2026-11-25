@@ -2945,20 +2945,58 @@ See
 
 ## 是什么
 
-（待补）
+**文档事实** data logging profile 是一组 data logging rules，决定测试系统记录哪些数据以及如何记录。它把 data logging 配置保存为可复用的 setup，并能在不删除生产 testflow 优化的情况下改变 flag 设置。
+
+**文档事实** 文档列出的优势：Ease of use（一键开关 data logging）、Flexibility（预定义多种配置，生产时按需切换）、Efficiency（支持固定与自适应 sampling）。
+
+**文档事实** SmarTest 交付两个默认 profile：`datalog_OFF.prf` 加载后不记录数据，也不向 log file 写信息；`datalog_ON.prf` 逐 pin 记录所有 test 的 value results。两者都可定制。
+
+**文档事实** profile 由 rule 组成；每个 profile 的第一条 rule 含属性 `log_events_enable`，值为 1 时打开 data logging 机制。rule 的选择字段包括 Test Suite or Group、Test Method、Test Name/Num/Bin 与 Property/Value。
+
+**文档事实** profile 的编程接口分四个类：ProfileMgr 负责 profile 的创建、加载、激活、反激活、删除、重载与目录枚举；Profile 管理 rule 集合与 selector bitmask；Rule 表示一条 rule（含 suite/method/name/num/bin/属性/值）；Property 在当前活动 profile 与上下文中查询属性值。
+
+**文档事实** rule engine 按 rule 顺序扫描，第一个匹配的 rule 生效（`Profile::value` 的说明）；未定义属性返回 `INT_MIN`，`Property::value` 在未指定时返回 0。
+
+**文档事实** 兼容性：既有 production settings file 可复制到 `<device directory>/profiles/`，再按只读 data logging profile 加载使用。
+
+**推断** 因此 profile 的本质是「按执行上下文求值的 flag 规则集」：激活 profile 等价于按 rule 批量设置 data logging flags，而不是修改 testflow 文件；文档的 Example 明说不必手工切换 flags，也不必修改 testflow 文件。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档的典型做法是建两个 profile：standard profile 只记录所有 test 的 pass/fail；debug profile 记录 pin value results、first failing cycles 等细节。产线良率下降时激活 debug profile，即可获得定位良率下降所需的详细结果。
+
+**文档事实** 可在 testflow 的 test method 中监控良率下降：当失败 test 数超过阈值时，从 test method 内做一次函数调用激活 debug profile，在运行中改变 flag 配置，无需人工介入。
+
+**文档事实** 创建规则的步骤（Creating or editing a data logging profile）：在 Test Suite or Group、Test Method、Test Name/Num/Bin 字段选 `*`，Property 选 `log_events_enable`，Value 填 `1`，点 Add，得到 rule `*.*.*. log_events_enable = 1`。
+
+**文档事实** 编程创建 profile（Data logging profile API examples）：`ProfileMgr::getInstance()` 后 `createProfile(WildcardProfileType)`，逐条 `profile->createRule("ts:AC* . * . * . datalog_level = 3")`，再拼出 `<device>/profiles/ProfileTest.prf` 并 `profile->save(filename)`。示例还演示按 test suite、test method、test name、test num 选择器分别设规则，最后用 `* . * . *` 兜底。
+
+**文档事实** 自适应 sampling 示例：初始化时把 `datalog_ON.prf` 与 `datalog_OFF.prf` 用 `createProfile` 载入，每次 testflow 执行按 `executionCount % SAMPLE_SIZE == 0` 调 `activateProfile` 切换。
+
+**文档事实** Logging by test number 示例：用 TESTSET 设 `testname("EdlFfcDatalog")` 与 `testnumber(900)`，执行 FUNCTIONAL_TEST 后调用 `set.judgeAndLog_FunctionalTest()`，由活动 profile 判断是否记录。
+
+**文档事实** 自定义属性示例：`Property logHistogram("logHistogram"); if (logHistogram) { drawHistogram(); }`；profile 在当前上下文定义该属性时返回规则值，否则为 0。
+
+**建议** 按文档说明优先使用 profile 而不是逐 flag 手工设置；Performance Cookbook 的 Data logging settings 页也明确推荐 profiles，理由是更快、更不易漏设。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** Data logging profile API 与 ProfileMgr、Profile、Rule、Property：本页子主题，定义创建与处理 profile、rule、property 的编程接口；本页语法节逐字收录其成员函数与示例。
+- **文档事实** Profile Editor（含 Starting the Profile Editor、Creating or editing a data logging profile、Data logging profile rule syntax）：本页子主题，提供图形化创建/编辑规则与规则语法。
+- **文档事实** Loading a data logging profile、Unloading a data logging profile、Associating a data logging profile with a testflow、Restoring the default data logging profiles：本页子主题，覆盖 profile 的生命周期与与 testflow 的关联。
+- **文档事实** Flags and data logging profiles 与 Data logging profiles and sampling：本页子主题，说明 profile 与 data logging flags 的关系，以及固定/自适应 sampling。
+- **文档事实** Datalog Control tool：其 Setting the data log general information 子主题说明选择 profile 时点 Active，并从列表选择 data log profile。
+- **文档事实** Setting up the data log information（Test Program Management）：该页说明若使用 Data Logging Profiles，profile 中的设置优先级高于 testflow 中的设置。
+- **文档事实** System flags 与 Testflow flags（Memory Test Plus）：两页都说明 flag 设置可作为 Data Logging Profiles 的一部分，通过切换 profile 改变 flag 而不修改原 setup。
+- **文档事实** Performance Cookbook 的 Data logging 与 Data logging settings：前者说 profiles 可把任意数量 flag 设置打包并一步切换，后者强烈推荐使用 profiles。
+- **文档事实** Profile（`02.08.04.21`）：该页引用本页（objpack 入边）；本页未展开该工具与 profile 的具体关系。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 记：Introduced before SmarTest 6.3.2。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.10_Data_Logging/02.10.01.02_Data_Logging_Profiles.htm`，主源，含子主题列表、advantages、默认 profiles、Example、Compatibility 与 Functional changes，已用 `show.py` 读取。
+- 语法节逐字收录的子主题：`02.10.01.02.06.02_Creating_or_editing_a_data_logging_profile.htm`、`02.07.04.01.169.01`–`.04`（ProfileMgr/Profile/Rule/Property class）、`02.10.01.02.08.01`–`.05`（同上及 Data logging profile API examples）。
+- 入边关系与引文取自 `extract/objpack.py` 的入边索引。

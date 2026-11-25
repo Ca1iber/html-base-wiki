@@ -891,20 +891,60 @@ return;
 
 ## 是什么
 
-（待补）
+**文档事实** DC_RESULT_ACCESSOR 是 Test Method API，用于以一致的方式处理不同 pin 类型与不同测量类型的测量结果（原文：allows the consistent handling of measurement results for different pin types and measurement types）。
+
+**文档事实** 它支持 DPS operating mode pin（用 DPS Pins editor 定义）与 PMU operating mode pin（用 Digital Pins editor 定义），可取得由 `DPS_TASK` 与 `SPMU_TASK` 建立的测量结果。支持的卡/模式：DC Scale DPS128 与 XPS256 的 DPS 和 PMU operating mode；DC Scale UHC4T pin 的 DPS operating mode。它不支持 legacy DPS pin（同样由 DPS Pins editor 定义）与数字通道 pin。
+
+**文档事实** 它也支持由 `PPMU_...` 与 `BADC_...` API 定义的测量；DC Dynamic 测量主要由 DC event API 设置。文档提醒：DC profiling 期间每 pin 捕获的 sample 数可能略有差异，原因是 profiling 的内部触发不是 vector exact。
+
+**文档事实** API 由中心类 `DC_RESULT_ACCESSOR` 与三个 helper 类 `RESULT_POINT`、`RESULT_POINT_LIST`、`RESULT_FAIL_INFO` 组成；头文件为 `/opt/hp93000/soc/prod_com/include/MAPI/DcResultAccessor.h`。构造函数可带 `dcResultConfigurationSetName`，用于在上传数据前设定 result configuration set。
+
+**文档事实** 成员函数覆盖：上传全部结果（`uploadResult`）、只上传失败结果（`uploadFailedResult`）、查询可用结果范围/数量（`getRangeOfAvailableResults`、`getNumberOfAvailableResults`）、取首/末结果点（`getFirstResultPoint`、`getLastResultPoint`）、取测量类型（`getMeasurementType`）、取 pass/fail（`getPassFail`）、取失败状态字节（`getFailInfo`）、取单个/批量测量值（`getValue`、`getValues`）、取期望结果/限值（`getExpectedResult`）。当前结果寻址方案只有 `TM::RESULT_INDEX`。
+
+**推断** 从“结果必须先上传”“测量由 DPS_TASK/SPMU_TASK 建立”可以看出，DC_RESULT_ACCESSOR 是测量执行之后的“结果上传与读取”层，而不是测量条件设置 API；这由文档的 upload 语义与支持的 setup API 列表归纳。
 
 ## 典型用法
 
-（待补）
+**文档事实** 基本流程：建立并执行测量（由 `DPS_TASK`/`SPMU_TASK` 或 DC event/PPMU/BADC API）→ 用 `uploadResult()` 上传结果（可先 `getRangeOfAvailableResults()` 获取范围）→ 用 `getFirstResultPoint()`/`getLastResultPoint()` 取得 `RESULT_POINT` 迭代器 → 逐点用 `getPassFail()`、`getValue()`、`getMeasurementType()`、`getFailInfo()` 读取 → 用 `TEST(...)` 或 `TESTSET.judgeAndLog(DcResultAccessor)` 记录结果。
+
+**文档事实** 上传全部结果可用 `uploadResult(pin, TM::RESULT_INDEX)`（返回 `TM::RESULT_RANGE`）或带显式范围的 `uploadResult(pin, TM::RESULT_INDEX, range)`；只上传失败结果用 `uploadFailedResult(...)`，其范围可能不连续（如 1,3,4,8），无失败时甚至为空。每次 `uploadResult()` 都会覆盖上一次上传的结果，且与具体 accessor 对象无关。若先后两个 pin，返回的是两 pin 的“最小公共结果范围”。
+
+**文档事实** 迭代时必须包含最后一个 `RESULT_POINT`：文档明确要求用 `<=`，用 `<` 或 `!=` 会漏掉最后一条结果；`RESULT_POINT` 只支持 `++`，不支持 decrement。若已知范围，直接传 `range` 可避免 `uploadResult()` 内部再次调用 `getRangeOfAvailableResults()`，文档称这样可提升性能。
+
+**文档事实** `getPassFail()` 无参数返回全局 pass/fail；给 pin 名时返回该 pin 所有可用结果的 AND；给结果范围或两者组合时同理。文档警告：只有在之前的 `uploadResult()` 指定上传 ALL results（`uploadAllResults = TRUE`）时才应使用这些方法，否则总是返回 FAIL。`getValue()` 取最后一个已上传结果的值；文档提示上传值可能无效，应先用 `RESULT_FAIL_INFO` 确认有效且未被标记为 fail。`getValues()` 对单 pin 返回值数组，不指定结果点时返回该 pin 全部可用结果；文档同样建议使用 `RESULT_POINT_LIST` 形式。
+
+**文档事实** 多 site 示例：用 `DC_RESULT_ACCESSOR result("dpsCurr")` 绑定 result configuration set，配合 `RESULT_AREA_CONFIG_SET resSet("dpsCurr")`、`resSet.pin("dps1").setDcValueResultAreaSize(8192)`、`resSet.setAsPrimary()`，在 `FOR_EACH_SITE_BEGIN()` 中对每 site 调 `uploadResult` 并逐点读取。
+
+**文档事实** 文档把在 `ON_FIRST_INVOCATION...` 块内调用 `uploadResult()`（Example 5）称为推荐做法，可显著减少测试时间。
+
+**建议** 优先使用文档推荐的 `RESULT_POINT`/`LIST` 形式（而非 `singlePin` 形式）；读取 value 前用 `RESULT_FAIL_INFO` 校验；迭代用 `<=` 且只 `++`；若已取得范围就显式传入，避免重复查询。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.50_DPS_TASK.htm`、`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.234_SPMU_TASK.htm`：文档明确本 API 取得由这两个 API 建立的测量结果，因此 DPS/PMU 测量设置与结果读取通过它衔接。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.193_RESULT_POINT.htm`、`.../02.07.04.01.194_RESULT_POINT_LIST.htm`、`.../02.07.04.01.192_RESULT_FAIL_INFO.htm`：三个 helper 类；其中 RESULT_FAIL_INFO 保存每个 pin 在指定 result point 的状态字节，并提供访问各 fail 位的 getter。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.08_BADC_MEASURE.htm`：BADC_MEASURE 的测量结果通过 DC_RESULT_ACCESSOR 获取。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.142_PATTERN_CONTROLLER.htm`：PATTERN_CONTROLLER 只能取全局 pass/fail，逐 pin 的 Board ADC 测量结果必须用 DC_RESULT_ACCESSOR 上传。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.26_DC_PROFILING_OFF.htm`：该页说明 profiling 得到的测量值由 DC_RESULT_ACCESSOR 取得，因此它也是 DC profiling 结果的读取入口。
+- **文档事实** `02_System_reference/02.05_Test_Head_Cards/02.05.04.01.03.04_PS1600_DC_value_measurements.htm`、`02_System_reference/02.05_Test_Head_Cards/02.05.04.02.07.02_Pin_Scale_5000_DC_value_measurements.htm`：两页均用 DC_RESULT_ACCESSOR 读取 DC 测量结果。
+- **文档事实** `02_System_reference/02.05_Test_Head_Cards/02.05.05.03.10.06_XPS256_programming_-_DGT.htm`、`.../02.05.05.03.10.13_XPS256_programming_-_Measure_currents.htm`、`.../02.05.05.03.10.14_XPS256_programming_-_Measure_voltages.htm`、`.../02.05.05.03.10.19_XPS256_programming_-_Voltage_drop_measurement.htm`：XPS256 的采样数据/电流/电压/电压降结果通过 DC_RESULT_ACCESSOR 上传，或与 `SPMU_TASK.getValue()`/`DPS_TASK.getValue()` 配合读取。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.241_TEST.htm`、`.../02.07.04.01.244.06_TESTSET__.judgeAndLog_DcResultAccessor.htm`：`TEST` 与 `TESTSET.judgeAndLog` 可直接以 DC_RESULT_ACCESSOR 对象作为测试数据来源。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.231.50_SMC_UPLOAD_DC_RESULTS.htm`：SMC_UPLOAD_DC_RESULTS 使用 DC_RESULT_ACCESSOR 上传指定测量结果，并可带 `TM::RESULT_RANGE`。
+- **文档事实** 本页 Related information 还列出 `ERRE?`、`DFTD`、`VALR?` 三个命令页（`02_System_reference/02.06_Command_Reference/02.06.02.02.115_ERRE__-__Expected_and_Received_Results_of_Events.htm`、`.../02.06.02.02.68_DFTD__DFTD___DeFine_Test_Data.htm`、`.../02.06.02.02.317_VALR__-__VALid_Range.htm`）。
 
 ## 版本
 
-（待补）
+**文档事实** 本页 `Functional changes` 记录：
+- Introduced before SmarTest 6.3.2
+- SmarTest 7.3.1: New function getExpectedResult().
+- SmarTest 7.3.1: New parameter site.
+- SmarTest 7.3.1: DC Scale PVI8 card added.
+- SmarTest 7.4.0: DC Scale AVI64 card added.
+- SmarTest 7.10.1: DC Scale XPS256 card added.
+
+**文档事实** 正文称支持 UHC4T 的 DPS operating mode，但 `Functional changes` 未记录 UHC4T 支持是在哪个版本加入的。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.04.01.28_DC_RESULT_ACCESSOR.htm`（主源：简介、Class definition、Member functions、Examples、Related information、Functional changes）。
+- 关联判断另参考 `extract/edges.jsonl` 中指向本页的入边；本页语法节逐字取自同页，无语法子主题。

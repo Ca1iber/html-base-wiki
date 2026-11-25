@@ -1111,20 +1111,48 @@ FOR_EACH_SHARED_SITE_END()
 
 ## 是什么
 
-（待补）
+**文档事实** SHARED_CONTINUITY_TEST 是 Memory Test Plus（MTP）的 API，用于对采用 driver sharing 的 DUT 做连续性（continuity）检查并找出短路（short circuit）；它在一次执行中测试 shared、non-shared 与 cross-terminated 三类 pin。文档明确：该 API 仅适用于 MTP。
+
+**文档事实** API 定义为 `SHARED_CONTINUITY_TEST` 类，头文件 `/opt/93000mts/mts/solution_tools/common/include/SHARED_CONTINUITY_TEST.h`。成员分四组：初始化 `init()`；设置 `sharingConfigFile()`、`pinShared()`、`forceVoltage()`、`pinNonShared()`、`forceCurrentNonShared()`、`pinCross()`、`forceCurrentCross()`、`terminationDPS()`、`supplyDPS()`、`settlingTime()`、`output()`；执行 `execute()`；结果 `judgeAndLog()`、`print()`、`getPassFail()`（整体或单 pin）、`getValue()`（单 pin 电压，单位 V）。
+
+**文档事实** 自建 test method 时需按测试 pin 添加三个 limit：`"Shared Voltage(mv)"`、`"Non-Shared Voltage(mv)"`、`"Cross-Terminated Voltage(mv)"`，分别给出 shared、non-shared、cross-terminated pin 的 pass 电压上下限；并需包含 driver sharing API 的库与头文件。
+
+**文档事实** 文档给出另外两种做法：MTP 自带的 `SharedContinuity` test method（无需特殊算法/输出格式时最简单），以及 `MTP_CONTINUITY_TASK` API（需要在同一 test method 内对 shared/non-shared/cross-terminated pin 使用不同测试条件时）。三者的差异见 MTP_CONTINUITY_TASK 页。
+
+**推断** SHARED_CONTINUITY_TEST 是“按三类 pin 一次性配置并执行”的较高层封装；MTP_CONTINUITY_TASK 则把配置粒度下放到 pin 组，可对不同组给不同条件。此判断由文档对两者的对比描述归纳。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档 Example 1 的骨架：在 `testmethod::TestMethod` 子类的 `run()` 中，`ON_FIRST_INVOCATION_BEGIN()` 内先 `mTest.init()`，再链式设置 `pinNonShared(...).forceCurrentNonShared(...).pinCross(...).forceCurrentCross(...).sharingConfigFile(...).pinShared(...).forceVoltage(...).terminationDPS(...).supplyDPS(...).settlingTime(...).output(...)`，然后 `mTest.execute()`；`ON_FIRST_INVOCATION_END()` 之后调 `mTest.judgeAndLog()` 与 `mTest.print()`。
+
+**文档事实** Example 1 的具体参数：non-shared pin 为 `"DQ_Bus,DQS_DiffBus,DM"`，force 100 µA；cross-terminated 为 `"Clock_Bus"`，force 100 µA；sharing 配置 `"default.cfg"`；shared pin 为 `"Addr_Bus,Command_Bus"`，force 1.1 V；termination DPS `"VTERM"`，supply DPS `"VDD,VDDQ"`，settlingTime 0，output 为 `MTP::OUTPUT_REPORT_UI`。
+
+**文档事实** Example 2 演示自定义输出：仍按上述方式设置并执行，然后用 `PinUtility.getDigitalPinNamesFromPinList(...)` 取得各类 pin 名，逐 pin 调 `mTest.getPassFail(pin)` 与 `mTest.getValue(pin)`，并用 `CURRENT_SITE_NUMBER()` 区分 site，自行 `cout` 输出。
+
+**文档事实** 文档说明完整 test method 代码可在 `/opt/93000mts/mts/solution_tools/common/sh_lib/DriverSharing.tar.gz` 中找到。示例代码包含 `solution_tools.h`、`testmethod.hpp`、`mapi.hpp`。
+
+**文档事实** 与本 API 同页收录的 `MTP_CONTINUITY_TASK` 示例展示了另一条路径：先 `DISCONNECT()`（continuity 通常在 disconnect 状态、DUT 不上电时测），再用 `FOR_EACH_TEST_BEGIN("default.cfg", "continuity")` / `FOR_EACH_SHARED_SITE_BEGIN()` 分 shared site 执行 `mTest.execute()`，最后 `mTest.postExecute()`；该示例属于 MTP_CONTINUITY_TASK，而非 SHARED_CONTINUITY_TEST 自身。
+
+**建议** 若没有自定义测试算法或特殊输出需求，优先用文档称“最容易开发”的 SharedContinuity test method；需要自定义算法/输出时用本 API；需要对不同 pin 组使用不同测试条件时用 MTP_CONTINUITY_TASK。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.10_MTP_CONTINUITY_TASK.htm`：文档称它提供与本 API 类似的功能，但可对 shared/non-shared/cross-terminated pin 使用不同测试条件；本页在“两种替代做法”处指向它。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.09.08_SharedContinuity_test_method.htm`：该页说明若需要比自带 test method 更细的控制，可用 SHARED_CONTINUITY_TEST 或 MTP_CONTINUITY_TASK 自建，并引用本 API。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.09.03_Driver_Sharing_APIs.htm` 与 `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.01.10.06.03_Driver-sharing_APIs.htm`：两页都把 SHARED_CONTINUITY_TEST 列为 driver-sharing API，并概括其“检查 continuity、找 short circuit”的用途。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.09.04_Setting_up_for_using_driver_sharing_APIs.htm`：本页要求自建 test method 时包含 driver sharing API 库与头文件，该页给出具体设置步骤。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.01_Driver_sharing_concepts.htm`：本 API 面向 driver sharing 的 DUT，该页解释 driver sharing 概念。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06_MTP_API_Reference.htm`：MTP API reference 父页，把本 API 列入 MTP API 集合。
+- **文档事实** 本页子主题 `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.21.01_SHARED_CONTINUITY_TEST.init.htm` 至 `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.21.17_SHARED_CONTINUITY_TEST.getValue.htm`：逐一描述本类的成员函数（init、sharingConfigFile、pinShared、forceVoltage、pinNonShared、forceCurrentNonShared、pinCross、forceCurrentCross、terminationDPS、supplyDPS、settlingTime、output、execute、judgeAndLog、print、getPassFail、getValue）。
+- **文档事实** `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.10_MTP_CONTINUITY_TASK.htm` 及其子主题 `.../02.12.06.10.01_MTP_CONTINUITY_PIN_TASK.htm` 至 `.../02.12.06.10.07_MTP_CONTINUITY_TASK.getValue.htm`、`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.41_DISCONNECT.htm`、`.../02.12.06.02_FOR_EACH_SHARED_SITE_BEGIN.htm`、`.../02.12.06.03_FOR_EACH_SHARED_SITE_END.htm`、`.../02.12.06.04_FOR_EACH_TEST_BEGIN.htm`、`.../02.12.06.05_FOR_EACH_TEST_BEGIN_WITH_RESET.htm`、`.../02.12.06.06_FOR_EACH_TEST_END.htm`：这些是本页语法节从 MTP_CONTINUITY_TASK 示例一并收录的配套 API/宏；SHARED_CONTINUITY_TEST 自身的 Example 1/2 不使用它们。
+- **文档事实** `02_System_reference/02.07_Test_Method_Reference/02.07.02.02.02_How_to_create_a_universal_test_method_class.htm`：本页要求按 pin 类型添加三个 voltage limit 时，指向该页说明如何向 test method 添加 limit 及其值。
 
 ## 版本
 
-（待补）
+**文档事实** 本页 `Functional changes`：`Introduced in MTP 3.1.3`；`MTP 3.1.5: Added new API: MTP_CONTINUITY_TASK`。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.21_SHARED_CONTINUITY_TEST.htm`（主源：类说明、limit 要求、替代做法、Class definition、Example 1/2、Related information、Functional changes）。
+- 本页「语法 / 参数」节逐字收录的子主题：`02.12.06.21.01`–`02.12.06.21.17`（SHARED_CONTINUITY_TEST 各成员）、`02.12.06.10_MTP_CONTINUITY_TASK.htm` 及其 `02.12.06.10.01`–`02.12.06.10.07`、`02.07.04.01.41_DISCONNECT.htm`、`02.12.06.02`–`02.12.06.06`（FOR_EACH_*）。
+- 关联判断另参考 `extract/edges.jsonl` 中指向本页的入边。

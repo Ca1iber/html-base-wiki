@@ -30,20 +30,44 @@ verified: doc-only
 
 ## 是什么
 
-（待补）
+**文档事实** TimeStampAttrType 表示事件发生的时间，其数据类型为 DRLTimeStampAttr。
+
+**文档事实** 它包含四个字段：`length`（int，attribute 长度）、`type`（short，attribute 类型）、`secs`（int，秒）、`usecs`（int，微秒）。
+
+**文档事实** `length` 与 `type` 组成 attribute header。
+
+**文档事实** `secs` 与 `usecs` 表示自 1970-01-01 起经过的秒数和微秒数，即 Linux 的标准时间度量。
+
+**文档事实** Related information 把本页归入 EDF data types 与 EDF data organization。
+
+**推断** 因此 TimeStampAttrType 是 EDF 事件记录中承载“事件何时发生”的 attribute，时间基准是 Unix epoch。
 
 ## 典型用法
 
-（待补）
+**文档事实** 本页只给出字段结构和类型，没有给出代码示例或调用步骤。
+
+**文档事实** 各类事件类型页把 TimeStampAttrType 用作事件时间字段：例如 ActionEventType 用它保存事件被记录的时间；TestProgramStartEventType 用它保存 test program 启动时间，TestProgramEndEventType 保存结束时间，二者可用于计算 test program 的执行时间。
+
+**文档事实** TestFlowStartEventType 与 TestFlowEndEventType 分别保存 testflow 开始与结束执行的时间；TestFunctionStartEventType 与 TestFunctionEndEventType 分别保存 test function 开始与完成的时间。
+
+**文档事实** TestSuiteStartEventType、TestEventType、BinReachedEventType、AssignmentEventType、PrintToDatalogEventType、UserProcedureEventType、ConfigurationChangedEventType、GenericDataEventType、ManualExecutionEventType 等事件页也说明对应时间由 TimeStampAttrType 保存。
+
+**推断** 典型用途是给测试程序、testflow、test suite、test function 及 binning 等事件打时间戳，并用起止时间戳计算阶段耗时。
 
 ## 和谁有关
 
-（待补）
+- **文档事实** DRLTimeStampAttr，本页正文明确说 TimeStampAttrType 的数据类型是 DRLTimeStampAttr。
+- **文档事实** EDF data types 与 EDF data organization，本页 Related information 链接这两页，把 TimeStampAttrType 放进 EDF 类型体系。
+- **文档事实** Attribute types，objpack 入边显示该页把 TimeStampAttrType 列入 attribute 类型清单。
+- **文档事实** ActionEventType、TestProgramStartEventType、TestProgramEndEventType、TestFlowStartEventType、TestFlowEndEventType、TestFunctionStartEventType、TestFunctionEndEventType 等事件页，objpack 入边引文说明这些事件的时间字段由 TimeStampAttrType 保存。
+- **文档事实** TestSuiteStartEventType/TestSuiteEndEventType、TestEventType、BinReachedEventType、AssignmentEventType、PrintToDatalogEventType、UserProcedureEventType/UserProcedureStartEventType、ConfigurationChangedEventType、GenericDataEventType、ManualExecutionEventType、AppModelLevelStartEventType/AppModelLevelEndEventType/AppModelLevelLoopEventType，objpack 入边引文同样以 TimeStampAttrType 保存对应事件时间。
+- **推断** 这些关系表明 TimeStampAttrType 是事件类型页的通用时间字段类型，而不是某个单一事件专用。
 
 ## 版本
 
-（待补）
+**文档事实** Functional changes 只记一条：Introduced before SmarTest 6.3.2。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.10_Data_Logging/02.10.01.06.05.65_TimeStampAttrType.htm`，主源，含字段表、Related information 与 Functional changes。
+- 事件类型页与 Attribute types 的引用关系取自 `extract/objpack.py` 入边索引。

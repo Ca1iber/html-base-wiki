@@ -310,20 +310,48 @@ examples see
 
 ## 是什么
 
-（待补）
+**文档事实**：POGOCABLING section 是 model file 的一节，定义 card slot（channel card 在 card cage 中的物理位置，即 control segment 位置）与 DUT interface 上 pogo block 的映射。它允许 card cage slot 与 pogo block 之间灵活走线，并取代早期的 pogo mapping file。语法为 `<physical_location>: pogoblocks = "<pogoblock_list>", type = SD | HD1x256 | HD2x32 | HD4x32 | VHD1x128 | VHD4x32 | REDIRECT, subtype`。
+
+**文档事实**：`<physical_location>` 采用 CSS 格式：C 是 control segment（1–4），SS 是 control segment slot 号（01–18）。SS=09 与 SS=18 是保留给 legacy DPS 卡（如 MS-DPS）的两个 slot。`pogoblocks` 是双引号字符串，逗号分隔块、连字符表示范围、两者可混用（如 "101, 210-212"）；总块范围 N MM（N=1–8，MM=01–64），实际可寻址范围取决于所选 pogo cable，且列表顺序必须与 pogo cable assembly 的结构一致——列表第一个块始终是 cable 的 pogo block A，最后一个块是 cable 的最后一个块。
+
+**文档事实**：`type` 指定 pogo cable 类型：`SD` 是标准 pogo cable，16 通道/块，按卡不同一条 cable 终止于 1–8 个块；`HD4x32` 为 32 通道/块、一条 cable 4 个块；`VHD1x128` 是 PS1600 的 pogo cable（2 个 VHD 块、64 通道/块），仅用于特殊配置；`VHD4x32` 是 DPS128 的 pogo cable（4 块 × 32 通道），文档写"尚未使用"；`HD2x32` 目前没有卡使用；`REDIRECT, subtype` 用于特殊 DPS pogo cable，使旧软件版本也能启动——软件一旦识别到 "redirect" 语句，即使后面的信息该版本不认识也会继续启动。`type` 可省略，默认 `SD`。
+
+**文档事实**：语法行还列出 `HD1x256`，但 `type` 参数说明没有对它作任何解释（只解释了 SD、HD2x32、HD4x32、VHD1x128、VHD4x32、REDIRECT）。这是文档自身的空档，不是本页省略。
+
+**文档事实**：同一 model file 同时使用 pogo mapping file 与 POGOCABLING 格式会导致 SmarTest 启动终止；此外以下情况也会终止启动并给出错误：pogo block 号非法；online 模式下 model file 给出的 pogo block 与所装卡变体的密度不匹配；offline 模式下 model file 所用硬件变体的密度与给出的 pogo block 不匹配；用 S2 pogo block 指定 UHC4T 的 pogo cabling；S1 映射到 UHC4T 但对应 S2 被其它卡占用；指定了所装 channel card 不支持的 pogo cable 类型。
+
+**文档事实**：SmarTest 6.5.x 同时支持 pogo mapping file 与 POGOCABLING 格式；SmarTest 7.0 及以后只支持 POGOCABLING 格式。
 
 ## 典型用法
 
-（待补）
+**文档事实**：最小示例 `101: pogoblocks= "101,102"`——双密度数字卡的 32 通道（2 个 logical board）经 2 个 16 通道的 pogo block 引出。
+
+**文档事实**：不同卡型有不同条目，见子主题 `Pogocabling entries for various card types`。例如 DC Scale UHC4T 的 4 个通道被路由到合并为一个单元的 2 个 pogo block（占用 S1/S2 对），model file 只填 S1 位置，软件自动封锁相邻 S2。
+
+**文档事实**：从旧的 pogo mapping file 迁移时，需先在 SmarTest 6.5.x（不是 7.x）启动，生成 `/opt/hp93000/soc/system/log` 下的 `PogoCabling.log`，其中含当前 pogo mapping；再按 `Conversions: pogo mapping file <-> POGOCABLING` 转换。SmarTest 7.0+ 不接受 pogo mapping file。
+
+**建议**：写 `pogoblocks` 列表时按实际 cable assembly 的物理顺序排列，不要按块号"排序"——文档明确列表顺序决定 cable 的 A 块到末块，重排会改变映射。这是建议；文档只规定顺序必须对应 cable 结构。
 
 ## 和谁有关
 
-（待补）
+- `DPS section`：**文档事实**——DPS section 文档说，DPS-slot 器件电源要指定 slot 号；DC Scale 卡要使用 POGOCABLING section 中指定的 pogo block 的六位数 channel 号；在该 section 里所有卡都必须指定类型。两个 section 需配套填写。
+- `GLOBAL section` / `Model file reference (model legacy)`：**文档事实**——GLOBAL section 与 legacy model file 参考都把 POGOCABLING 列为 model file 的一节；legacy 参考列出的 section 顺序包含 GLOBAL、POGOCABLING、IOCHANNEL、INTERFACE_SECTION、ETC、DPS、DMM。
+- `Pogo mapping`：**文档事实**——该页说 `CARD_CONFIGURATION` section of the tester.model file 把卡的物理位置映射到 DUT interface 的 pogo block 编号，并明确 "In the legacy model file, mapping is made in the POGOCABLING section"。
+- `DUT interface layout`：**文档事实**——该页说 POGOCABLING section（SmarTest 7）与 CARD_CONFIGURATION section（SmarTest 8）把卡的 card cage 位置映射到 DUT interface 的 pogo block 位置；POGOCABLING 的 `pogoblocks` 参数也直接引用该页。
+- `UHC4T specific setup tasks`：**文档事实**——该页要求 UHC4T 必须同时在 DPS section 与 POGOCABLING section 中定义（或写在 tester.model 的 CARD_CONFIGURATION section），软件标识为 `DCS-UHC4T`。**推断**：这与本页 Error messages 中的 S1/S2 pogo block 限制相互印证。
+- `Pogocabling entries for various card types`、`Conversions: pogo mapping file <-> POGOCABLING`：**文档事实**——本页 Subtopics 与 Related information 直接列出这两篇子主题；前者给各卡型的条目写法，后者给迁移步骤与日志。
+- `DUT Scale interface`：**文档事实**——该页入边写 "The POGOCABLING section in the model file maps the physical position of a card with the pogo block numbering of the DUT interface"，即把本页当作 DUT Scale 接口映射的定义处。
+- `SE-UDPS`：**文档事实**——该页入边写 SE-UDPS "is to be defined in the DPS section of the model file and in the POGOCABLING section of the file"，并给出 `POGOCABLING <physical_card_location>: pogoblocks = "<pogoblock_list>"` 的写法。
+- `DPS128/DPS64 pogo cable assemblies and pogo pin assignments`、`PS1600 pogo pin assignment`、`Concepts of logical boards`：**文档事实**——这三篇的入边都只是链接到本页（PS1600 篇的语境写作 "SmarTest 7: POGOCABLING section"），未给出更具体的用途句。
 
 ## 版本
 
-（待补）
+**文档事实**：Functional changes 记录：Introduced in SmarTest 6.5.0；SmarTest 7.0.1 新增 pogo cable 参数 `type` 与 `subtype`，并新增 Pin Scale 9G 卡的 pogo block 计算；SmarTest 7.1.0 新增 PS1600 的 pogo cable 参数与 PS1600 卡的 pogo block 计算；SmarTest 7.1.3 把 MCE 加入 analog hardware types。
+
+**文档事实**：SmarTest 7.0 起只支持 POGOCABLING 格式，pogo mapping file 不再被接受；6.5.x 是两种格式并存的最后版本（见 Conversions 子主题）。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02_POGOCABLING_section.htm`——语法、参数、Card cage allocation 表、错误信息、示例与 Functional changes 均取自本篇。
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02.01_Pogocabling_entries_for_various_card_types.htm`——各卡型条目（含 UHC4T 的 S1/S2 用法）取自本篇。
+- `02_System_reference/02.04_Model_File_and_Licensing/02.04.01.03.02.02.02_Conversions__pogo_mapping_file__-__POGOCABLING.htm`——6.5.x/7.0 支持差异、`PogoCabling.log` 与迁移步骤取自本篇。
