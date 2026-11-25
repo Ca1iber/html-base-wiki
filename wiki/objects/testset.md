@@ -4421,20 +4421,71 @@ logs to the multibin.
 
 ## 是什么
 
-（待补）
+**文档事实** TESTSET 是测试方法 API 中的一个类，文档称它访问一个数据容器，该容器保存“某个 test suite 中结果的编号过程（numbering procedures）”所需信息，并用于指定与 TEST API 及 test method 相关的全部选项。
+
+**文档事实** 构造函数：
+- `TESTSET()` 创建上述类对象。
+- `TESTSET(bool withContext, INT site)` 额外指定要处理的 site；文档要求 `withContext` 必须设为 `false`。
+
+**文档事实** 文档给出的对象形式与限制：
+- 系统预制对象为 `TestSet`，该预制对象不能在 SMC 框架内使用。
+- 也可以创建临时对象或用户对象。
+- `TESTSET` 对象不得跨多个线程共享；若用于 SMC 后台处理，应只在 `SMC_backgroundProcessing()` 方法内创建和使用。
+- 成员函数设置的参数会一直保持，直到被重置或恢复为默认设置。
+- 头文件：`/opt/hp93000/soc/prod_com/include/MAPI/TestSet_r.h`。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档给出的对象用法：
+- 临时对象：`TESTSET().member_func().judgeAndLog_xxx(parameters);`
+- 指定 site 的临时对象：`TESTSET(false, site).member_func().judgeAndLog_xxx(parameters);`
+- 系统预制对象：`TestSet.member_func().judgeAndLog_xxx(parameters);`（SMC 框架内不可用）
+- 用户对象：`TESTSET obj; obj.member_func().judgeAndLog_xxx(parameters);`
+
+**文档事实** 常见组合是先调用 `cont()`、`port()`、`testnumber()` 等设置条件，再调用 `judgeAndLog_*` 进行判定和记录，例如：
+- `TESTSET().cont(true).judgeAndLog_ParametricTest("dgtz_pin", "THD", thd_result);`
+- `TESTSET().port("port").judgeAndLog_FunctionalTest();`
+- `TESTSET().judgeAndLog_Dps(dpsTask);`
+
+**文档事实** 编号方面，`testnumber()` 支持按 Properties view 中的 test name 取 offset/increment、直接给整数编号，或传入 `TESTNUMBER` 对象；`testnumber_default()` 生成默认 test ID（test table 编号与 Properties view 的 Flags 区编号之和；若不用 test table，则为 Limits 区编号与 Flags 区编号之和），`testnumber_none()` 不为当前测试写 test number（即使 `test_number_enable` 已启用）。文档 Example 1 中 `TestSet.cont(true).testnumber(sdc6);` 之后的多次 `TEST()` 共用同一编号条件。
+
+**文档事实** 文档 Example 4 在高阻/功能测量后，于 `ON_FIRST_INVOCATION_END();` 之后调用 `TESTSET().judgeAndLog_FunctionalTest();`，即先测量、再判定并记录。
 
 ## 和谁有关
 
-（待补）
+以下关系均来自文档正文、子主题或入边语境：
+
+- 与 TESTNUMBER、GET_TESTNUMBER：Related information 明确列出。`testnumber(TESTNUMBER&)` 使用 TESTNUMBER 的 offset/increment 生成 subtest test number；`GET_TESTNUMBER("name")` 返回的 TESTNUMBER 可直接传给 `testnumber()`。
+- 与 TEST()：`testname()`、`testnumber()` 的设置作用于随后调用的 `TEST()` 方法；文档警告 `TEST()` 必须在 TESTNUMBER 变量作用域内调用，否则出错并停止测试方法。
+- 与 TMLimits（`V93kLimits::TMLimits`）：多个 `judgeAndLog_*` 重载直接接收 `tmLimits`，按测试表中的 limit/bin 信息判定；文档给出了 tmLimits 的 first-fail 分 bin 规则。
+- 与各类测量/结果对象：`judgeAndLog_FunctionalTest()`、`judgeAndLog_ParametricTest()`、`judgeAndLog_PmuIfvm()`、`judgeAndLog_PmuVfim()`、`judgeAndLog_Dps()`、`judgeAndLog_DpsVfim()`、`judgeAndLog_Spmu()`、`judgeAndLog_PpmuMeasure()`、`judgeAndLog_SpecSearch()`、`judgeAndLog_PptiaTask()`、`judgeAndLog_ScanTest()`、`judgeAndLog_DcResultAccessor()`、`doLog_ShmooTest()` 分别以 PMU_IFVM、PMU_VFIM、DPS_TASK、DPS_VFIM、SPMU_TASK、PPMU_MEASURE、SPEC_SEARCH、PPTIA_TASK、SCAN_TEST_RESULT、DC_RESULT_ACCESSOR、ShmooData 等对象为输入。
+- 与 ON_FIRST_INVOCATION_BEGIN/END：TESTSET 的示例把测量放在 first-invocation block 内、把 `judgeAndLog_*` 放在 block 外；ON_FIRST_INVOCATION_BEGIN 页面也明确禁止在 first-invocation block 内使用 TEST()、LIMIT() 和 judgeAndLog_* 语句（入边证据）。
+- 与 SMC / SmartCalc：系统预制 `TestSet` 非线程安全，不能用于 SMC；SMC 中应使用 `SMC_TEST()` 或动态创建的 `TESTSET().judgeAndLog_*()`；文档示例用 `TESTSET(false, mActiveSites[siteIndex])` 在 SMC 后台按 site 处理。`judgeAndLog_ParametricTest()` 自 7.1.4 起可在 SMC 框架内使用（版本记录）。
+- 与 SET_MULTIBIN：`judgeAndLog_ParametricTest()` 的 `softBin` / `hardBin` 参数文档中指向 `SET_MULTIBIN` API。
+- 与数据记录（EDL/STDF）：参数表与示例说明判定结果写入 EDL/STDF；`doLog_ShmooTest()` 可指定 log test number；文档提醒 STDF 只保证前 6 位数值被正确记录。
 
 ## 版本
 
-（待补）
+`Functional changes` 原文记录：
+- Introduced before SmarTest 6.3.2
+- SmarTest 6.5.0: New member function judgeAndLog_ScanTest()
+- SmarTest 6.5.1: testtext() text can replace the content of Test_TXT or be appended to it
+- SmarTest 6.5.2: New member function doLog_ShmooTest()
+- SmarTest 6.5.2: New member function judgeAndLog_Dps()
+- SmarTest 6.5.2: New member function judgeAndLog_Spmu()
+- SmarTest 6.5.3: New member functions hlmfmt(), llmfmt(), resfmt()
+- SmarTest 7.0.3: Removed test number manager
+- SmarTest 7.1.0: Added specifications for judgeAndLog_FunctionalTest()
+- SmarTest 7.1.4: Enhanced judgeAndLog_ParametricTest() function can be used within SMC framework.
+- SmarTest 7.1.4: New member function combineMultiPortTests().
+- SmarTest 7.2.0: Removed test_number_manager flag
+- SmarTest 7.2.1: New member function suppressTestnameLoopCount().
+- SmarTest 7.2.2: Enhanced judgeAndLog_FunctionalTest() and judgeAndLog_ScanTest() functions can be used within SMC framework.
+- SmarTest 7.5.0: New member function addAlarm()
+- SmarTest 7.5.1: New signatures for testnumber()
+- SmarTest 7.5.2: Renamed forceSTDFTestNam parameter to forceSTDFTestName
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.244_TESTSET.htm`（Class definition、Syntax descriptions、Examples、Subtopics、Related information、Functional changes）。
+- 语法/参数材料另取自其子主题 `02.07.04.01.244.01`–`02.07.04.01.244.33`（`TESTSET().*.htm`），以及 `02.07.04.01.250_TMLimits.htm`、`02.07.04.01.99_GET_TESTNUMBER.htm` 等（objscaffold 逐字汇总，已读）。

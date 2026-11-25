@@ -2321,20 +2321,55 @@ Fail cycles for pin ... : ...
 
 ## 是什么
 
-（待补）
+**文档事实** DPS_AUX_PIN_TASK 是 DPS_AUX_TASK API 的辅助数据容器（subsidiary data container）。文档明确：它只能通过 `DPS_AUX_TASK.pin()` 成员函数访问，不能直接构造任何该类的对象。头文件：`/opt/hp93000/soc/prod_com/include/MAPI/DpsAuxPinTask.h`。
+
+**文档事实** 它按 pin 提供 DPS 辅助功能配置，子主题包括：`checkIcHacError()`、`checkPowerFlags()`、`checkSetRangeError()`、`checkSurgeTracker()`、`selectISensorSetThresholds()`、`selectVSensorSetThresholds()`、`setMode()`。多数方法返回 `DPS_AUX_PIN_TASK&`，可链式调用。
+
+**文档事实** `setMode()` 的模式选项为 `TM::DPS_AUX_OFF`、`TM::SURGE_TRACKER`、`TM::CMP_HIGH`、`TM::TO_TMU`；`checkSurgeTracker()` 可选 `TM::AGAINST_BOTH`（默认）、`TM::AGAINST_HIGH`、`TM::AGAINST_LOW`。`checkPowerFlags()` 默认读 `TM::ALL_FLAGS`，也可只读指定 flag。
+
+**文档事实** 顺序约束：通过 PRLT 取得的 pass/fail 结果会被 CSAS 和 PSAS 命令作废，文档建议在相关 functional test 之后、CSAS/PSAS 之前直接使用 PRLT；同理，`GET_FUNCTIONAL_RESULT()` 必须在任何 `DPS_AUX_PIN_TASK.check...()` 函数之前调用，否则其结果无效。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档主示例：配置电流阈值并打开 surge tracker，execute 后检查状态，再读取结果：
+```
+DPS_AUX_TASK auxTask;
+ON_FIRST_INVOCATION_BEGIN();
+auxTask.pin("dps1")
+       .selectISensorSetThresholds(-1 mA, 1 mA)
+       .setMode(TM::SURGE_TRACKER);
+auxTask.execute();
+auxTask.pin("dps1").checkSurgeTracker(TM::AGAINST_BOTH);
+ON_FIRST_INVOCATION_END();
+TM::SURGE_TRACKER_STATUS s = auxTask.getSurgeTrackerStatus("dps1");
+```
+
+**文档事实** power flags 用法：先用 `checkPowerFlags()` 把硬件 flag 读入 test method cache（默认读全部并清除），再用 `getStatusWithoutConstVol("dps1")` 等 get...() 函数读取；也可 `checkPowerFlags(TM::LOW_HEADROOM)` 只读/清指定 flag，再用 `getLowHeadroom()` 读取。
+
+**文档事实** 文档 Example 2（XPS256）：在 `ON_FIRST_INVOCATION` 内设置公共阈值，在 `FOR_EACH_SITE` 循环中替换为 site-specific 阈值；为避免 `setMode()` 发出 warning，`setMode()` 只在 `FOR_EACH_SITE` 循环外调用；`RDI_INIT()` 放在最前面作为 SmartRDI 的前提，surge tracker 结果在另一个 `FOR_EACH_SITE` 循环中读取。
 
 ## 和谁有关
 
-（待补）
+- 与 DPS_AUX_TASK：父类。文档明确只能经 `DPS_AUX_TASK.pin()` 访问；入边显示 `DPS_AUX_TASK.pin()` 返回对应的 DPS_AUX_PIN_TASK 对象引用，`DPS_AUX_TASK.execute()` 依据 DPS_AUX_TASK 与 DPS_AUX_PIN_TASK 中定义的测量条件执行 DC parametric test。
+- 与 DPS power flags - get...() 函数：`checkPowerFlags()` 负责把 power flag 从硬件读入 test method cache，get...() 函数从 cache 读取；文档要求先调用 check 函数。
+- 与 DPS status flags - get...() 函数：同理，相关的 `DPS_AUX_PIN_TASK.check...()` 必须先调用，get...() 才能读到 status flag。
+- 与 EVENT_CMP：入边说明 EVENT_CMP 用于 match loop，其 low/high 阈值由 DPS_AUX_PIN_TASK 定义（`EVENT_CMP.low` / `EVENT_CMP.high` 页面均指向 DPS_AUX_PIN_TASK）。
+- 与 XPS256：文档称 surge tracker 的完整功能由 DPS_AUX_TASK 与 DPS_AUX_PIN_TASK 覆盖；`getSurgeTrackerStatus()` 的第二个语法仅 XPS256 支持，文档 Example 2 也以 XPS256 的 site-specific 阈值为例。
+- 与 GET_FUNCTIONAL_RESULT() / PRLT / CSAS / PSAS：文档的顺序约束如上（GET_FUNCTIONAL_RESULT 必须先于 check...；PRLT 结果会被 CSAS/PSAS 作废）。
+- 与 FOR_EACH_SITE / RDI_INIT / SmartRDI：文档 Example 2 展示了这种搭配（属示例级关系）。
 
 ## 版本
 
-（待补）
+`Functional changes` 原文记录：
+- Introduced in SmarTest 7.2.1
+- SmarTest 7.4.0: New member functions DPS_AUX_PIN_TASK.checkBatteryFull() and DPS_AUX_PIN_TASK.checkPowerBudget().
+- SmarTest 7.4.0: New member function DPS_AUX_PIN_TASK.checkPowerFlags().
+- SmarTest 7.4.0: New member functions DPS_AUX_PIN_TASK.selectComp(), DPS_AUX_PIN_TASK.setCompHysteresis().
+- SmarTest 7.5.1: New member function DPS_AUX_PIN_TASK.setCompHoldOff().
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.01_DPS_AUX_PIN_TASK.htm`（正文、Subtopics、Syntax、Examples、Functional changes）。
+- 另一来源：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.43.01.02_DPS_AUX_PIN_TASK.checkPowerFlags.htm`（`checkPowerFlags()` 的语法、参数表、示例，objscaffold 汇总，已读）。
+- 语法/参数材料另取自其子主题 `02.07.04.01.43.01.01`–`02.07.04.01.43.01.07`，以及 `DPS_AUX_TASK.pin/execute/setup`、`DPS power flags`、`DPS status flags`、`PRLT`、`CSAS`、`PSAS`、`GET_FUNCTIONAL_RESULT` 等被 objscaffold 汇总的相邻页面。
+- 关联判断另参考 `extract/edges.jsonl` 中指向该页的入边记录（DPS_AUX_TASK、EVENT_CMP、XPS256 surge tracker 等）。

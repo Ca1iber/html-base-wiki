@@ -672,20 +672,48 @@ rss_buffer_pins:
 
 ## 是什么
 
-（待补）
+**文档事实**：`SHARING_CONFIGURATION` 是 MTP（Memory Test Plus）的 C++ 类/API，用于访问 Sharing configuration file 中的数据（`02.12.06.25`）。文档明确注明该 API **仅 MTP 可用**，定义在头文件 `/opt/93000mts/mts/solution_tools/import/SHARING_CONFIGURATION.h`（`02.12.06.25`）。成员函数分两类：数据加载类 `hasLoaded()`、`load()`、`setRefPin()`，以及数据访问类 `getModeContext()`、`isFXDLIgnorePin()`、`utilitySearchFirst()`/`utilitySearchNext()`、`utilityActionExecute()`、`utilityGetApplicableSitesString()`、`utilitySubstitutePins()`、`domainsGetXSize()`/`YSize()`/`ZSize()`、`domainsGetApplicableSitesString()`、`domainsGetSiteAtPos()`、`getTerminatedPinList()`、`getBufferPinMap()`、`getDomain()`（`02.12.06.25`）。
+
+**文档事实**：使用该 API 必须先调用 `getInstance()` 取得该类唯一的活动对象，之后才能使用其他成员函数（`02.12.06.25`、`02.12.06.25.01`）。
+
+**推断**：它围绕已加载的共享配置文件提供查询与 utility 执行入口，不负责编辑配置文件本身；配置文件的格式与关键字属于 Sharing configuration file 文档（`02.12.02.05.06.07.07.02`）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：最小用法是先取单例、再加载配置文件（`02.12.06.25.01`、`02.12.06.25.03`）：
+
+```cpp
+SHARING_CONFIGURATION &sharingConfig = SHARING_CONFIGURATION::getInstance();
+sharingConfig.load("default.cfg");   // 文件须位于 <device directory>/configuration/
+```
+
+**文档事实**：
+- 用 `hasLoaded()` 判断是否已加载；返回 false 时可用 `load()` 或 `setRefPin()` 加载（`02.12.06.25.02`）。
+- `load(config)` 的 `config` 是共享配置文件名，文件必须放在 `<device directory>/configuration/`（`02.12.06.25.03`）。
+- `setRefPin(pinName)` 按引脚名加载该引脚的共享配置信息（`02.12.06.25.04`）。
+- 加载后可按需调用 `getModeContext()`、`domainsGetXSize()`/`YSize()`/`ZSize()`、`domainsGetSiteAtPos()`、`getDomain()`、`utilitySearchFirst()`/`utilitySearchNext()`、`utilityGetApplicableSitesString()`、`utilitySubstitutePins()`、`utilityActionExecute()`、`isFXDLIgnorePin()`、`getTerminatedPinList()`、`getBufferPinMap()`（`02.12.06.25` 各子主题）。
+
+**推断**：文档只给出 getInstance + load 的完整示例；其余函数的调用顺序见各子主题，常规顺序是「加载 → 查询/执行 utility 设置」。
 
 ## 和谁有关
 
-（待补）
+- **Sharing configuration file** — 文档事实：SHARING_CONFIGURATION 就是访问该文件内容的 API，Related information 直接指向它（`02.12.06.25`、`02.12.02.05.06.07.07.02`）。
+- **`FOR_EACH_TEST_BEGIN()`** — 文档事实：其 `configFile` 参数指定共享配置文件，文档写明 "FOR_EACH_TEST_BEGIN will automatically use the SHARING_CONFIGURATION API to load the file for you"；一个 block 里给出多个 utility 名时，需用 `GET_CURRENT_UTILITY_CONTROL()` 配合 `SHARING_CONFIGURATION.utilityActionExecute()` 手动执行各设置（`02.12.06.04`）。
+- **MTP_IDD_TASK / MTP_LEAKAGE_TASK** — 文档事实：两者把 SHARING_CONFIGURATION 列入相关/可用 API（`02.12.06.13`、`02.12.06.14`）。
+- **Driver Sharing APIs** — 文档事实：该总览页把 SHARING_CONFIGURATION 列在 driver sharing 的可用类中（`02.12.02.05.06.07.09.03`）。
+- **SHARED_CONTINUITY_TEST / SHARED_LEAKAGE_PARALLEL_TEST** — 文档事实：两者通过 `sharingConfigFile("default.cfg")` 指定共享配置文件（`02.12.06.21`、`02.12.06.23`）；它们是否在内部调用 SHARING_CONFIGURATION 类，文档未说明，不能据此推断。
+- **各成员函数子主题** — 文档事实：`02.12.06.25.01`–`02.12.06.25.19` 是 SHARING_CONFIGURATION 的成员函数页。
 
 ## 版本
 
-（待补）
+文档事实（`02.12.06.25` 的 Functional changes）：
+- Introduced in MTP 3.1.5
+
+除此之外该页没有更细的版本变更记录；MTP 3.1.5 之前的接口情况，文档未覆盖。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.25_SHARING_CONFIGURATION.htm`（主文档）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.25.01`–`02.12.06.25.19`（成员函数子主题）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.02.05.06.07.07.02_Sharing_configuration_file.htm`
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.06.04_FOR_EACH_TEST_BEGIN.htm`、`02.12.06.13_MTP_IDD_TASK.htm`、`02.12.06.14_MTP_LEAKAGE_TASK.htm`、`02.12.02.05.06.07.09.03_Driver_Sharing_APIs.htm`、`02.12.06.21_SHARED_CONTINUITY_TEST.htm`、`02.12.06.23_SHARED_LEAKAGE_PARALLEL_TEST.htm`

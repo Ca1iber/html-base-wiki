@@ -381,20 +381,48 @@ cout << "Site " << CURRENT_SITE_NUMBER() << ", Current surge tracker: " << statu
 
 ## 是什么
 
-（待补）
+**文档事实**XPS256 是面向所有 SOC 测试应用的高密度、可扩展 DUT 电源与 V/I 卡，属于 DC Scale 家族，可插在 V93000 EXA Scale 系统的任意 channel card slot。卡有 256 个完整四象限 VI 源，每个可 source 或 sink -2.5 V 至 +7.0 V、最高 1 A，支持 ganging 以获得更高电流。
+
+**文档事实**功能特性页给出更细的变体与指标（EK751HC）：256 个 DCVI 通道；source 1.0 A @ -2.5 … +3.0 V、0.6 A @ -2.5 … +7.0 V；sink 1.0 A @ -2.0 … +3.0 V、0.6 A @ -2.5 … +7.0 V；每卡最高 256 A（@2.0 V）；force/measure 精度 ±150 µV（10 µV 分辨率）与 ±50 nA（100 pA 分辨率）；电压降 <40 mV、负载跳变后建立时间 <10 µs；通道耐压至 ±80 V；具备过流保护、每通道快速电流钳位、电压降监测/告警、电压与电流 profiling；每 pin 带 AWG 与 Digitizer；支持 Smart Connect、硬件平均、Xtreme Link。文档称其与 DPS128 兼容，DPS128 的功能与量程是 XPS256 的子集；massive ganging 可替代 DC Scale UHC4T。
+
+**文档事实**卡还含 current monitor（用其他 XPS256 pin 监测 ganging 组总电流）、open loop protection（默认 DIODE；当 force/return 的电压降阈值设为 >0.5 V 时须设为 NONE）、每通道 surge tracker。
+
+**推断**由于单通道 1 A 且可整卡 ganging，XPS256 的定位是以大量并行通道覆盖大电流供电需求；这一判断由“up to 256 A per card”与“massive channel ganging”推出。
 
 ## 典型用法
 
-（待补）
+**文档事实**XPS256 pin 的编程有三种方式（XPS256 programming - PMU operating mode）：Example 1 SmartRDI pattern‑based、Example 2 SmartRDI code‑based、Example 3 test method API SPMU_TASK；三者对同一 pin 产生相同的测量序列。标准流程分三步：连接并施加基本设置 → 测量所需参数 → 在单独 task 中断开。
+
+**文档事实**pattern‑based SmartRDI 被文档称为推荐方案：代码最少，且时序最稳定。code‑based SmartRDI 主要包装 SPMU_TASK，结构受该 API 约束；其测量需显式给全参数，而 pattern‑based 只需给测量相关参数。
+
+**文档事实**本页语法节已逐字收录的典型 API：连接用 `rdi.dc().pin(...).vForce(...).vForceRange(...).iClamp(...).iForceRange(...).execute()`；测量用 `.iMeas().average(16).measWait(2.5 ms)`；断开用 `.disconnect()`。SPMU_TASK 方式用 `.mode("VFIM")`、`.relay("NT"/"NO")` 以及 `execMode(TM::FORCE_ON/PVAL/FORCE_OFF)` 的组合：connect task 用 relay("NT")+FORCE_ON，measure task 用 relay("NO")+PVAL，disconnect task 用 relay("NT")+FORCE_OFF。
+
+**文档事实**ganging 连接性检查用 `HW_STATE::checkGangConnectionParallel`（所有 active site 并行）与 `HW_STATE::checkGangConnection`（串行定位失效 pin）。surge tracker 用 `DPS_AUX_TASK`：`setMode(TM::SURGE_TRACKER)`、`selectVSensorSetThresholds`、`selectISensorSetThresholds`、`checkSurgeTracker`、`getSurgeTrackerStatus`。
+
+**建议**需要稳定时序时优先 pattern‑based 编程；使用 code‑based 或 test method API 时要为测量显式指定全部参数（文档如此对比两种方式）。
 
 ## 和谁有关
 
-（待补）
+- `02.07.04.01.234.01.12_SPMU_PIN_TASK.iClampFilter.htm`、`...13.iFilter`、`...22.measFilter`、`...33.vFilter`、`...35.vForceFilter`、`...17.iSlewRate`、`...38.vSlewRate`：这些 SPMU_PIN_TASK 成员分别标注为“仅 XPS256 支持”。
+- `02.07.04.01.234.01.24_SPMU_PIN_TASK.mode.htm`、`...26.preCharge.htm`：XPS256 有专属测量模式，且 preCharge 的 safe_con 字符串参数仅 XPS256 支持。
+- `02.07.04.01.117_HW_STATE.htm`、`...117.02_HW_STATE.checkKelvinStatus.htm`：checkGangConnection/checkGangConnectionParallel 以及部分 checkKelvinStatus 语法仅 XPS256 支持。
+- `02.07.04.01.43.05_DPS_AUX_TASK.getSurgeTrackerStatus.htm`、`02.07.04.01.43.01.05_DPS_AUX_PIN_TASK.selectISensorSetThresholds.htm`、`...06.selectVSensorSetThresholds`、`...07.setMode`、`...04.checkSurgeTracker`：这些构成 XPS256 的 surge tracker 编程接口。
+- `02.08.04.14.02.03.07.01_DPSPINS_resources.htm`：Functional changes 记录 7.10.1 支持 XPS256，并新增 capacitance、load_step_mode、ms_const_curr_time_to_alarm、pulldown、warn_voltage_drop_force/return、voltage_slew_rate 等参数，7.10.3 新增 open_loop_protection。
+- `02.08.04.18.03.01.04_Utility_Pins_editor.htm`：Utility Card 的 utility line 可配置为 safety line 或 global shutdown line，用于硬件控制地关断 XPS256 pin。
+- `02.05.05.01_DC_Scale_DPS128_DPS64_cards.htm`：DPS128 的功能与量程是 XPS256 的子集；但同一 tester.model 中两者不能混用（见 XPS256 specific setup tasks）。
+- `02.05.05.02_DC_Scale_UHC4T_card.htm`：XPS256 的 massive ganging 可替代 UHC4T；UHCM 命令部分参数仅 XPS256 支持，二者都能测 force/return 线电压降。
+- `02.07.04.01.63.02_EVENT_CF.htm`、`...63.03_EVENT_CFIM`、`...63.13_EVENT_RANGE_CF`：这些 class 仅在 PMU 模式下的 XPS256 支持。
+- `02.06.02.02.68_DFTD__DFTD___DeFine_Test_Data.htm`：XPS256 不支持设置 voltage ranges。
 
 ## 版本
 
-（待补）
+**文档事实**定义页 Functional changes：Introduced in SmarTest 7.10.1。
+
+**文档事实**功能与特性子主题另记：7.10.2 新增 Current monitor；7.10.3 新增 open loop protection。DPSPINS resources 的 Functional changes 也记 7.10.1 支持 XPS256 及一组新参数、7.10.3 新增 open_loop_protection。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.05_Test_Head_Cards/02.05.05.03_DC_Scale_XPS256_card.htm`
+- `02_System_reference/02.05_Test_Head_Cards/02.05.05.03.03_XPS256_functionality_and_features.htm`
+- `02_System_reference/02.05_Test_Head_Cards/02.05.05.03.05_XPS256_operating_modes.htm`
+- 本页「语法 / 参数」节逐字取自 `02.05.05.03.10.10_XPS256_programming_-_Ganging.htm`、`02.05.05.03.10.15_XPS256_programming_-_PMU_operating_mode.htm`、`02.05.05.03.10.17_XPS256_programming_-_Surge_tracker.htm`

@@ -384,20 +384,59 @@ rdi.util().pin("upin_A").setOn().pin("upin_B").setOff().execute();
 
 ## 是什么
 
-（待补）
+**文档事实**：RDI_Configure file 用于配置 SmartRDI 编程时使用的一些默认设置；文件位于所加载 device 的 `testmethod` 目录，首次运行时会生成 `RDI_Configure.Template`，其中列出所有选项并带注释（`02.07.13.04`）。这些设置包括默认 pin status 的设定和 sequencer 控制的 utility 的配置（`02.07.13.04`）。
+
+**文档事实**：关键字按用途分组，包括 Alarm handling for DCVI、Default pin status、For debugging、For production、ORE setup、Pass or fail per label、PPMU setup、Result upload、Routing setup、Setup naming、smartVec setup、SMC execution、Utility line setup、Others（`02.07.13.04`）。
+
+**推断**：它是纯配置文本，不含可执行逻辑；具体某项关键字是否生效，取决于对应 SmartRDI 功能是否被使用（例如 alarm 关键字只在 alarm handling 流程中读取）。
 
 ## 典型用法
 
-（待补）
+**文档事实**：
+- 把 RDI_Configure 文件放在 `<device>/testmethod`；首次运行生成带全部选项与注释的 `RDI_Configure.Template`，据此编辑（`02.07.13.04`）。
+- 用 testflow 变量 `RDI_CONFIGURE_FILE` 为不同 testflow 选择不同的 RDI_Configure 文件，可指向绝对路径，数量不限（`02.07.13.04`）。
+- 运行时可用 `rdi.getRdiConfig(optionName)` 查询当前生效的选项值；例如 `rdi.getRdiConfig("RF_CAL_DEFAULT")` 返回 `ON`、`OFF` 或 `SYSTEM_CAL`（`02.07.13.04.02`）。
+- 关键字示例：`UTIL_BLOCK = 12,34,5,6,7,8`、`SETUP_UPTODATE = TRUE`、`ALARM_HANDLING_DCVI_ENABLE = TRUE`、`ROUTING_SETUP_FILE = "testmethod/routing_tool_states_1.xml"` 等（`02.07.13.04.01`）。
+- 文档在 RDI_BEGIN() 的 setup 流程中要求：若要让 SmartRDI 生成 setup，需把 `SETUP_UPTODATE` 设为 `FALSE`，然后重新加载 setups（`02.07.13.08.01.04`）。
+
+**推断**：`RDI_CONFIGURE_FILE` 的用途是让不同 testflow 使用不同默认值；具体需要放哪些关键字取决于项目所用到的功能，不必把全部关键字都写一遍。
 
 ## 和谁有关
 
-（待补）
+- **SmartRDI** — 文档事实：RDI_Configure file 是 SmartRDI 的子主题，用来配置 SmartRDI 的默认设置（`02.07.13`、`02.07.13.04`）。
+- **getRdiConfig()** — 文档事实：该函数检索 RDI_Configure file 中指定 setup option 的当前值（`02.07.13.04.02`）。
+- **Default pin status / Utility lines control** — 文档事实：这些是 RDI_Configure 覆盖的设置项；对应 `DEFAULT_STATUS_*`、`UTIL_*` 关键字与 `setPinStatus()`/`clearPinStatus()`、`rdi.util()` 示例（`02.07.13.04`、`02.07.13.08.02`、`02.07.13.23`）。
+- **RDI_BEGIN()** — 文档事实：其 setup 说明要求在需要生成 setup 时把 `SETUP_UPTODATE` 设为 `FALSE`（`02.07.13.08.01.04`）。
+- **vMeas() / PPMU** — 文档事实：`PPMU_PURE_VMEAS_2P2_COMPATIBLE_MODE` 可让 SmartRDI 2.3.0 的 `vMeas()` 保持 2.2.0 的行为（`02.07.13.12.01.01.20`）。
+- **Alarm handling for DCVI、ORE、Routing Tools** — 文档事实：对应关键字组 `ALARM_HANDLING_DCVI_*`、`ENABLE_ORE`/`ORE_FILE`、`ROUTING_SETUP_FILE`（`02.07.13.04`、`02.07.13.04.01`）。
+- **Testflow 变量 `RDI_CONFIGURE_FILE`** — 文档事实：按 testflow 选择配置文件（`02.07.13.04`）。
 
 ## 版本
 
-（待补）
+文档事实（`02.07.13.04` 的 Functional changes），按版本汇总关键字新增/变更：
+- Introduced in SmartRDI 2.1.0
+- 2.2.0：RF_OPTMIZE_SEQUENCE、RF_STIM_PATH_LOSS_ADJUSTMENT
+- 2.3.0：PPMU_PURE_VMEAS_2P2_COMPATIBLE_MODE、PMUX_X_CTRL
+- 2.3.1：PPMU_DEFAULT_VALUE_MODE、PPMU_DEFAULT_RELAY
+- 2.4.0：SETUP_UPTODATE、VEC_EDIT_MODE
+- 2.4.1：PER_LABEL_FUNC_RESULT_MODE、SMV_VEC_MEM_TYPE
+- 2.4.3：ANALOG_SET_NAME_MD5、BURST_NAME_MD5、REPORT_RESULT_IN_SINGLE_MODE、VEC_MODE_SAMPLING_WAIT；支持首次运行在 `testmethod` 目录生成 `RDI_Configure.Template`
+- 2.4.4：ALLOW_SAME_RESULT_ID_ACROSS_RDI_BLOCK、COMBINED_FREQ_LIST、DEFAULT_SMV_READ_MODE、UTIL_CTRL_MAX_SPEED
+- 2.4.5：`BURST_NAME_MD5` 为 FALSE 时，首次运行可判断 burst pattern 是否需要重生成；新增 USER_NAMED_LABEL_CONTENT_CHECK、DEFAULT_EMAP_LOCATION、ENABLE_RDI_INFO_LOG_FILE、DISABLE_SMC_EXEC_GLOBAL、DISABLE_SMC_EXEC_SHORT_BURST、SMV_DIGCAP_AUTO_BURSTUPLOAD、UTIL_DYN_MASK_UNSPECIFIED_PIN、UTIL_DYN_MASK_INACTIVE_SITE、DIGCAP_ADAPTIVE_RESULT_SIZE、TMU_TIMEOUT_50ms
+- 2.5.0：新增 DC_BURST_SITE_UPLOAD、DIGCAP_BURST_SITE_UPLOAD、PURE_GENERATION_MODE、PER_LABEL_FUNC_RESULT_NO_BREAK_VEC、ENABLE_ORE、ORE_FILE、ROUTING_SETUP_FILE；四个默认值变更（PPMU_DEFAULT_VALUE_MODE SA→BADC、PER_LABEL_FUNC_RESULT_MODE FLBL→ERMP、DEFAULT_SMV_READ_MODE EMAP→DIGCAP、VEC_MODE_SAMPLING_WAIT MSET→PATTERN）
+- 2.5.1：`UTIL_DYN_MASK_UNSPECIFIED_PIN` 默认值变为 TRUE
+- 7.5.0：新增 UTIL_PADDING_RPTV_FLAT、PMUX_CTRL_MAX_SPEED、ALARM_HANDLING_DCVI_ENABLE、ALARM_HANDLING_DCVI_SETUP_FILE；新增 testflow 变量 `RDI_CONFIGURE_FILE`
+- 7.5.1：ORE_TEMPLATE_BY_USER_CODE
+- 7.5.2：ALARM_FAIL_WARNING、ORE_FOLDER；`ENABLE_ORE` 新增值 TRUE_OFFLINE
+- 7.5.3：FAST_PPMU_LEVEL_TRANSFER、ROUTING_ACK_CHECK
+- 7.6.0：SMV_IGNORE_COMMENT
+- 7.10.0：ORE_TEMPLATE_DATA_FILE_SIZE_THRESHOLD；移除 PPMU_PURE_VMEAS_2P2_COMPATIBLE_MODE；`SMV_DIGCAP_AUTO_BURSTUPLOAD` 默认 TRUE
+- 7.10.3：INACTIVE_SITE_AUTO_MASK；`UTIL_BLOCK` 定义中可使用 `-` 字符
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.04_RDI_Configure_file.htm`（主文档）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.04.01_Example_of_keyword_setups_in_the_RDI_Configure_file.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.04.02_getRdiConfig.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.08.01.04_RDI_BEGIN.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.12.01.01.20_vMeas.htm`

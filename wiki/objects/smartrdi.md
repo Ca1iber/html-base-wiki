@@ -7814,20 +7814,66 @@ ARRAY_LL data_result = rdi.id("result").getReadData("DATA1");
 
 ## 是什么
 
-（待补）
+**文档事实**：SmartRDI（Rapid Development Interface）是 V93000 的高层编程接口，用来编写 test method 程序；文档称它是一套新的 V93000 API，目标是提供简单统一的编程接口（`02.07.13`）。文档列出的能力包括：为 DC 测试、Analog/RF 触发、digital capture、error map、protocol、utility line 控制自动生成 sequencer-based pattern burst；自动生成 burst Analog/RF set；通过透明的 hidden upload 取结果；简化调试（`02.07.13`）。
+
+**文档事实**：SmartRDI 以类划分测试类型，文档列出的类有 `cogo()`、`dc()`、`digCap()`、`emap()`、`func()`、`hiddenUpload()`、`hwRelay()`、`level()`/`timing()`、`protocol()`、`route()`、`smartVec()`、`tmu()`、`util()`、`alarm()`（`02.07.13`）。
+
+**文档事实**：有两种执行模式（`02.07.13`）：
+- **pattern-based**：目标模式。SmartRDI 在 `RDI_BEGIN()`/`RDI_END()` 块内为 DC event、analog trigger 生成 burst pattern，并为指定的 analog 测试生成 analog set；burst 在 `RDI_END()` 执行。生成的 burst pattern 名为 `_rdi_burst_` + test suite 名 + RDI 块在 test suite 中的编号。
+- **code-based**：按普通 test method API 逐条执行，由工作站控制，不生成 burst pattern/analog set；code-based 代码要放在 RDI 块之外。部分硬件功能只在 code-based 模式可用。
+
+**文档事实**：默认 sequencer timeout 为 900 s，长序列需用 `SQTO` 增大（`02.07.13`）。支持的数字卡为 PS1600、PS5000；DC Scale/VI 卡为 DPS128、UHC4T、XPS256（`02.07.13`）。
+
+**推断**：SmartRDI 是「用 C++ test method 代码描述测试、由它生成并执行 sequencer 资源」的封装；本页只复述文档，不代表某台具体机台已启用上述全部能力。
 
 ## 典型用法
 
-（待补）
+**文档事实**：`RDI_INIT()` 必须在 `ON_FIRST_INVOCATION_BEGIN()` 之前调用（`02.07.13.08.01.06`）。最小的 RDI 块为 `RDI_BEGIN(); ...; RDI_END();`，可用一对可选花括号便于缩进，但同一 test method 类里两种写法不应混用（`02.07.13.08.01.04`、`02.07.13.08.01.05`）：
+
+```cpp
+RDI_INIT();
+ON_FIRST_INVOCATION_BEGIN();
+
+RDI_BEGIN();
+rdi.dc().pin("DATA1").vForce(3 V).execute();
+RDI_END();
+
+ON_FIRST_INVOCATION_END();
+```
+
+**文档事实**：
+- `RDI_BEGIN(mode)` 的 `mode` 可为 `TA::BURST`（默认，pattern-based）、`TA::SINGLE`（单步调试）、`TA::PROD`（生产模式，不再生成新 setup，使用 pattern-based 模式已保存的 setup）（`02.07.13.08.01.04`）。
+- `RDI_END(TA::NON_BLOCKING)` 以非阻塞方式启动 burst，其他动作可与 burst 并行，结束时用 `RDI_WAIT_TEST_DONE()` 对齐；不写 mode 时为阻塞方式（`02.07.13.08.01.05`）。
+- 一个 test method 可有多个 RDI 块；burst pattern 与 analog set 只在 test method 构建后的首次运行时生成，device setup 重新加载/修改后需重新构建 test method（`02.07.13`）。
+- 结果按 ID 取，例如 `rdi.id("id").getPassFail()`；digital capture 用 `rdi.id("cap").getVector("DATA1")`；运行期值用 `rdi.runTimeVal()`/`rdi.perSiteVal()` 下发（`02.07.13`、`02.07.13.08.03` 及各子主题）。
+- 默认值来自 RDI_Configure file，可用 `rdi.getRdiConfig("...")` 查询（`02.07.13.04.02`）。
+
+**推断**：文档示例的常见形态是「RDI 块内 setup + execute，块外用 `rdi.id(...)` 取结果」；这不代表所有函数都必须在块内调用，文档另有函数注明只能在 code-based 模式使用（如 `forceDropWarn()`，`02.07.13.12.02.09` 入边语境）。
 
 ## 和谁有关
 
-（待补）
+- **RDI_Configure file** — 文档事实：SmartRDI 的默认设置文件，配置默认 pin status、sequencer-controlled utility 等；`getRdiConfig()` 读取其选项（`02.07.13`、`02.07.13.04`、`02.07.13.04.02`）。
+- **RDI_INIT() / RDI_BEGIN() / RDI_END()** — 文档事实：RDI 块的三条边界命令；`RDI_INIT()` 必须先于 `ON_FIRST_INVOCATION_BEGIN()`（`02.07.13.08.01.04`、`.05`、`.06`）。
+- **各测试类** — 文档事实：`cogo()`、`dc()`、`digCap()`、`emap()`、`func()`、`hiddenUpload()`、`hwRelay()`、`level()`/`timing()`、`protocol()`、`route()`、`smartVec()`、`tmu()`、`util()`、`alarm()` 各有专题页（`02.07.13`）。
+- **RDI_INFO_LEVEL / `rdi.getInfoLevel()`、`rdi.setInfoLevel()`** — 文档事实：控制 SmartRDI 在 UI report window 中输出的耗时信息等级（`02.07.13`、`02.07.13.06.01`、`02.07.13.06.02`）。
+- **Routing Tools / `rdi.route()`** — 文档事实：Routing Tools 由编辑器与 `rdi.route()` 类组成；route 函数页反向引用本页的 Execution mode（`02.08.04.24`、`02.07.13.15.05`，入边）。
+- **支持硬件** — 文档事实：PS1600/PS5000、DPS128/UHC4T/XPS256（`02.07.13`）。
+- **ON_FIRST_INVOCATION_BEGIN() / RDI_WAIT_TEST_DONE()** — 文档事实：前者约束 `RDI_INIT()` 的调用位置，后者用于非阻塞 burst 的收尾（`02.07.13.08.01.06`、`02.07.13.08.01.05`）。
 
 ## 版本
 
-（待补）
+文档事实（`02.07.13` 的 Functional changes）：
+- Introduced in SmartRDI 2.1.0
+- SmartRDI 2.4.2：新增 DC Scale AVI64 卡
+- SmartRDI 7.5.0：新增 DC Scale FVI16 卡
+- SmarTest 7.10.2：新增 Pin Scale 5000 卡
+
+更细的功能变化分散在各子主题的 Functional changes 中（例如 RDI_Configure file 的各关键字、getRdiConfig 自 SmartRDI 2.4.3 引入），本页不重复。
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13_SmartRDI.htm`（主文档）
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.08.01.04_RDI_BEGIN.htm`、`02.07.13.08.01.05_RDI_END.htm`、`02.07.13.08.01.06_RDI_INIT.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.04_RDI_Configure_file.htm`、`02.07.13.04.02_getRdiConfig.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.06.01_rdi.getInfoLevel.htm`、`02.07.13.06.02_rdi.setInfoLevel.htm`
+- `02_System_reference/02.07_Test_Method_Reference/02.07.13.08.03_Changing_the_parameter_value_at_runtime_with_SmartRDI.htm`

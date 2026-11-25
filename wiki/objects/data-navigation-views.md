@@ -356,20 +356,49 @@ image.
 
 ## 是什么
 
-（待补）
+**文档事实**：Result perspective 的 data navigation 区为每个已打开的 data store 建立一个 data navigation view；每个 view 最多有五个 tab，分别给出该 data store 的不同汇总：Test summary、Wafer summary（correlation data store 没有）、Device summary（correlation data store 没有）、Hardware bin summary、Software bin summary。
+
+**文档事实**：data log 文件的 view 是静态的，内容不随文件变化；system data log stream 是动态的——运行中的 test 产生新 data log entry 会立即加入已打开的 log，summary 和 result display 随之更新。
+
+**文档事实**：data navigation view 的工具栏是 SmarTest 主工具栏的一部分。按钮对最前 tab 中的 test summary 做 grouping：把原本一行显示的 summary 拆成每个子类一行（例如按 site 分组后，每个 test 的结果按 site 分行显示）。`Group by wafer`、`Group by site`、`Group by pin` 可用；按 site 分组也可从 hardware bin summary / software bin summary tab 的右键菜单使用（但这些视图里工具栏按钮禁用）。
+
+**文档事实**：`Refresh`、`Pause`、`Resume`、`Clear`、`Save and Clear` 只在最前 tab 是 system data log stream 的 test summary tab 时可用。`Refresh` 更新暂停中的显示但不恢复自动更新；`Pause` 暂停 system data log stream 的更新并变为 `Resume`；`Resume` 恢复自动更新；`Clear` 清空 Integrated Result Tool 中 system data log stream 的显示并清除 system event stream；`Save and Clear` 先把 system event stream 存成 EDL 文件，再清空显示和 event stream。最前 tab 不是 test summary tab 时这些按钮禁用。
+
+**文档事实**：子主题 `Table filter` 规定过滤输入：文本列可用 plain text 或正则（`Ctrl+Space` 可插入常用正则项），数字列可用精确数字、`~` 范围（可省略一端，如 `~2` 显示小于 2 的行）、逗号分隔多值（OR）；数字与范围可混用（如 `3~,3`、`-1,-1~1,1`）。
+
+**文档事实**：子主题 `Correlation data store structure` 规定：correlation store 按 base data log 的顺序包含 base 的全部 test results，并附加其他 correlated store 中同一 test 的结果，使同一 test 的所有结果排在一起；不包含 base 中不存在的 test。列在 base 全部列之外增加 `Data Store` 以及 `ΔMean`、`ΔMean%`、`ΔSdev`、`ΔSdev%`、`ΔRange%`、`ΔStDev%`、`ΔCp`、`ΔCp%`、`ΔCpk`、`ΔCpk%`、`ΔCpl`、`ΔCpl%`、`ΔCpu`、`ΔCpu%`、`ΔTime`、`ΔTime%`、`ΔTS Time`、`ΔTS Time%`；HW/SW bin summary tab 还可有 `ΔDevice#`、`ΔDevice%`。base data log 的行在这些列显示 `***`。显示哪些列取决于 preferences 中的 visible columns。
 
 ## 典型用法
 
-（待补）
+**文档事实**：在 Data Log Explorer 中打开一个 data log，会为它打开一个 data navigation view，并自动生成统计汇总表；每份选中的 log 对应一个 view。卸载 log 时，若已有对应的 data navigation view，会被关闭。
+
+**文档事实**：在 summary 表中选择一行，即可在 detail data view / raw data view / analysis views 中查看该汇总行的底层数据；analysis view 默认显示最前 data navigation view 的当前选择，选择变化时显示随之变化。
+
+**文档事实**：分组：用工具栏 `Group by wafer`/`Group by site`/`Group by pin`，或在 HW/SW bin summary tab 右键按 site。
+
+**文档事实**：过滤：在 table filter 字段输入上述文本/正则/数字/范围/多值。
+
+**文档事实**：动态 log：对 system data log stream 用 `Pause`/`Resume`/`Refresh`；用 `Save and Clear` 保存 EDL 并清空。
+
+**文档事实**：相关日志：对 base log 执行 `Correlate` 命令生成 correlation data store；其 view 没有 Wafer summary 与 Device summary，可用 Δ 列比较其他 store 与 base 的差异；base 行显示 `***`。
 
 ## 和谁有关
 
-（待补）
+- [[integrated-result-tool]]：data navigation view 属于 Result perspective；IRT 的 principles 页说这些 summary/statistical tables 是 IRT 的核心。（文档事实）
+- **五个 tab**：[[test-summary-tab]]、[[wafer-summary-tab]]、[[device-summary-tab]]、[[hardware-bin-summary-tab]]、[[software-bin-summary-tab]]；Wafer/Device 对 correlation data store 不出现。为什么：本页正文与 `Subtopics` 明确列出它们。
+- [[table-filter]]：table filter 的输入语法由其子页定义；本页只给入口。
+- **Data Log Explorer**：`Link with Editor` 会把对应 data navigation view 提到前台；打开/卸载 log 会创建/关闭 view。为什么：Explorer 与 view 一一对应。
+- [[raw-data-views]]、[[analysis-views]]：raw data view 显示选中 summary 行所汇总的 log entry；analysis view 默认跟随最前 data navigation view 的选择（Link 模式）。
+- **Correlating data logs / correlation data store**：`Correlate` 命令产生 correlation data store，本页 tab 组成与 Δ 列按它的结构定义。
+- **Preferences**：visible columns 决定显示哪些 Δ 列；`Synchronize selections in navigation views` 决定多个 data navigation view 的选择是否同步；Alerts/Annotations/Shmoo 偏好会在这些 view 中显示高亮或注记。
+- **Sorting tables**：data navigation view 的表可按列标题排序。
+- **Saving the system data log stream**：`Save and Clear` 把 system data log stream 存为 EDL。
 
 ## 版本
 
-（待补）
+**文档事实**：`Functional changes` 写 “Introduced in SmarTest 7.2.0”；SmarTest 7.2.2 新增 `Refresh`、`Clear`、`Save and Clear` 按钮；SmarTest 7.2.2 新增 `Save and Clear` shortcut menu 命令。
 
 ## 出处
 
-（待补）
+- 主源：`02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.13.03.02_Data_navigation_views.htm`（正文、Toolbar、Related information、Functional changes）。
+- 上面「语法 / 参数」节另逐字取自其子主题：`02.08.04.13.03.02.01`–`.06`（Test/Wafer/Device/HW bin/SW bin summary tab、Table filter），以及 `02.08.04.13.02.02.04`、`02.08.04.13.02.02.04.01`（Correlating data logs、Correlation data store structure）。

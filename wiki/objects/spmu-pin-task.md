@@ -1782,20 +1782,55 @@ required for an executable SPMU_TASK object.
 
 ## 是什么
 
-（待补）
+**文档事实** SPMU_PIN_TASK 是一个数据容器类，用来定义“每 pin 的 DC 测量条件”。文档明确：该类没有 public 构造函数，`SPMU_PIN_TASK` 对象只能通过 `SPMU_TASK` 类的 `SPMU_TASK.pin()` 函数访问。头文件：`/opt/hp93000/soc/prod_com/include/MAPI/SpmuPinTask.h`。
+
+**文档事实** 它提供大量链式 setter（大多返回 `SPMU_PIN_TASK&`），用于按 pin 配置：测量模式（`mode()`）、force/measure 值与量程、clamp、relay、settling、samples、各类 filter、slew rate、load capacitance、电压降保护、connect/disconnect、high accuracy 等；具体选项与默认值以各子主题为准。
+
+**文档事实** `mode()` 的选项包括 `"IFVM"`（默认）、`"VFIM"`、`"VM_HIZ"`、`"VM_HIZ_HAC"`、`"IFVM_UNGANGED"`、`"VFIM_UNGANGED"`、`"PPMU_BADC"`，以及仅 XPS256 支持的 `"VFVM"`、`"CFVM"`、`"CFIM"`。若调用 `iForce()` 或 `vForce()`，对应模式（`"IFVM"` / `"VFIM"`）会被自动设置。
 
 ## 典型用法
 
-（待补）
+**文档事实** 文档 Example 1 对 `pinName` 做端接高阻测量（VM_HIZ）：先配置模式/建立时间，再配置 relay、min/max，最后 preAction + execMode + execute，并在 block 外读取结果：
+```
+SPMU_TASK badc_task;
+ON_FIRST_INVOCATION_BEGIN();
+badc_task.pin("pinName").mode("VM_HIZ").settling(1 ms);
+badc_task.pin("pinName").relay("TERM").min(0 V).max(5 V);
+badc_task.preAction("NONE").execMode("PVAL").execute();
+ON_FIRST_INVOCATION_END();
+cout << badc_task.getValue("pinName") << endl;
+```
+
+**文档事实** 文档 Example 2 展示 pattern-controlled 高阻电压测量：由 pin PMU 在 `pin_force` 上 force 电压，`pin_meas` 通过 SPMU_PIN_TASK 配置的高阻测量路径测电压，并用 PPMU_SETTING / PPMU_RELAY / BADC_SETTING / BADC_MEASURE 等搭建 pattern。
+
+**文档事实** 链式配置通常写在 `execute()` 之前。`connect()` / `disconnect()` 有特殊语义：同一 task 内，在 `connect()` 或 `disconnect()` 之前调用的其他函数不会被考虑；若同一 SPMU_TASK 中有的 pin 要 connect、有的要 disconnect，必须拆成两个 task 分别 execute。
 
 ## 和谁有关
 
-（待补）
+- 与 SPMU_TASK：父/宿主类。文档明确只能通过 `SPMU_TASK.pin()` 取得 SPMU_PIN_TASK 对象；入边显示 `SPMU_TASK.pin()` “返回表示指定 pin 测量条件的 SPMU_PIN_TASK 类对象引用”。
+- 与 SPMU_TASK.execMode 及其他 SPMU_TASK 成员：入边显示这些页面引用 SPMU_PIN_TASK，两者共同组成 SPMU 测量设置。
+- 与 DC Scale DPS128/64、XPS256：文档在多个成员（clamp、connectState、forceDropMax/returnDropMax、loadCap、openLoopProtection、relay 的 NT 等）中注明仅特定 DC Scale 卡或 XPS256 支持，具体能力以对应子主题为准。
+- 与 BADC_SETTING、BADC_MEASURE、PPMU_SETTING、PPMU_RELAY、DC_RESULT_ACCESSOR：文档 Example 1/2 用它们与 SPMU_PIN_TASK 搭配完成测量与结果读取（属示例级关系）。
+- 与各成员子主题：`SPMU_PIN_TASK.*.htm`（clamp、compare、connect、connectState、…、vSlewRate）构成该容器的全部配置接口。
 
 ## 版本
 
-（待补）
+`Functional changes` 原文记录：
+- Introduced before SmarTest 6.3.2
+- SmarTest 6.5.3: New SPMU_PIN_TASK.connect(), SPMU_PIN_TASK.disconnect()
+- SmarTest 6.5.3: New SPMU_PIN_TASK.vForceRange(), SPMU_PIN_TASK.iForceRange(),
+- SmarTest 6.5.3: New SPMU_PIN_TASK.iMeasureRange(), SPMU_PIN_TASK.vMeasureRange()
+- SmarTest 7.3.1: New SPMU_PIN_TASK.connectState()
+- SmarTest 7.3.1: New SPMU_PIN_TASK.iClampFilter(), SPMU_PIN_TASK.vForceFilter()
+- SmarTest 7.4.0: New SPMU_PIN_TASK.iSlewRate(), SPMU_PIN_TASK.vSlewRate()
+- SmarTest 7.4.0: New SPMU_PIN_TASK.refPin(), SPMU_PIN_TASK.measFilter()
+- SmarTest 7.4.0: New SPMU_PIN_TASK.iFilter(), SPMU_PIN_TASK.vFilter()
+- SmarTest 7.5.0: New SPMU_PIN_TASK.forceDropMax() and SPMU_PIN_TASK.returnDropMax()
+- SmarTest 7.5.0: New SPMU_PIN_TASK.vCompliance()
+- SmarTest 7.5.1: New SPMU_PIN_TASK.dcPower() and SPMU_PIN_TASK.pulseEnergy()
 
 ## 出处
 
-（待补）
+- 主文档：`02_System_reference/02.07_Test_Method_Reference/02.07.04.01.234.01_SPMU_PIN_TASK.htm`（Class definition、Examples、Subtopics、Functional changes）。
+- 语法/参数材料另取自其子主题 `02.07.04.01.234.01.01`–`02.07.04.01.234.01.38`（`SPMU_PIN_TASK.*.htm`，objscaffold 逐字汇总，已读）。
+- 关联判断另参考 `extract/edges.jsonl` 中指向该页的入边记录（SPMU_TASK.pin、SPMU_TASK.execMode、DC Scale 相关页面等）。

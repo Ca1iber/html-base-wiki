@@ -1717,20 +1717,71 @@ Idle(tRFC-1);
 
 ## 是什么
 
-（待补）
+**文档事实**：APG pattern file 是编译器的 "master" 文件，包含编译测试 pattern 所需的其余文件的位置，以及（可选的）程序参数和 mode context；文件扩展名为 `.apg`（`02.12.03.03.02`）。
+
+**文档事实**：它包含以下内容（`02.12.03.03.02`）：
+- `:apgProgram:` — APG program file
+- `:deviceAccess:` — Device access file
+- `:deviceArchitecture:` — Device architecture file
+- `:dcTest:` — DC event file（可选，仅使用 DC events 时需要）
+- `:pinMap:` — Pin mapping file
+- `:waveformMap:` — waveform mapping 信息（引用 timing file，或引用再引用 timing file 的 waveform mapping file）
+- `:maintenanceOperation:` — memory device 维护操作（可选）
+- `:countedMatchPad:` — match loop padding setup（可选）
+- 可选：scrambling、null data、CRC、bus inversion 等设置
+- `:programParams:` — APG program 代码使用的程序参数（可选；文档示例中写作 `:programParam:`）
+
+**文档事实**：pattern file 的语法和关键字在子主题 APG pattern file syntax 中描述（`02.12.03.03.02`、`02.12.03.03.02.01`）。
+
+**推断**：`.apg` 是「索引/入口」——真正的内容分散在 program、device access、device architecture、pin map、waveform map 等文件里；换实现文件时通常只改 `.apg` 的引用。
 
 ## 典型用法
 
-（待补）
+**文档事实**：在 `.apg` 中用 `:apgPattern:` 块列出各文件与可选设置，例如（`02.12.03.03.02`）：
+
+```text
+:apgPattern:
+{
+:apgProgram: "refresh_routines.prog"
+:deviceAccess: "../../device_defs/access_defs/ddr3_64Mx8_x4.dvac"
+:deviceArchitecture: "../../device_defs/arch_defs/ddr3_64Mx8.dvar"
+:pinMap: "../../device_defs/pin_maps/ddr3_64Mx8.pmap"
+:waveformMap: "../../device_defs/waveform_maps/ddr3_x4.wmap:PreDefined"
+:nullData: 0
+:maintenanceOperation: "allcore_refresh"
+:programParam: { :format: { :name: :value: } { tRFC 48 } }
+}
+```
+
+**文档事实**：
+- 文件引用用相应关键字；可选块（`:dcTest:`、`:maintenanceOperation:`、`:countedMatchPad:`、scrambling/CRC/DBI、`:programParams:`）按需添加（`02.12.03.03.02`）。
+- MTL 编译器接受 APG pattern file：命令行运行 `apgc` 时把 `.apg` 文件名（可带路径，也可用 `?`/`*` 通配符）加到命令中，编译器据此生成 vector pattern 文件（`02.12.03.02.05`）。
+- 创建 MTL pattern 的流程中，需要创建 APG pattern file（`.apg`）（`02.12.02.04.04`，入边语境）。
+
+**推断**：典型编辑顺序是「先写好被引用的各配置文件，再在 `.apg` 里串联它们」，但文档没有规定必须按此顺序；文件本身只保存引用与设置。
 
 ## 和谁有关
 
-（待补）
+- **APG program file** — 文档事实：经 `:apgProgram:` 引用；扩展名 `.prog`（`02.12.03.03.02`、`02.12.03.03.03`）。
+- **Device access file** — 文档事实：经 `:deviceAccess:` 引用；扩展名 `.dvac`（`02.12.03.03.02`、`02.12.03.03.04`）。
+- **Device architecture file** — 文档事实：经 `:deviceArchitecture:` 引用；scrambling、bit inversion/ordering、CRC、DBI、maintenance operation、deviceParam 在此定义，再由 APG pattern file 引用（`02.12.03.03.02`、`02.12.03.03.05`、`02.12.03.03.05.01`）。
+- **Pin mapping file** — 文档事实：经 `:pinMap:` 引用；bus 定义与 copied vectors（`bitseq=copy`）也依赖 APG pattern file 中的 `:defines:`（`02.12.03.03.02`、`02.12.03.03.06`、`02.12.03.03.06.04`）。
+- **Waveform mapping file / Timing file** — 文档事实：经 `:waveformMap:` 引用；direct waveform mapping 直接引用 timing file，indirect 则引用 `.wmap`（`02.12.03.03.07`、`02.12.03.03.09.02`）。
+- **DC event file** — 文档事实：可选，经 `:dcTest:` 引用；扩展名 `.dcev`（`02.12.03.03.08`、`02.12.03.03.08.01`）。
+- **MTL compiler（`apgc`）** — 文档事实：命令行编译时把 APG pattern file 名加入 `apgc` 命令（`02.12.03.02.05`）。
+- **Counted match loops / `:countedMatchPad:`** — 文档事实：counted match loop 需要 padding routine，在 APG pattern file 中用 `:countedMatchPad:` 指定（`02.12.03.04.06`、`02.12.01.09.07.01`，入边语境）。
 
 ## 版本
 
-（待补）
+文档事实（`02.12.03.03.02` 的 Functional changes）：
+- Introduced before SmarTest 6.3.2
+- MTP 2.6.6：新增 `:countedMatchPadding:` 关键字
+- MTP 3.0.3（MTP on SOC 103.0.0）：`:countedMatchPadding:` 改名为 `:countedMatchPad:`
 
 ## 出处
 
-（待补）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.02_APG_pattern_file.htm`（主文档）
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.02.01_APG_pattern_file_syntax.htm`
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.03.03_APG_program_file.htm`、`02.12.03.03.04_Device_access_file.htm`、`02.12.03.03.05_Device_architecture_file.htm`、`02.12.03.03.06_Pin_mapping_file.htm`、`02.12.03.03.07_Waveform_mapping_file.htm`、`02.12.03.03.08_DC_event_file.htm`
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.02.05_Using_the_MTL_compiler_from_the_command_line.htm`
+- `02_System_reference/02.12_Memory_Test_Plus_7.10.2/02.12.03.04.06_Counted_match_loops.htm`
