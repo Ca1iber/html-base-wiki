@@ -10,3 +10,4 @@ run,stage,,,02_System_reference/02.08_Setup_and_Result_Tools/02.08.01.01_Digital
 testflow,stage,,,02_System_reference/02.08_Setup_and_Result_Tools/02.08.04.32_Testflow_Tool.htm,done,
 testmethod,stage,,,01_Getting_started/01.06_Test_methods/01.06.01_Test_Method_Introduction.htm,done,
 timing,stage,,,01_Getting_started/01.07_Testing_a_Basic_Digital_Device/01.07.01.01.01_Device_directory_structure.htm,done,
+dfpn,object,L1,pin,02_System_reference/02.06_Command_Reference/02.06.02.02.63_DFPN__DFPN__-__DeFine_Pin_Name.htm,todo,

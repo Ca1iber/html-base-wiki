@@ -425,8 +425,18 @@ def build_file_map():
 
 # ---------------------------------------------------------------- 单篇抽取
 
+def in_syntax_container(node):
+    """命令语法块：<div class="syntax"><h2>DFPN</h2><pre>…</pre></div>。"""
+    p = node.parent
+    while p is not None:
+        if p.tag == 'div' and p.has_class('syntax'):
+            return True
+        p = p.parent
+    return False
+
+
 def flatten_events(article):
-    """按文档顺序产出 ('h', level, text, node) / ('t', text) / ('b', 结构化文本)。"""
+    """按文档顺序产出 ('h', level, text, node, in_syntax) / ('t', text) / ('b', 结构化文本)。"""
     events = []
 
     def walk(n):
@@ -438,7 +448,8 @@ def flatten_events(article):
             if c.tag == 'h1':
                 continue
             if c.tag in ('h2', 'h3', 'h4', 'h5', 'h6'):
-                events.append(('h', int(c.tag[1]), norm(text_of(c)), c))
+                events.append(('h', int(c.tag[1]), norm(text_of(c)), c,
+                               in_syntax_container(c)))
                 continue
             if c.tag in ('script', 'style'):
                 continue
@@ -483,16 +494,20 @@ def extract_doc(path, rel, by_href, mapping, all_topic_ids):
     parts = []
     for ev in flatten_events(article):
         if ev[0] == 'h':
-            _, level, text, node = ev
+            _, level, text, node, syn = ev
             if cur is not None and level <= cur_level:
                 sections.append(_make_section(rel, cur, cur_level, parts))
                 cur = None
                 parts = []
-            if cur is None and group_of(text):
-                cur = (text, node.line)
+            # 已知节名优先（Application / Errors 在命令页里也裹在 div.syntax 中）；
+            # 只有未知节名（如 DFPN / DFPN?）才靠 syntax 容器归类。
+            g = group_of(text) or ('syntax' if syn else None)
+            if cur is None and g:
+                cur = (text, node.line, g)
                 cur_level = level
             elif cur is not None and level > cur_level:
-                parts.append(text)
+                # 嵌套标题必须保留 # 标记，否则写进页面时退化成正文字。
+                parts.append('#' * level + ' ' + text)
         elif ev[0] == 't':
             if cur is not None:
                 parts.append(ev[1])
@@ -608,7 +623,7 @@ def _make_section(rel, cur, level, parts):
     return {
         'doc': rel,
         'h2': cur[0],
-        'group': group_of(cur[0]) or 'other',
+        'group': (cur[2] if len(cur) > 2 else None) or group_of(cur[0]) or 'other',
         'level': level,
         'line': cur[1],
         'chars': chars,
